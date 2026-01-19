@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMSwift UI Demo</title>
+    <link rel="stylesheet" href="/src/_cmswift-fe/css/responsive.css" />
+    <link rel="stylesheet" href="/src/_cmswift-fe/css/ui.css" />
+    <link rel="stylesheet" href="/src/_cmswift-fe/css/animation.css" />
+    <link rel="stylesheet" href="/src/_cmswift-fe/css/tabler-icons-out.css" />
+    <script src="/config-fe/setting.js"></script>
+    <script src="/src/_cmswift-fe/js/cms.js"></script>
+    <script src="/src/_cmswift-fe/js/ui.js"></script>
+    <style>
+      body {
+        margin: 0;
+        background: var(--cms-bg);
+        color: var(--cms-text);
+        font-family: var(--cms-font);
+      }
+
+      a {
+        color: inherit;
+      }
+      .demo-section {
+        margin-top: var(--cms-s-xs);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+  <script>
+    //UI.Btn({ onClick: () => CMSwift.router.navigate("/users") }, "Vai a Users")
+    //CMSwift.router.add("/users", () => UsersPage());
+
+    // Router mount
+    CMSwift.router.setOutlet("#app");
+    CMSwift.router.setMode("auto");
+    CMSwift.router.add("/", () => Home());
+    CMSwift.router.add("/login", () => Login());
+    CMSwift.router.add("/dashboard", () => Dashboard());
+    CMSwift.router.start();
+    CMSwift.ready(() => {
+      // --- Playground state ---
+      const rLabel = _rod("Stato");
+      const rClearable = _rod(true);
+      const rFilterable = _rod(false);
+      const rDisabled = _rod(false);
+      const rValue = _rod("published");
+
+      // --- Demo component builder ---
+      const DemoPreview = () =>
+        _ui.Card(
+          { class: "demo-box" },
+          _ui.Select({
+            label: rLabel,
+            clearable: rClearable,
+            filterable: rFilterable,
+            disabled: rDisabled,
+            model: rValue,
+            options: [
+              { label: "Draft", value: "draft" },
+              { label: "Published", value: "published" },
+              { label: "Archived", value: "archived", disabled: true },
+            ],
+          }),
+          _h.div(
+            { class: "cms-muted", style: { marginTop: "8px" } },
+            () => `Selezionato: ${rValue}`
+          )
+        );
+
+      // --- Controls (Playground) ---
+      const Controls = _ui.Card(
+        { class: "demo-controls" },
+        _ui.Input({
+          label: "Label",
+          model: rLabel,
+          clearable: rClearable,
+        }),
+        _ui.Toolbar(
+          { dense: true, justify: "space-between" },
+          _ui.Btn({
+            label: () =>
+              rClearable.value ? "Clearable: ON" : "Clearable: OFF",
+            onClick: () => (rClearable.value = !rClearable.value),
+          }),
+          _ui.Btn({
+            label: () => (rFilterable.value ? "Filter: ON" : "Filter: OFF"),
+            onClick: () => (rFilterable.value = !rFilterable.value),
+          }),
+          _ui.Btn({
+            label: () => (rDisabled.value ? "Disabled: ON" : "Disabled: OFF"),
+            onClick: () => (rDisabled.value = !rDisabled.value),
+          })
+        )
+      );
+
+      // --- Page Layout ---
+      CMSwift.mount(
+        "#app",
+        _ui.Container(
+          // HERO
+          _ui.Card(
+            { class: "demo-hero" },
+            _h.h1("_ui.Select"),
+            _h.p(
+              { class: "cms-muted" },
+              "Select premium: clearable, filterable, keyboard nav, async options, groups."
+            ),
+            _ui.Toolbar(
+              { dense: true, gap: "10px" },
+              _ui.Badge?.({ color: "success" }, "Stable") || _h.span("Stable"),
+              _ui.Badge?.({ color: "info" }, "Reactive") || _h.span("Reactive"),
+              _ui.Badge?.({ color: "dark" }, "No build") || _h.span("No build")
+            ),
+            _h.pre(
+              { class: "demo-code" },
+              `const val = _rod("published");
+        UI.Select({ label:"Stato", model: val, clearable:true, filterable:true, options:[...] });`
+            )
+          ),
+
+          // PLAYGROUND
+          _ui.Card(
+            { class: "demo-section" },
+            _h.h2("Playground"),
+            _ui.Row(
+              _ui.Col({ style: { flex: "1" } }, DemoPreview()),
+              _ui.Col({ style: { width: "340px" } }, Controls)
+            )
+          ),
+
+          // FEATURES
+          _ui.Card(
+            { class: "demo-section" },
+            _h.h2("Features"),
+            _h.ul(
+              _h.li("Clearable + placeholder"),
+              _h.li("Filterable (useInput)"),
+              _h.li("Groups + Async options"),
+              _h.li("Keyboard navigation (↑ ↓ Enter Esc)")
+            )
+          ),
+
+          // API (auto)
+          _ui.Card(
+            { class: "demo-section" },
+            _h.h2("API"),
+            _ui.DocTable
+              ? _ui.DocTable("Select")
+              : _h.div("_ui.DocTable non disponibile")
+          ),
+
+          // EXAMPLES
+          _ui.Card(
+            { class: "demo-section" },
+            _h.h2("Examples"),
+            _h.h3("Basic"),
+            _ui.Card(DemoPreview()),
+
+            _h.h3("Disabled + Error"),
+            _ui.Select({
+              label: "Tags",
+              multiple: true,
+              filterable: true,
+              allowCustom: true,
+              clearable: true,
+              options: [
+                "Design",
+                "Frontend",
+                "Backend",
+                { label: "Platform", options: ["API", "Infra", "DevOps"] },
+              ],
+            }),
+            _ui.Select({
+              label: "Categoria",
+              disabled: true,
+              error: "Campo bloccato",
+              options: ["A", "B", "C"],
+            }),
+            CMSwift.ui.Select({
+              label: "Tags",
+              clearable: rClearable,
+              filterable: true,
+              options: ["Alpha", "Beta", "Gamma"],
+              slots: {
+                filter: ({ value, setValue, close }) =>
+                  _h.input({
+                    class: "cms-input",
+                    placeholder: "Type to filter…",
+                    value,
+                    onInput: (e) => setValue(e.target.value),
+                    onKeydown: (e) => {
+                      if (e.key === "Escape") close();
+                    },
+                  }),
+              },
+            }),
+            CMSwift.ui.Input({
+              label: "Search",
+              clearable: true,
+              slots: {
+                clear: ({ clear, disabled, readonly, hasValue }) =>
+                  CMSwift.ui.Btn(
+                    {
+                      disabled: disabled || readonly || !hasValue,
+                      onClick: clear,
+                    },
+                    "Reset"
+                  ),
+              },
+            }),
+            CMSwift.ui.Select({
+              label: "Team",
+              allowCustom: true,
+              options: [
+                { label: "Alice", value: 1 },
+                { label: "Bob", value: 2 },
+              ],
+              slots: {
+                option: ({ opt, selected }) =>
+                  _h.div(
+                    { class: selected ? "is-selected" : "" },
+                    _h.strong(opt.label),
+                    _h.span(
+                      { class: "cms-muted", style: { marginLeft: "6px" } },
+                      `#${opt.value}`
+                    )
+                  ),
+              },
+            })
+          )
+        )
+      );
+    });
+    CMSwift.ready(() => {
+      const form = CMSwift.useForm({
+        model: _rod({ email: "", role: "user" }),
+        validateOn: "blur",
+        rules: {
+          email: [
+            (v) => (!!v && String(v).includes("@")) || "Email non valida",
+          ],
+          role: [(v) => !!v || "Seleziona un ruolo"],
+        },
+      });
+
+      const fEmail = form.field("email", { hint: "Inserisci un'email valida" });
+      const fRole = form.field("role");
+      const modelTest = _rod(null);
+      CMSwift.mount(
+        "#app",
+        _ui.Card(
+          _h.h2("Signup"),
+          _ui.Form(
+            { form, onSubmit: async (model) => console.log("SUBMIT", model) },
+            () => [
+              _ui.Input({
+                label: "Email",
+                model: fEmail.model,
+                error: () => fEmail.error(),
+                hint: fEmail.hint,
+                onInput: fEmail.onInput,
+                onBlur: fEmail.onBlur,
+                clearable: true,
+              }),
+              _ui.Select({
+                label: "Ruolo",
+                model: fRole.model,
+                error: fRole.error,
+                options: ["user", "admin", "editor"],
+                clearable: true,
+              }),
+              _ui.Toolbar(
+                { justify: "space-between" },
+                _ui.Btn({ onClick: () => form.reset() }, "Reset"),
+                _ui.Btn(
+                  {
+                    color: "primary",
+                    type: "submit",
+                    loading: form.submitting.value,
+                  },
+                  "Invia"
+                )
+              ),
+              _h.div(
+                { class: "cms-error" },
+                () => form.submitError.value || ""
+              ),
+            ]
+          ),
+          _ui.Card(
+            _h.h4("Model"),
+            _h.div(
+              _ui.Btn(
+                {
+                  onClick: () => {
+                    fEmail.model.value = "ccamavi@gmail.com";
+                    console.log(fEmail.error());
+                  },
+                },
+                "Test"
+              )
+            )
+          )
+        )
+      );
+      // Dialog confirm
+      const dlg = _ui.Dialog({
+        title: "Delete file?",
+        content: ({ close }) => _h.p("This action cannot be undone."),
+        actions: ({ close }) => [
+          _ui.Btn({ onClick: close }, "Cancel"),
+          _ui.Btn(
+            {
+              variant: "primary",
+              onClick: () => {
+                /* confirm */ close();
+              },
+            },
+            "Delete"
+          ),
+        ],
+      });
+      dlg.open();
+    });
+  </script>
+</html>
+
