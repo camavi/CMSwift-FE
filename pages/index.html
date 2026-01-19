@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMSwift UI Demo</title>
+    <link rel="stylesheet" href="/_cmswift-fe/css/responsive.css" />
+    <link rel="stylesheet" href="/_cmswift-fe/css/ui.css" />
+    <link rel="stylesheet" href="/_cmswift-fe/css/animation.css" />
+    <link rel="stylesheet" href="/_cmswift-fe/css/tabler-icons-out.css" />
+    <script src="/config-fe/setting.js"></script>
+    <script src="/_cmswift-fe/js/cms.js"></script>
+    <script src="/_cmswift-fe/js/ui.js"></script>
+    <style>
+      body {
+        margin: 0;
+        background: var(--cms-bg);
+        color: var(--cms-text);
+        font-family: var(--cms-font);
+      }
+
+      a {
+        color: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+  <script>
+    CMSwift.ready(() => {
+      const title = _rod("Landing Demo");
+      const published = _rod(true);
+      const visibility = _rod("public");
+      const featured = _rod(false);
+      const completion = _rod(62);
+
+      const progress = _ui.Progress({ value: completion.value });
+      const progressLabel = _h.span(
+        { class: "cms-muted" },
+        `${completion.value}%`
+      );
+      completion.action((v) => {
+        progress.querySelector(".cms-progress-bar").style.width = `${v}%`;
+        progressLabel.textContent = `${v}%`;
+      });
+
+      const statusLine = _h.div(
+        { class: "cms-muted", style: { marginTop: "10px" } },
+        ""
+      );
+      const updateStatus = () => {
+        statusLine.textContent = `Titolo: ${title.value} • Pubblicato: ${
+          published.value ? "si" : "no"
+        } • Visibilità: ${visibility.value} • In evidenza: ${
+          featured.value
+        } • Avanzamento: ${completion.value}%`;
+      };
+      [title, published, visibility, featured, completion].forEach((r) =>
+        r.action(updateStatus)
+      );
+      updateStatus();
+
+      const dialog = _ui.Dialog({
+        title: "Dialog di esempio",
+        content: () => _h.div("Questo dialog conferma l'uso di _ui.Dialog. 🤩"),
+        actions: ({ close }) => [
+          _ui.Btn({ onClick: close }, "Chiudi"),
+          _ui.Btn({ variant: "primary", onClick: close }, "Conferma"),
+        ],
+      });
+
+      const navCard = _ui.Card(
+        _h.h3("Layout e navigazione"),
+        _ui.Breadcrumbs({
+          items: [
+            { label: "Home", to: "#" },
+            { label: "UI" },
+            { label: "Demo" },
+          ],
+        }),
+        _h.div(
+          { style: { marginTop: "12px" } },
+          _ui.Toolbar(
+            _ui.Btn({ icon: "#home", iconAlign: "right" }, "Dashboard"),
+            _ui.Btn({ icon: "#search" }, "Cerca"),
+            _ui.Btn({ variant: "primary", icon: "#plus" }, "Nuovo")
+          )
+        )
+      );
+
+      const interactiveCard = _ui.Card(
+        _h.h3("Elementi interattivi"),
+        _h.div(
+          {
+            class: "cms-row",
+            style: { gap: "var(--cms-s-sm)", flexWrap: "wrap" },
+          },
+          _ui.Btn({ variant: "primary" }, "Primario"),
+          _ui.Btn({ variant: "success" }, "Successo"),
+          _ui.Btn({ variant: "danger" }, "Pericolo"),
+          _ui.Btn({ outline: true }, "Outline")
+        ),
+        _h.div(
+          {
+            class: "cms-row",
+            style: {
+              marginTop: "12px",
+              gap: "var(--cms-s-md)",
+              alignItems: "center",
+              flexWrap: "wrap",
+            },
+          },
+          _ui.Input({ placeholder: "Titolo pagina", model: title }),
+          _ui.Checkbox({ label: "Pubblicato", model: published }),
+          _ui.Toggle({ label: "In evidenza", model: featured })
+        ),
+        _h.div(
+          {
+            class: "cms-row",
+            style: {
+              marginTop: "12px",
+              gap: "var(--cms-s-md)",
+              alignItems: "center",
+              flexWrap: "wrap",
+            },
+          },
+          _ui.Radio({
+            name: "vis",
+            value: "public",
+            label: "Pubblico",
+            model: visibility,
+          }),
+          _ui.Radio({
+            name: "vis",
+            value: "private",
+            label: "Privato",
+            model: visibility,
+          }),
+          _h.div(
+            { style: { minWidth: "170px" } },
+            _ui.Slider({ min: 0, max: 100, model: completion })
+          ),
+          progress,
+          progressLabel
+        ),
+        statusLine
+      );
+
+      const infoList = _ui.List(
+        _ui.Item({}, "Dashboard"),
+        _ui.Item({}, "Articoli"),
+        _ui.Item({}, "Media"),
+        _ui.Item({}, "Impostazioni")
+      );
+
+      const dataCard = _ui.Card(
+        _h.h3("Dati e visualizzazione"),
+        _h.div(
+          {
+            class: "cms-row",
+            style: {
+              gap: "var(--cms-s-sm)",
+              alignItems: "center",
+              flexWrap: "wrap",
+            },
+          },
+          _ui.Avatar({ label: "CM", size: 40 }),
+          _ui.Badge({ label: "New" }),
+          _ui.Chip({
+            label: "Marketing",
+            removable: true,
+            onRemove: () => _ui.Notify.info("Tag rimosso"),
+          }),
+          _ui.Chip({ label: "Design" })
+        ),
+        _h.div({ style: { marginTop: "12px" } }, infoList)
+      );
+
+      const rows = [
+        {
+          id: 1,
+          title: "Homepage",
+          status: "Published",
+          updated: "2024-07-18",
+        },
+        { id: 2, title: "Chi siamo", status: "Draft", updated: "2024-07-16" },
+        {
+          id: 3,
+          title: "Contatti",
+          status: "Published",
+          updated: "2024-07-11",
+        },
+        { id: 4, title: "Blog", status: "Archived", updated: "2024-06-30" },
+        {
+          id: 5,
+          title: "Landing Prodotto",
+          status: "Draft",
+          updated: "2024-06-25",
+        },
+      ];
+
+      const table = _ui.Table({
+        columns: [
+          { key: "title", label: "Pagina", sortable: true },
+          {
+            key: "status",
+            label: "Stato",
+            sortable: true,
+            render: (row) =>
+              _ui.Badge({
+                label: row.status,
+                color:
+                  row.status === "Published"
+                    ? "var(--cms-success)"
+                    : "var(--cms-primary)",
+              }),
+          },
+          { key: "updated", label: "Aggiornato", sortable: true },
+        ],
+        rows,
+        pageSize: 5,
+        actions: (row) =>
+          _ui.Btn(
+            {
+              outline: true,
+              onClick: () => _ui.Notify.info(`Apri: ${row.title}`),
+            },
+            "Apri"
+          ),
+      });
+
+      const notifyCard = _ui.Card(
+        _h.h3("Notifiche e feedback"),
+        _h.div(
+          {
+            class: "cms-row",
+            style: { gap: "var(--cms-s-sm)", flexWrap: "wrap" },
+          },
+          _ui.Btn({ onClick: () => dialog.open() }, "Apri dialog"),
+          _ui.Btn(
+            {
+              onClick: () => _ui.Notify.success("Operazione completata"),
+            },
+            "Notify success"
+          ),
+          _ui.Btn(
+            {
+              onClick: () => _ui.Notify.error("Si è verificato un errore"),
+            },
+            "Notify error"
+          )
+        ),
+        _h.div(
+          {
+            class: "cms-row",
+            style: {
+              marginTop: "12px",
+              gap: "var(--cms-s-sm)",
+              alignItems: "center",
+            },
+          },
+          _ui.Spinner({ size: 22 }),
+          _h.span("Caricamento in corso")
+        )
+      );
+
+      const parallax = _ui.Parallax(
+        { height: "320px", startTop: 105 },
+        _h.div(
+          _h.h2({ style: { margin: 0 } }, "CMSwift UI Kit"),
+          _h.p(
+            { style: { margin: "6px 0 0" } },
+            "Tutti i componenti in azione su una singola pagina."
+          )
+        )
+      );
+
+      const page = _ui.Page(
+        _ui.Container(
+          parallax,
+          _h.div(
+            { style: { margin: "16px 0" } },
+            _ui.Breadcrumbs({
+              items: [{ label: "Home", to: "#" }, { label: "Demo componenti" }],
+            })
+          ),
+          _ui.Grid(
+            { gap: "var(--cms-s-lg)" },
+            _ui.GridCol({ span: 24, sm: 24, class: "cms-m-b-sm" }, navCard),
+            _ui.GridCol(
+              { span: 24, sm: 24, class: "cms-m-b-sm" },
+              interactiveCard
+            ),
+            _ui.GridCol({ span: 24, sm: 24, class: "cms-m-b-sm" }, dataCard),
+            _ui.GridCol({ span: 24, sm: 24, class: "cms-m-b-sm" }, notifyCard),
+            _ui.GridCol({ span: 24, sm: 24, class: "cms-m-b-sm" }, table),
+            _ui.GridCol({ span: 24 }, CMSwift.ui.DocTable("Btn"))
+          )
+        )
+      );
+
+      const header = _ui.Header({
+        title: "CMSwift",
+        subtitle: "Demo componenti UI",
+        right: _ui.Toolbar(
+          _ui.Btn(
+            {
+              icon: "#bell",
+              onClick: () => _ui.Notify.info("Hai nuove notifiche"),
+            },
+            "Notifiche"
+          ),
+          _ui.Btn(
+            { variant: "primary", icon: "#plus", onClick: () => dialog.open() },
+            "Nuovo"
+          )
+        ),
+      });
+
+      const drawer = _ui.Drawer({
+        stateKey: "demo:drawer",
+        header: _ui.Banner({ message: "Menu principale" }),
+        items: [
+          { label: "Home", to: "/", icon: "🏠" },
+          { label: "Blog", to: "/blog", icon: "📰" },
+          {
+            label: "Gestione",
+            icon: "🧰",
+            iconPosition: "right",
+            expanded: true,
+            items: [
+              { label: "Utenti", to: "/users" },
+              {
+                label: "Impostazioni",
+                icon: "⚙️",
+                iconSidePosition: "right",
+                openIcon: _ui.Icon("#minus"),
+                closeIcon: _ui.Icon("#plus"),
+                items: [
+                  { label: "Generali", to: "/settings/general" },
+                  { label: "Billing", to: "/settings/billing" },
+                ],
+              },
+            ],
+          },
+          {
+            label: "Docs esterne",
+            href: "https://example.com/docs",
+            icon: "🔗",
+            external: true,
+          },
+          {
+            label: "Nuovo contenuto",
+            icon: "➕",
+            button: true,
+            onClick: () => _ui.Notify.success("Azione eseguita"),
+          },
+        ],
+      });
+
+      const footer = _ui.Footer(
+        _h.div(
+          "CMSwift UI Demo • Layout completo con componenti attivi",
+          _ui.Icon({ color: "red", name: "#heart" })
+        )
+      );
+
+      CMSwift.mount(
+        "#app",
+        _ui.Layout({
+          header,
+          aside: drawer,
+          page,
+          footer,
+        })
+      );
+    });
+  </script>
+</html>
+

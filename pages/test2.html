@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMSwift UI Demo</title>
+    <link rel="stylesheet" href="/_cmswift-fe/css/responsive.css" />
+    <link rel="stylesheet" href="/_cmswift-fe/css/ui.css" />
+    <link rel="stylesheet" href="/_cmswift-fe/css/animation.css" />
+    <link rel="stylesheet" href="/_cmswift-fe/css/tabler-icons-out.css" />
+    <script src="/config-fe/setting.js"></script>
+    <script src="/_cmswift-fe/js/cms.js"></script>
+    <script src="/_cmswift-fe/js/ui.js"></script>
+    <style>
+      body {
+        display: grid;
+        grid:
+          "a h h"
+          "a b c"
+          "a f f";
+        grid-template-columns: auto 1fr 20%;
+        grid-template-rows: auto 1fr auto;
+      }
+      main {
+        grid-area: b;
+        min-width: 12em;
+        background-color: aquamarine;
+      }
+      nav {
+        grid-area: a; /* auto min-width */
+        background-color: rgb(161, 127, 255);
+        min-width: 200px;
+      }
+      aside {
+        grid-area: c;
+        min-width: 12em;
+      }
+      header {
+        grid-area: h;
+        background-color: bisque;
+      }
+      footer {
+        grid-area: f;
+        background-color: bisque;
+      }
+    </style>
+  </head>
+  <body>
+    <header>header</header>
+    <main>main</main>
+    <nav>nav</nav>
+    <aside>aside</aside>
+    <footer>footer</footer>
+  </body>
+</html>
+
