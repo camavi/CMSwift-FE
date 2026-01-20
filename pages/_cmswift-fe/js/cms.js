@@ -2490,8 +2490,8 @@
   // ===============================
   // HTTP (fetch wrapper)
   // ===============================
-  function createHttpReactiveState(app) {
-    const reactive = app.reactive || CMSwift.reactive;
+  function createHttpReactiveState() {
+    const reactive = CMSwift.reactive;
     const [getInFlight, setInFlight] = reactive.signal(0);
     const [getStatus, setStatus] = reactive.signal("idle");
     const [getLastRequest, setLastRequest] = reactive.signal(null);
@@ -2554,8 +2554,8 @@
     const state = {
       inFlight: getInFlight,
       status: getStatus,
-      isLoading: app.store?.computed
-        ? app.store.computed(() => getInFlight() > 0)
+      isLoading: CMSwift.store?.computed
+        ? CMSwift.store.computed(() => getInFlight() > 0)
         : () => getInFlight() > 0,
       lastRequest: getLastRequest,
       lastResponse: getLastResponse,
@@ -2576,14 +2576,14 @@
     return { state, markStart, markEnd };
   }
   const configHTTP = {
-    baseURL: opts.baseURL || "",
-    timeout: opts.timeout ?? 0, // ms, 0 = no timeout
-    retry: opts.retry || { attempts: 0, delay: 250, factor: 2 }, // attempts extra
-    headers: opts.headers || {},
-    credentials: opts.credentials, // "include" etc (optional)
-    debug: opts.debug ?? false
+    baseURL: CMSwift_setting?.http?.baseURL || "",
+    timeout: CMSwift_setting?.http?.timeout ?? 0, // ms, 0 = no timeout
+    retry: CMSwift_setting?.http?.retry || { attempts: 0, delay: 250, factor: 2 }, // attempts extra
+    headers: CMSwift_setting?.http?.headers || {},
+    credentials: CMSwift_setting?.http?.credentials, // "include" etc (optional)
+    debug: CMSwift_setting?.debug ?? false
   };
-  const httpState = createHttpReactiveState(app);
+  const httpState = createHttpReactiveState();
   const now = () => (typeof performance !== "undefined" && performance.now ? performance.now() : Date.now());
 
   const hooksHTTP = {
