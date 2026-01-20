@@ -70,11 +70,13 @@ const layout = _h.div({ class: "cms-panel cms-page" },
   _ui.Card(
     { header: "Esempio di utilizzo:" },
     _ui.Row(
-      _ui.Col({ col: 6 },
-        _ui.Row(
-          _ui.Col({ col: 6 }, "Responsive:"),
-          _ui.Col({ col: 6 }, _ui.Btn({ onClick: () => { width.value = "400px"; console.log(width.value) }, icon: "#mobil" }, "Mobile")),
-        )
+      _ui.Col({ col: 24 },
+        _ui.Row({ class: 'cms-m-b-md' },
+          _ui.Col({ col: 5 }, "Device Responsive:"),
+          _ui.Col({ col: 4 }, _ui.Btn({ onClick: () => { width.value = "400px"; console.log(width.value) }, icon: "#device-mobile" }, "Mobile")),
+          _ui.Col({ col: 4 }, _ui.Btn({ onClick: () => { width.value = "900px"; console.log(width.value) }, icon: "#device-ipad" }, "Table")),
+          _ui.Col({ col: 4 }, _ui.Btn({ onClick: () => { width.value = "133%"; console.log(width.value) }, icon: "#device-desktop" }, "Full PC")),
+        ),
       ),
       _ui.Col({ col: 24, class: 'cms-t-center' },
         _h.div({ style: { width: '100%', display: 'inline-block' } },
