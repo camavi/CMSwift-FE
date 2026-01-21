@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "gen:ui-dts": "node tools/generate-ui-dts.mjs",
-    "gen:ui-dts:watch": "node tools/generate-ui-dts.mjs --watch"
+    "gen:ui-dts": "node cms-dev/generate-ui-dts.mjs",
+    "gen:ui-dts:watch": "node cms-dev/generate-ui-dts.mjs --watch"
   },
   "devDependencies": {
     "vite": "^7.2.4",

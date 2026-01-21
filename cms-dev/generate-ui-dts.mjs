@@ -5,6 +5,8 @@ import path from "node:path";
 const CWD = process.cwd();
 const OUTPUT_PATH = path.join(CWD, "types", "cmswift-ui.d.ts");
 const HEADER = "// AUTO-GENERATED - DO NOT EDIT.\n";
+const ICONS_INFO_PATH = path.join(CWD, "cms-dev", "tabler-icons", "tabler-icons-info.json");
+const DOM_ELEMENTS_PATH = path.join(CWD, "cms-dev", "dom", "elements.json");
 
 // Parsing strategy: regex for declarations + lightweight scanners for params/body.
 // This is intentionally fast and conservative, not a full JS parser.
@@ -54,6 +56,8 @@ function resolveRoots(candidates) {
 
 async function generateOnce() {
   const files = await collectSourceFiles(roots);
+  const iconIds = await loadTablerIconIds();
+  const domElements = await loadDomElements();
   const uiComponents = new Map();
   const cmswiftComponents = new Map();
   const cmswiftUiComponents = new Map();
@@ -86,13 +90,23 @@ async function generateOnce() {
   lines.push("");
   lines.push("declare global {");
   lines.push("  namespace UI {");
+  if (iconIds.length) {
+    emitIconTypes(lines, iconIds, 4);
+    lines.push("");
+  }
 
   for (const name of uiNames) {
     const info = uiComponents.get(name);
     if (info.jsdoc) {
       lines.push(...indentBlock(info.jsdoc, 4));
     }
-    emitFunctionDeclaration(lines, name, info, 4);
+    if (name === "Icon" && iconIds.length) {
+      emitIconFunctionDeclarations(lines, info, 4);
+    } else if (name === "Btn" && iconIds.length) {
+      emitBtnFunctionDeclarations(lines, info, 4);
+    } else {
+      emitFunctionDeclaration(lines, name, info, 4);
+    }
     lines.push("");
   }
 
@@ -137,6 +151,10 @@ async function generateOnce() {
     lines.push("  }");
   }
 
+  if (domElements.length) {
+    emitDomHelpers(lines, domElements, 2);
+  }
+
   lines.push("  const cms = CMSwift;");
   lines.push("  const _ui = UI;");
   lines.push("  const _http = CMSwift.http;");
@@ -148,6 +166,88 @@ async function generateOnce() {
 
   const totalComponents = uiNames.length + cmswiftNames.length + cmswiftUiNames.length;
   console.log(`Generated ${totalComponents} components -> ${OUTPUT_PATH}`);
+}
+
+async function loadTablerIconIds() {
+  try {
+    const raw = await fs.readFile(ICONS_INFO_PATH, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((value) => typeof value === "string" && value);
+  } catch {
+    return [];
+  }
+}
+
+function emitIconTypes(lines, iconIds, indent = 4) {
+  const pad = " ".repeat(indent);
+  lines.push(`${pad}type IconId =`);
+  for (const id of iconIds) {
+    lines.push(`${pad}  | "${id}"`);
+  }
+  lines.push(`${pad};`);
+  lines.push(`${pad}type IconName = \`#\${IconId}\` | (string & {});`);
+  lines.push(`${pad}type IconProps = {`);
+  lines.push(`${pad}  name?: IconName | object | Function | any[] | null | undefined;`);
+  lines.push(`${pad}  size?: number | string;`);
+  lines.push(`${pad}  color?: string;`);
+  lines.push(`${pad}  slots?: { default?: any };`);
+  lines.push(`${pad}  class?: string;`);
+  lines.push(`${pad}  style?: object;`);
+  lines.push(`${pad}  [key: string]: any;`);
+  lines.push(`${pad}};`);
+  lines.push(`${pad}type BtnProps = {`);
+  lines.push(`${pad}  icon?: IconName | object | Function | any[] | null | undefined;`);
+  lines.push(`${pad}  [key: string]: any;`);
+  lines.push(`${pad}};`);
+}
+
+function emitIconFunctionDeclarations(lines, info, indent = 4) {
+  const pad = " ".repeat(indent);
+  lines.push(`${pad}function Icon(name: IconName, props?: IconProps, ...children: any[]): ${info.returnType};`);
+  lines.push(`${pad}function Icon(props: IconProps, ...children: any[]): ${info.returnType};`);
+  lines.push(`${pad}function Icon(...args: any[]): ${info.returnType};`);
+}
+
+function emitBtnFunctionDeclarations(lines, info, indent = 4) {
+  const pad = " ".repeat(indent);
+  lines.push(`${pad}function Btn(props: BtnProps, ...children: any[]): ${info.returnType};`);
+  lines.push(`${pad}function Btn(...args: any[]): ${info.returnType};`);
+}
+
+function emitDomHelpers(lines, domElements, indent = 2) {
+  const pad = " ".repeat(indent);
+  const innerPad = " ".repeat(indent + 2);
+  lines.push(`${pad}type DomHElement = HTMLElement | SVGElement | Text;`);
+  lines.push(`${pad}type DomHFactory = (...args: any[]) => DomHElement;`);
+  lines.push(`${pad}const _h: {`);
+  lines.push(`${innerPad}fragment: (...children: any[]) => any[];`);
+  lines.push(`${innerPad}dynamic: (renderFn: Function) => DocumentFragment;`);
+  for (const tag of domElements) {
+    if (typeof tag !== "string" || !tag) continue;
+    const key = isValidIdentifier(tag) ? tag : `"${tag}"`;
+    lines.push(`${innerPad}${key}: DomHFactory;`);
+  }
+  lines.push(`${pad}};`);
+  lines.push("");
+}
+
+async function loadDomElements() {
+  try {
+    const raw = await fs.readFile(DOM_ELEMENTS_PATH, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const seen = new Set();
+    const out = [];
+    for (const value of parsed) {
+      if (typeof value !== "string" || !value || seen.has(value)) continue;
+      seen.add(value);
+      out.push(value);
+    }
+    return out;
+  } catch {
+    return [];
+  }
 }
 
 function shouldReplaceComponent(existing, next) {
