@@ -137,6 +137,9 @@ async function generateOnce() {
     lines.push("  }");
   }
 
+  lines.push("  const cms = CMSwift;");
+  lines.push("  const _ui = UI;");
+  lines.push("  const _http = CMSwift.http;");
   lines.push("}");
   lines.push("");
 

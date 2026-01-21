@@ -238,6 +238,264 @@
   UI.Parallax
   */
 
+  const META_PROP_DESCRIPTIONS = {
+    actions: "Content rendered in the action area, typically in a footer or trailing region.",
+    active: "Marks the item as active/selected and applies active styling/ARIA when relevant.",
+    align: "Alignment of content along the cross axis (e.g. left/center/right).",
+    allowCustom: "Allows values not present in the options list.",
+    allowCustomValue: "Accepts free-form values in addition to predefined options.",
+    aside: "Content or configuration for the aside/secondary region.",
+    auto: "Enables automatic sizing or layout behavior instead of fixed sizing.",
+    autocomplete: "Native autocomplete attribute for input elements.",
+    backdrop: "Whether to render a backdrop overlay behind the component.",
+    bgClass: "Additional CSS classes applied to the background layer.",
+    bgPosition: "CSS background-position value for the background image/layer.",
+    bgSize: "CSS background-size value for the background image/layer.",
+    cardClass: "Additional CSS classes applied to the card container.",
+    checked: "Checked state for toggleable controls (controlled).",
+    class: "Additional CSS classes applied to the component root element.",
+    clearable: "Shows a clear action to reset the current value.",
+    clickable: "Enables pointer/hover styles and click handling on the component.",
+    closeOnEsc: "Closes the component when the Escape key is pressed.",
+    closeOnOutside: "Closes the component when clicking outside its bounds.",
+    closeOnSelect: "Closes the menu/popover after selecting an item.",
+    color: "Semantic color name used to style the component.",
+    cols: "Number of columns for grid layouts.",
+    columns: "Column definitions for table-like components.",
+    content: "Main content node(s) or render function for the component body.",
+    contentClass: "Additional CSS classes applied to the content container.",
+    control: "Custom control element or render function for the input area.",
+    delay: "Delay in milliseconds before showing or hiding.",
+    dense: "Uses compact spacing and sizing.",
+    disabled: "Disables interaction and applies disabled styling/ARIA.",
+    divider: "Shows dividers between items or sections.",
+    drawer: "Content or configuration for the drawer region.",
+    drawerBreakpoint: "Viewport width where the drawer switches behavior (overlay vs persistent).",
+    drawerCloseIcon: "Icon used for the drawer close control.",
+    drawerOpen: "Controls whether the drawer is open (controlled).",
+    drawerOpenIcon: "Icon used for the drawer open control.",
+    drawerStateKey: "Storage key used to persist drawer open state.",
+    drawerWidth: "Drawer width (number interpreted as px or CSS length).",
+    elevated: "Applies elevated shadow/raised styling.",
+    emptyText: "Text shown when there is no data to display.",
+    error: "Error state or message displayed with the component.",
+    escClose: "Alias for close-on-escape behavior.",
+    filterPlaceholder: "Placeholder text for the filter/search input.",
+    filterable: "Enables filtering UI for option lists.",
+    flat: "Removes elevation/border for a flat look.",
+    footer: "Footer content node(s) or render function.",
+    form: "HTML form attribute to associate controls with a form.",
+    gap: "Gap/spacing between child elements.",
+    getValue: "Function to extract a value from an item object.",
+    groupCloseIcon: "Icon used to collapse grouped items.",
+    groupOpenIcon: "Icon used to expand grouped items.",
+    header: "Header content node(s) or render function.",
+    height: "Explicit height (number interpreted as px or CSS length).",
+    hint: "Helper text shown near the control.",
+    icon: "Icon name or node rendered with the component.",
+    iconAlign: "Position of the icon relative to the label.",
+    initialSort: "Initial sort configuration for table data.",
+    inputmode: "Native inputmode attribute hint for virtual keyboards.",
+    items: "Array of items or nodes to render.",
+    justify: "Justification of items along the main axis.",
+    label: "Label text or node for the component.",
+    left: "Content or configuration for the left region.",
+    lg: "Column span at large breakpoint.",
+    loading: "Shows loading state and disables interactions where appropriate.",
+    loadingText: "Text displayed while loading.",
+    lockScroll: "Prevents body scroll while an overlay is open.",
+    max: "Maximum value for range-based controls.",
+    md: "Column span at medium breakpoint.",
+    message: "Message text shown in banners/alerts.",
+    min: "Minimum value for range-based controls.",
+    model: "Two-way bound value (alias to value in some components).",
+    multi: "Enables multi-selection behavior.",
+    multiple: "Allows selecting multiple values.",
+    name: "HTML name attribute for form submission.",
+    noDrawer: "Disables rendering of the drawer region.",
+    note: "Secondary note text.",
+    number: "Forces numeric input/formatting where supported.",
+    offset: "General offset for positioning.",
+    offsetX: "Horizontal offset for overlay placement in pixels.",
+    offsetY: "Vertical offset for overlay placement in pixels.",
+    onBlur: "Callback fired when the control loses focus.",
+    onChange: "Callback fired when the value or selection changes.",
+    onClear: "Callback fired when the clear action is used.",
+    onClose: "Callback fired when the component closes.",
+    onFocus: "Callback fired when the control gains focus.",
+    onInput: "Callback fired on input events or while typing.",
+    onOpen: "Callback fired when the component opens.",
+    onRemove: "Callback fired when an item is removed.",
+    onSubmit: "Callback fired when a form is submitted.",
+    open: "Controls open/visible state (controlled).",
+    options: "Array of selectable options or option groups.",
+    outline: "Uses outlined visual style.",
+    overlay: "Renders content in an overlay layer or portal.",
+    overlayClose: "Closes the overlay when the backdrop is clicked.",
+    page: "Current page index (1-based unless documented otherwise).",
+    pageSize: "Number of items per page.",
+    persistent: "Prevents closing via outside click or Escape.",
+    placeholder: "Placeholder text for inputs.",
+    placement: "Overlay placement relative to the target/anchor.",
+    prefix: "Content rendered before the main control.",
+    readonly: "Prevents editing while keeping focus and selection.",
+    removable: "Shows a remove affordance for chips/items.",
+    right: "Content or configuration for the right region.",
+    rowKey: "Key or function used to derive unique row IDs.",
+    rows: "Row data array for table-like components.",
+    separator: "Separator string/node between items.",
+    showLabel: "Whether to render the label text.",
+    size: "Size token, number, or CSS length for sizing.",
+    slots: "Named slots map for render overrides.",
+    sm: "Column span at small breakpoint.",
+    span: "Column span within a grid.",
+    speed: "Animation speed or duration in milliseconds.",
+    square: "Use square corners instead of rounded.",
+    src: "Image source URL.",
+    startTop: "Starting scroll offset for parallax effects.",
+    stateKey: "Storage key used to persist component state.",
+    step: "Step increment for numeric controls.",
+    sticky: "Makes the component sticky within its container.",
+    stickyAside: "Keeps the aside region sticky during scroll.",
+    stickyFooter: "Keeps the footer region sticky during scroll.",
+    stickyHeader: "Keeps the header region sticky during scroll.",
+    striped: "Applies striped row styling.",
+    style: "Inline styles applied to the component root element.",
+    subtitle: "Subtitle text or node.",
+    success: "Marks the component with success state styling.",
+    suffix: "Content rendered after the main control.",
+    tableClass: "Additional CSS classes applied to the table element.",
+    tabs: "Tab definitions array.",
+    tagPage: "Query parameter name used to read/write the current page.",
+    target: "Target element or anchor used for positioning.",
+    text: "Text content for simple components.",
+    thickness: "Stroke/line thickness for progress indicators.",
+    title: "Title text or node.",
+    to: "Navigation target/route to open on click.",
+    topLabel: "Label displayed above the control.",
+    trapFocus: "Keeps focus trapped inside the dialog/popover.",
+    type: "Variant or native input type.",
+    useInput: "Uses an input field to allow custom typing.",
+    value: "Current value (controlled).",
+    variant: "Visual variant name.",
+    vertical: "Vertical orientation instead of horizontal.",
+    warning: "Marks the component with warning state styling.",
+    width: "Explicit width (number interpreted as px or CSS length).",
+    wrap: "Allows children to wrap to new lines.",
+    wrapClass: "Additional CSS classes applied to the outer wrapper.",
+    zIndex: "z-index for overlay stacking."
+  };
+
+  const META_SLOT_DESCRIPTIONS = {
+    actions: "Slot for action buttons or links.",
+    arrow: "Slot for the tooltip/popover arrow element.",
+    aside: "Slot for aside/secondary content.",
+    center: "Slot for centered content within a toolbar/row.",
+    clear: "Slot for the clear control/content.",
+    content: "Slot for the main body content.",
+    control: "Slot for custom control/input rendering.",
+    default: "Primary content for the component.",
+    drawer: "Slot for drawer content.",
+    empty: "Slot for empty-state content.",
+    errorMessage: "Slot for custom error message rendering.",
+    filter: "Slot for custom filter/search UI.",
+    footer: "Slot for footer content.",
+    group: "Slot for grouped content container.",
+    groupLabel: "Slot for group label content.",
+    header: "Slot for header content.",
+    hint: "Slot for helper/hint text.",
+    icon: "Slot for icon content.",
+    input: "Slot for custom input element/content.",
+    item: "Slot for custom item rendering.",
+    itemLabel: "Slot for item label rendering.",
+    label: "Slot for label content.",
+    left: "Slot for left-aligned content.",
+    loading: "Slot for loading state content.",
+    message: "Slot for message/alert content.",
+    next: "Slot for the next-page control.",
+    note: "Slot for note/secondary text.",
+    option: "Slot for custom option rendering.",
+    page: "Slot for page indicator/content.",
+    prefix: "Slot for prefix content.",
+    prev: "Slot for the previous-page control.",
+    right: "Slot for right-aligned content.",
+    separator: "Slot for separator rendering between items.",
+    star: "Slot for custom star icon/content in rating.",
+    subtitle: "Slot for subtitle content.",
+    success: "Slot for success message/content.",
+    suffix: "Slot for suffix content.",
+    tab: "Slot for custom tab label/content.",
+    target: "Slot for custom target/anchor element.",
+    title: "Slot for title content.",
+    topLabel: "Slot for top label content.",
+    warning: "Slot for warning message/content."
+  };
+
+  const normalizeMetaType = (value) => {
+    if (typeof value === "string") return value;
+    if (!value || typeof value !== "object" || Array.isArray(value)) return "unknown";
+    return value.type || value.signature || value.value || "unknown";
+  };
+
+  const fallbackMetaDescription = (name, kind) => {
+    if (kind === "slot") {
+      return `Slot content for "${name}". Accepts nodes, arrays, or render functions.`;
+    }
+    return `Component configuration for "${name}". When not handled internally, it is forwarded to the root element.`;
+  };
+
+  const normalizeMetaFields = (fields, descriptions, kind) => {
+    if (!fields || typeof fields !== "object") return fields;
+    const out = {};
+    for (const [name, value] of Object.entries(fields)) {
+      const description = descriptions[name] || fallbackMetaDescription(name, kind);
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        out[name] = {
+          ...value,
+          type: normalizeMetaType(value),
+          description: value.description || description
+        };
+      } else {
+        out[name] = { type: normalizeMetaType(value), description };
+      }
+    }
+    return out;
+  };
+
+  const normalizeMetaEntry = (componentName, meta) => {
+    if (!meta || typeof meta !== "object") return meta;
+    if (meta.props) meta.props = normalizeMetaFields(meta.props, META_PROP_DESCRIPTIONS, "prop");
+    if (meta.slots) meta.slots = normalizeMetaFields(meta.slots, META_SLOT_DESCRIPTIONS, "slot");
+    if (!meta.description) {
+      meta.description = `${componentName} component meta definition.`;
+    }
+    return meta;
+  };
+
+  const ensureMetaProxy = () => {
+    if (app.ui._metaProxyInstalled) return;
+    app.ui._metaProxyInstalled = true;
+    const target = app.ui.meta || {};
+    for (const key of Object.keys(target)) {
+      normalizeMetaEntry(key, target[key]);
+    }
+    const proxy = new Proxy(target, {
+      set(obj, prop, value) {
+        if (typeof prop === "symbol") {
+          obj[prop] = value;
+          return true;
+        }
+        obj[prop] = normalizeMetaEntry(prop, value);
+        return true;
+      }
+    });
+    app.ui.meta = proxy;
+    UI.meta = proxy;
+  };
+
+  if (app.isDev?.()) {
+    ensureMetaProxy();
+  }
 
   function flattenSlotValue(value) {
     if (!value) return null;
@@ -288,8 +546,8 @@
     return _h.div(p, ...content);
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Row = {
+    UI.meta = UI.meta || {};
+    UI.meta.Row = {
       signature: "UI.Row(...children) | UI.Row(props, ...children)",
       props: {
         slots: "{ default?: Slot }",
@@ -335,8 +593,8 @@
     }
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Col = {
+    UI.meta = UI.meta || {};
+    UI.meta.Col = {
       signature: "UI.Col(...children) | UI.Col(props, ...children)",
       props: {
         slots: "{ default?: Slot }",
@@ -360,8 +618,8 @@
     return _h.div(p, ...content);
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Spacer = {
+    UI.meta = UI.meta || {};
+    UI.meta.Spacer = {
       signature: "UI.Spacer() | UI.Spacer(props)",
       props: {
         slots: "{ default?: Slot }",
@@ -385,8 +643,8 @@
     return _h.div(p, ...content);
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Container = {
+    UI.meta = UI.meta || {};
+    UI.meta.Container = {
       signature: "UI.Container(...children) | UI.Container(props, ...children)",
       props: {
         slots: "{ default?: Slot }",
@@ -556,7 +814,7 @@
     }, ...content);
   }
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta.Btn = {
+    UI.meta.Btn = {
       signature: "UI.Btn(...children) | UI.Btn(props, ...children)",
       props: {
         label: "String|Node|Function|Array",
@@ -779,8 +1037,8 @@
     return wrap;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.FormField = {
+    UI.meta = UI.meta || {};
+    UI.meta.FormField = {
       signature: "UI.FormField(props)",
       description: "Wrapper field con label floating, hint/error/success/warning/note, clear e addons slot-based.",
       props: {
@@ -1068,9 +1326,9 @@
     return field;
   }
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
+    UI.meta = UI.meta || {};
 
-    CMSwift.ui.meta.Input = {
+    UI.meta.Input = {
       signature: "UI.Input(props)",
       description: "Field input con floating label, hint/error/success/warning/note, clearable, icon, prefix/suffix e supporto reattivo (rod/signal).",
       props: {
@@ -1694,8 +1952,8 @@
     return field;
   }
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Select = {
+    UI.meta = UI.meta || {};
+    UI.meta.Select = {
       signature: "UI.Select(props)",
       description: "Select premium: keyboard nav, option groups, async options, filter, clearable, multi select, valori custom da filtro. Wrappato in UI.FormField.",
 
@@ -2057,8 +2315,8 @@
     return root;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Layout = {
+    UI.meta = UI.meta || {};
+    UI.meta.Layout = {
       signature: "UI.Layout({ header, aside, page, footer, ... })",
       props: {
         header: "Node|Function|Array",
@@ -2115,8 +2373,8 @@
     return _h.footer(p, ...content);
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Footer = {
+    UI.meta = UI.meta || {};
+    UI.meta.Footer = {
       signature: "UI.Footer(...children) | UI.Footer(props, ...children)",
       props: {
         sticky: "boolean",
@@ -2182,8 +2440,8 @@
     return _h.div(p, ...content);
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Toolbar = {
+    UI.meta = UI.meta || {};
+    UI.meta.Toolbar = {
       signature: "UI.Toolbar(...children) | UI.Toolbar(props, ...children)",
       props: {
         dense: "boolean",
@@ -2236,8 +2494,8 @@
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Grid = {
+    UI.meta = UI.meta || {};
+    UI.meta.Grid = {
       signature: "UI.Grid(...children) | UI.Grid(props, ...children)",
       props: {
         gap: "string|number",
@@ -2275,8 +2533,8 @@
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.GridCol = {
+    UI.meta = UI.meta || {};
+    UI.meta.GridCol = {
       signature: "UI.GridCol(...children) | UI.GridCol(props, ...children)",
       props: {
         span: "number",
@@ -2373,8 +2631,8 @@
     return _h.span({ ...p, "data-icon": nameStr }, nameStr, ...children);
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Icon = {
+    UI.meta = UI.meta || {};
+    UI.meta.Icon = {
       signature: "UI.Icon(name) | UI.Icon(props) | UI.Icon(props, ...children)",
       props: {
         name: "string|Node|Function",
@@ -2421,8 +2679,8 @@
     return _h.span(p, ...(content.length ? content : [""]));
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Badge = {
+    UI.meta = UI.meta || {};
+    UI.meta.Badge = {
       signature: "UI.Badge(...children) | UI.Badge(props, ...children)",
       props: {
         label: "String|Node|Function|Array",
@@ -2473,8 +2731,8 @@
     return _h.div(p, img || (fallback.length ? fallback : ["?"]));
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Avatar = {
+    UI.meta = UI.meta || {};
+    UI.meta.Avatar = {
       signature: "UI.Avatar(...children) | UI.Avatar(props, ...children)",
       props: {
         src: "string",
@@ -2530,8 +2788,8 @@
     return wrap;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Chip = {
+    UI.meta = UI.meta || {};
+    UI.meta.Chip = {
       signature: "UI.Chip(...children) | UI.Chip(props, ...children)",
       props: {
         label: "String|Node|Function|Array",
@@ -2695,8 +2953,8 @@
     return { bind, show, hide };
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Tooltip = {
+    UI.meta = UI.meta || {};
+    UI.meta.Tooltip = {
       signature: "UI.Tooltip(props) -> { bind, show, hide } | UI.Tooltip(target, text)",
       props: {
         text: "String|Node|Function|Array",
@@ -2732,8 +2990,8 @@
     return _h[number ? "ol" : "ul"](p, ...renderSlotToArray(slots, "default", {}, children));
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.List = {
+    UI.meta = UI.meta || {};
+    UI.meta.List = {
       signature: "UI.List(...children) | UI.List(props, ...children)",
       props: {
         dense: "boolean",
@@ -2760,8 +3018,8 @@
     return _h.li(p, ...renderSlotToArray(slots, "default", {}, children));
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Item = {
+    UI.meta = UI.meta || {};
+    UI.meta.Item = {
       signature: "UI.Item(...children) | UI.Item(props, ...children)",
       props: {
         divider: "boolean",
@@ -2793,8 +3051,8 @@
     return _h.hr(p);
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Separator = {
+    UI.meta = UI.meta || {};
+    UI.meta.Separator = {
       signature: "UI.Separator() | UI.Separator(props)",
       props: {
         vertical: "boolean",
@@ -2850,8 +3108,8 @@
     );
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Checkbox = {
+    UI.meta = UI.meta || {};
+    UI.meta.Checkbox = {
       signature: "UI.Checkbox(...children) | UI.Checkbox(props, ...children)",
       props: {
         label: "String|Node|Function|Array",
@@ -2917,8 +3175,8 @@
     );
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Radio = {
+    UI.meta = UI.meta || {};
+    UI.meta.Radio = {
       signature: "UI.Radio(...children) | UI.Radio(props, ...children)",
       props: {
         label: "String|Node|Function|Array",
@@ -2981,8 +3239,8 @@
     );
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Toggle = {
+    UI.meta = UI.meta || {};
+    UI.meta.Toggle = {
       signature: "UI.Toggle(...children) | UI.Toggle(props, ...children)",
       props: {
         label: "String|Node|Function|Array",
@@ -3036,8 +3294,8 @@
     return input;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Slider = {
+    UI.meta = UI.meta || {};
+    UI.meta.Slider = {
       signature: "UI.Slider(props)",
       props: {
         min: "number",
@@ -3105,8 +3363,8 @@
     return wrap;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Rating = {
+    UI.meta = UI.meta || {};
+    UI.meta.Rating = {
       signature: "UI.Rating(props)",
       props: {
         max: "number",
@@ -3137,8 +3395,8 @@
     return _h.input(p);
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Date = {
+    UI.meta = UI.meta || {};
+    UI.meta.Date = {
       signature: "UI.Date(props)",
       props: {
         value: "string",
@@ -3163,8 +3421,8 @@
     return _h.input(p);
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Time = {
+    UI.meta = UI.meta || {};
+    UI.meta.Time = {
       signature: "UI.Time(props)",
       props: {
         value: "string",
@@ -3224,8 +3482,8 @@
     return wrap;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Tabs = {
+    UI.meta = UI.meta || {};
+    UI.meta.Tabs = {
       signature: "UI.Tabs(props) | UI.Tabs(props, ...children)",
       props: {
         tabs: "Array<{label,value,onClick}>",
@@ -3271,8 +3529,8 @@
     return _h.a(p, ...(content.length ? content : [props.to || ""]));
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.RouteTab = {
+    UI.meta = UI.meta || {};
+    UI.meta.RouteTab = {
       signature: "UI.RouteTab(...children) | UI.RouteTab(props, ...children)",
       props: {
         label: "String|Node|Function|Array",
@@ -3316,8 +3574,8 @@
     return wrap;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Breadcrumbs = {
+    UI.meta = UI.meta || {};
+    UI.meta.Breadcrumbs = {
       signature: "UI.Breadcrumbs(props)",
       props: {
         items: "Array<{label,to,href}>",
@@ -3376,8 +3634,8 @@
     return wrap;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Pagination = {
+    UI.meta = UI.meta || {};
+    UI.meta.Pagination = {
       signature: "UI.Pagination(props)",
       props: {
         max: "number",
@@ -3431,8 +3689,8 @@
     return _h.div(p);
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Spinner = {
+    UI.meta = UI.meta || {};
+    UI.meta.Spinner = {
       signature: "UI.Spinner(props)",
       props: {
         size: "number|string",
@@ -3478,8 +3736,8 @@
     return wrap;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Progress = {
+    UI.meta = UI.meta || {};
+    UI.meta.Progress = {
       signature: "UI.Progress(props)",
       props: {
         value: "number",
@@ -3540,8 +3798,8 @@
     return { el: root, set, start, stop };
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.LoadingBar = {
+    UI.meta = UI.meta || {};
+    UI.meta.LoadingBar = {
       signature: "UI.LoadingBar(props)",
       props: {
         height: "string|number",
@@ -3602,8 +3860,8 @@
     return wrap;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Banner = {
+    UI.meta = UI.meta || {};
+    UI.meta.Banner = {
       signature: "UI.Banner(...children) | UI.Banner(props, ...children)",
       props: {
         message: "String|Node|Function|Array",
@@ -3734,8 +3992,8 @@
     );
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Header = {
+    UI.meta = UI.meta || {};
+    UI.meta.Header = {
       signature: "UI.Header(...children) | UI.Header(props, ...children)",
       props: {
         title: "string",
@@ -3931,8 +4189,8 @@
     return drawerEl;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Drawer = {
+    UI.meta = UI.meta || {};
+    UI.meta.Drawer = {
       signature: "UI.Drawer(props)",
       props: {
         items: "Array",
@@ -3965,8 +4223,8 @@
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Page = {
+    UI.meta = UI.meta || {};
+    UI.meta.Page = {
       signature: "UI.Page(...children) | UI.Page(props, ...children)",
       props: {
         dense: "boolean",
@@ -4000,8 +4258,8 @@
     );
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.AppShell = {
+    UI.meta = UI.meta || {};
+    UI.meta.AppShell = {
       signature: "UI.AppShell(props)",
       props: {
         header: "Node|Function|Array",
@@ -4080,8 +4338,8 @@
     return wrap;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Parallax = {
+    UI.meta = UI.meta || {};
+    UI.meta.Parallax = {
       signature: "UI.Parallax(...children) | UI.Parallax(props, ...children)",
       props: {
         src: "string",
@@ -4446,8 +4704,8 @@
     return el;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Form = {
+    UI.meta = UI.meta || {};
+    UI.meta.Form = {
       signature: "UI.Form({ form, onSubmit, ...props }, ...children)",
       props: {
         form: "useForm() instance",
@@ -4521,8 +4779,8 @@
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.CardHeader = {
+    UI.meta = UI.meta || {};
+    UI.meta.CardHeader = {
       signature: "UI.CardHeader(...children) | UI.CardHeader(props, ...children)",
       props: {
         divider: "boolean",
@@ -4540,7 +4798,7 @@
       returns: "HTMLDivElement",
       description: "Header della card con supporto layout flex."
     };
-    CMSwift.ui.meta.CardBody = {
+    UI.meta.CardBody = {
       signature: "UI.CardBody(...children) | UI.CardBody(props, ...children)",
       props: {
         slots: "{ default? }",
@@ -4553,7 +4811,7 @@
       returns: "HTMLDivElement",
       description: "Body della card."
     };
-    CMSwift.ui.meta.CardFooter = {
+    UI.meta.CardFooter = {
       signature: "UI.CardFooter(...children) | UI.CardFooter(props, ...children)",
       props: {
         divider: "boolean",
@@ -4637,8 +4895,8 @@
     return { open, close, isOpen };
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Dialog = {
+    UI.meta = UI.meta || {};
+    UI.meta.Dialog = {
       signature: "UI.Dialog(props) -> { open, close }",
       props: {
         title: "String|Node|Function|Array",
@@ -5144,8 +5402,8 @@ transition: width 200ms ease;
     return wrap;
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Table = {
+    UI.meta = UI.meta || {};
+    UI.meta.Table = {
       signature: "UI.Table(props)",
       props: {
         columns: "Array<{ key, label?, sortable?, get?, render?, width?, align?, compare? }>",
@@ -5249,8 +5507,8 @@ transition: width 200ms ease;
     return { open, close };
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Menu = {
+    UI.meta = UI.meta || {};
+    UI.meta.Menu = {
       signature: "UI.Menu(props) -> { open, close }",
       props: {
         content: "Node|Function|Array|({ close })=>Node",
@@ -5336,8 +5594,8 @@ transition: width 200ms ease;
     return { open, close };
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.Popover = {
+    UI.meta = UI.meta || {};
+    UI.meta.Popover = {
       signature: "UI.Popover(props) -> { open, close }",
       props: {
         title: "String|Node|Function|Array",
@@ -5451,8 +5709,8 @@ transition: width 200ms ease;
     return { bind, openAt, close };
   };
   if (CMSwift.isDev?.()) {
-    CMSwift.ui.meta = CMSwift.ui.meta || {};
-    CMSwift.ui.meta.ContextMenu = {
+    UI.meta = UI.meta || {};
+    UI.meta.ContextMenu = {
       signature: "UI.ContextMenu(props) -> { bind, openAt, close }",
       props: {
         content: "Node|Function|Array|({ close })=>Node",

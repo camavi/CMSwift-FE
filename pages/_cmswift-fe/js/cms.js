@@ -2851,7 +2851,8 @@
   CMSwift.http.onAfter = function (fn) { hooksHTTP.afterResponse.add(fn); return () => hooksHTTP.afterResponse.delete(fn); };
   CMSwift.http.onError = function (fn) { hooksHTTP.onError.add(fn); return () => hooksHTTP.onError.delete(fn); };
 
-
+  // shortcuts per browser global
+  window._http = CMSwift.http;
   // ===============================
   // useRouter (hook-style)
   // ===============================
@@ -2912,8 +2913,6 @@
   CMSwift.ui.meta = CMSwift.ui.meta || {};
 
   window._ui = CMSwift.ui;
-
-  CMSwift.ui = CMSwift.ui || {};
 
   CMSwift.ui.slot = function slot(value, opts = {}) {
     const UI = CMSwift.ui;

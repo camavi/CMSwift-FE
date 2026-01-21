@@ -88,6 +88,7 @@ const layout = _h.div({ class: "cms-panel cms-page" },
         ),
       ),
     )
-  )
+  ),
+  _ui.Card({ class: "cms-m-t-lg", header: "Esempio di utilizzo:" },)
 );
 export { layout };

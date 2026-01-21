@@ -196,4 +196,7 @@ declare global {
       function state(): any;
     }
   }
+  const cms = CMSwift;
+  const _ui = UI;
+  const _http = CMSwift.http;
 }
