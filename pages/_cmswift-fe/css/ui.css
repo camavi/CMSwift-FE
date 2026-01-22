@@ -78,7 +78,123 @@
 
 }
 
+/* FONTS */
 /* - CSS BASE */
+
+.cms-overlay-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1010;
+}
+
+.cms-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.cms-overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 160ms ease;
+  pointer-events: auto;
+}
+
+.cms-overlay.entered .cms-overlay-backdrop {
+  opacity: 1;
+}
+
+.cms-overlay.leave .cms-overlay-backdrop {
+  opacity: 0;
+}
+
+.cms-overlay-panel {
+  pointer-events: auto;
+  background: var(--cms-panel);
+  border: 1px solid var(--cms-border);
+  border-radius: var(--cms-r-md);
+  box-shadow: var(--cms-shadow-sm);
+  color: var(--cms-text);
+}
+
+.cms-overlay-panel.enter {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.cms-overlay-panel.entered {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.cms-overlay-panel.leave {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.cms-dialog {
+  min-width: 320px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cms-s-md);
+  padding: var(--cms-s-lg);
+}
+
+.cms-dialog-title {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.cms-dialog-body {
+  overflow: auto;
+}
+
+.cms-dialog-actions {
+  display: flex;
+  gap: var(--cms-s-sm);
+  justify-content: flex-end;
+}
+
+.cms-menu {
+  min-width: 180px;
+  padding: var(--cms-s-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cms-menu-item {
+  padding: 6px 10px;
+  border-radius: var(--cms-r-sm);
+  cursor: pointer;
+}
+
+.cms-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cms-tooltip {
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 1.3;
+  border-radius: var(--cms-r-sm);
+  background: var(--cms-panel);
+  border: 1px solid var(--cms-border);
+  box-shadow: var(--cms-shadow-sm);
+  pointer-events: none;
+  max-width: 240px;
+}
+
 .cms-d-none {
   display: none;
 }

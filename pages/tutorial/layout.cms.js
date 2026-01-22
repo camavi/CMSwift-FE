@@ -91,6 +91,6 @@ const layout = _h.div({ class: "cms-panel cms-page" },
   ),
   _ui.Card({ class: "cms-m-t-lg", header: "Esempio di utilizzo:" },),
   _ui.Icon("#menu-2"),
-  _ui.Btn({ icon: "#access-point", class: "" })
+  _ui.Btn({ icon: "#access-point", class: "" }),
 );
 export { layout };

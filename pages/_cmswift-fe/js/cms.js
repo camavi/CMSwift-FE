@@ -2984,7 +2984,10 @@
     if (!meta) return _h.div({ class: "cms-muted" }, `Meta non trovata: ${name}`);
 
     const propsRows = Object.entries(meta.props || {}).map(([k, v]) =>
-      _h.tr(_h.td(_h.code(k)), _h.td(_h.code(String(v))))
+      _h.tr(_h.td(_h.code(k)), _h.td(
+        _h.div({ class: "cms-m-b-lg" }, _ui.Chip({ label: 'Type' }), _h.span(" : "), _h.b(v.type)),
+        _h.div({ class: "cms-m-t-lg" }, _h.code({ class: "cms-m-l-lg" }, v.description)),
+      ))
     );
 
     const eventsRows = (meta.events || []).map(ev =>

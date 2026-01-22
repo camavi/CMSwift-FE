@@ -3,191 +3,9 @@
 // ===============================
 
 (function initCMSwiftUI(app) {
-  app.theme = app.theme || {};
   app.ui = app.ui || {};
   app.services = app.services || {};
   app.services.notify = app.services.notify || {};
-
-  // -------------------------------
-  // 1) THEME TOKENS + CSS INJECTION
-  // -------------------------------
-  const DEFAULT_TOKENS = {
-    colors: {
-      bg: "#0b0f1a",
-      panel: "#121a2b",
-      text: "#e9eefc",
-      muted: "#a7b0c5",
-      primary: "#4f7cff",
-      danger: "#ff4f6d",
-      success: "#37d28a",
-      border: "rgba(255,255,255,0.10)"
-    },
-    radius: { sm: "10px", md: "14px", lg: "18px" },
-    space: { xs: "6px", sm: "10px", md: "14px", lg: "18px", xl: "26px" },
-    font: { base: "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" },
-    shadow: { sm: "0 8px 24px rgba(0,0,0,0.25)" }
-  };
-
-  function deepMerge(a, b) {
-    const out = { ...(a || {}) };
-    for (const k in (b || {})) {
-      if (b[k] && typeof b[k] === "object" && !Array.isArray(b[k])) out[k] = deepMerge(out[k], b[k]);
-      else out[k] = b[k];
-    }
-    return out;
-  }
-
-  const [getTokens, setTokens] = app.reactive.signal(DEFAULT_TOKENS);
-
-  function cssVars(tokens) {
-    const c = tokens.colors;
-    const r = tokens.radius;
-    const s = tokens.space;
-    const f = tokens.font;
-    const sh = tokens.shadow;
-    return `
-:root{
-  --cms-bg:${c.bg};
-  --cms-panel:${c.panel};
-  --cms-text:${c.text};
-  --cms-muted:${c.muted};
-  --cms-primary:${c.primary};
-  --cms-danger:${c.danger};
-  --cms-success:${c.success};
-  --cms-border:${c.border};
-
-  --cms-r-sm:${r.sm};
-  --cms-r-md:${r.md};
-  --cms-r-lg:${r.lg};
-
-  --cms-s-xs:${s.xs};
-  --cms-s-sm:${s.sm};
-  --cms-s-md:${s.md};
-  --cms-s-lg:${s.lg};
-  --cms-s-xl:${s.xl};
-
-  --cms-font:${f.base};
-  --cms-shadow-sm:${sh.sm};
-}
-`;
-  }
-
-  const BASE_CSS = `
-.cms-overlay-root{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:1010;
-}
-.cms-overlay{
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  pointer-events:none;
-}
-.cms-overlay-backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.45);
-  opacity:0;
-  transition:opacity 160ms ease;
-  pointer-events:auto;
-}
-.cms-overlay.entered .cms-overlay-backdrop{ opacity:1; }
-.cms-overlay.leave .cms-overlay-backdrop{ opacity:0; }
-
-.cms-overlay-panel{
-  pointer-events:auto;
-  background:var(--cms-panel);
-  border:1px solid var(--cms-border);
-  border-radius:var(--cms-r-md);
-  box-shadow:var(--cms-shadow-sm);
-  color:var(--cms-text);
-}
-.cms-overlay-panel.enter{
-  opacity:0;
-  transform:translateY(6px);
-}
-.cms-overlay-panel.entered{
-  opacity:1;
-  transform:translateY(0);
-  transition:opacity 160ms ease,transform 160ms ease;
-}
-.cms-overlay-panel.leave{
-  opacity:0;
-  transform:translateY(6px);
-  transition:opacity 140ms ease,transform 140ms ease;
-}
-
-.cms-dialog{
-  min-width:320px;
-  max-width:calc(100vw - 32px);
-  max-height:calc(100vh - 32px);
-  display:flex;
-  flex-direction:column;
-  gap:var(--cms-s-md);
-  padding:var(--cms-s-lg);
-}
-.cms-dialog-title{
-  font-weight:600;
-  font-size:18px;
-}
-.cms-dialog-body{ overflow:auto; }
-.cms-dialog-actions{
-  display:flex;
-  gap:var(--cms-s-sm);
-  justify-content:flex-end;
-}
-
-.cms-menu{
-  min-width:180px;
-  padding:var(--cms-s-sm);
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-.cms-menu-item{
-  padding:6px 10px;
-  border-radius:var(--cms-r-sm);
-  cursor:pointer;
-}
-.cms-menu-item:hover{ background:rgba(255,255,255,0.06); }
-
-.cms-tooltip{
-  padding:6px 8px;
-  font-size:12px;
-  line-height:1.3;
-  border-radius:var(--cms-r-sm);
-  background:var(--cms-panel);
-  border:1px solid var(--cms-border);
-  box-shadow:var(--cms-shadow-sm);
-  pointer-events:none;
-  max-width:240px;
-}
-`;
-
-  let styleEl = null;
-  function ensureStyles() {
-    if (styleEl) return;
-    styleEl = document.createElement("style");
-    styleEl.setAttribute("data-cmswift-ui", "true");
-    document.head.appendChild(styleEl);
-
-    // reattivo: aggiorna CSS vars se cambi tokens
-    app.reactive.effect(() => {
-      const t = getTokens();
-      styleEl.textContent = cssVars(t) + BASE_CSS;
-    }, "CMSwiftUI:theme");
-  }
-  app.theme.configure = (partialTokens) => {
-    ensureStyles();
-    setTokens(deepMerge(getTokens(), partialTokens || {}));
-  };
-
-  app.theme.tokens = getTokens;
-  ensureStyles();
 
   // --------------------------------
   // 2) UI PRIMITIVES (layout + atoms)
@@ -570,7 +388,7 @@
       const style = { ...(props.style || {}) };
       const size = props.size || null;
       const cls = [
-        col === "" ? "cms-col" : (col != null ? `cms-col-${col}` : "cms-col"),
+        col === "" ? "cms-col" : col != null ? `cms-col-${col}` : "cms-col",
         props.sm ? `cms-sm-col-${props.sm}` : "",
         props.md ? `cms-md-col-${props.md}` : "",
         props.lg ? `cms-lg-col-${props.lg}` : "",
@@ -819,8 +637,8 @@
       props: {
         label: "String|Node|Function|Array",
         icon: "String|Node|Function|Array",
-        iconAlign: `"before"|"after"|"left"|"right"`,
-        color: `"primary"|"secondary"|"warning"|"danger"|"success"|"info"|"light"|"dark"`,
+        iconAlign: `before|after|left|right`,
+        color: `primary|secondary|warning|danger|success|info|light|dark`,
         variant: "string (alias di color)",
         outline: "boolean",
         loading: "boolean",
@@ -2380,7 +2198,7 @@
         sticky: "boolean",
         dense: "boolean",
         elevated: "boolean",
-        align: `"left"|"center"|"right"`,
+        align: `left|center|right`,
         slots: "{ default? }",
         class: "string",
         style: "object"
@@ -2449,8 +2267,8 @@
         elevated: "boolean",
         sticky: "boolean",
         wrap: "boolean",
-        align: `"stretch"|"flex-start"|"center"|"flex-end"|"baseline"`,
-        justify: `"flex-start"|"center"|"flex-end"|"space-between"|"space-around"|"space-evenly"`,
+        align: `stretch|flex-start|center|flex-end|baseline`,
+        justify: `flex-start|center|flex-end|space-between|space-around|space-evenly`,
         gap: "string (es: '8px' o 'var(--cms-s-md)')",
         slots: "{ default? }",
         class: "string",
@@ -2500,8 +2318,8 @@
       props: {
         gap: "string|number",
         cols: "number|string",
-        align: `"stretch"|"start"|"center"|"end"`,
-        justify: `"start"|"center"|"end"|"space-between"|"space-around"|"space-evenly"`,
+        align: `stretch|start|center|end`,
+        justify: `start|center|end|space-between|space-around|space-evenly`,
         dense: "boolean",
         slots: "{ default? }",
         class: "string",
@@ -4784,8 +4602,8 @@
       signature: "UI.CardHeader(...children) | UI.CardHeader(props, ...children)",
       props: {
         divider: "boolean",
-        align: `"stretch"|"flex-start"|"center"|"flex-end"|"baseline"`,
-        justify: `"flex-start"|"center"|"flex-end"|"space-between"|"space-around"|"space-evenly"`,
+        align: `stretch|flex-start|center|flex-end|baseline`,
+        justify: `flex-start|center|flex-end|space-between|space-around|space-evenly`,
         wrap: "boolean",
         gap: "string|number",
         slots: "{ default? }",
@@ -4815,8 +4633,8 @@
       signature: "UI.CardFooter(...children) | UI.CardFooter(props, ...children)",
       props: {
         divider: "boolean",
-        align: `"stretch"|"flex-start"|"center"|"flex-end"|"baseline"`,
-        justify: `"flex-start"|"center"|"flex-end"|"space-between"|"space-around"|"space-evenly"`,
+        align: `stretch|flex-start|center|flex-end|baseline`,
+        justify: `flex-start|center|flex-end|space-between|space-around|space-evenly`,
         wrap: "boolean",
         gap: "string|number",
         slots: "{ default? }",
@@ -5195,7 +5013,7 @@ transition: width 200ms ease;
     // rowKey: "id" | (row)=>string
     // loading: boolean | () => boolean
     // pageSize: number
-    // initialSort: { key, dir: "asc"|"desc" }
+    // initialSort: { key, dir: "asc|desc" }
     // actions: (row) => Node|Node[]   (per row)
     // emptyText, loadingText
     // onRowClick(row)
