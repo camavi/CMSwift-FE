@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CMSwift UI Demo</title>
+    <link rel="stylesheet" href="/_cmswift-fe/css/base.css" />
     <link rel="stylesheet" href="/_cmswift-fe/css/responsive.css" />
     <link rel="stylesheet" href="/_cmswift-fe/css/ui.css" />
     <link rel="stylesheet" href="/_cmswift-fe/css/animation.css" />
@@ -38,7 +39,7 @@
       const progress = _ui.Progress({ value: completion.value });
       const progressLabel = _h.span(
         { class: "cms-muted" },
-        `${completion.value}%`
+        `${completion.value}%`,
       );
       completion.action((v) => {
         progress.querySelector(".cms-progress-bar").style.width = `${v}%`;
@@ -47,7 +48,7 @@
 
       const statusLine = _h.div(
         { class: "cms-muted", style: { marginTop: "10px" } },
-        ""
+        "",
       );
       const updateStatus = () => {
         statusLine.textContent = `Titolo: ${title.value} • Pubblicato: ${
@@ -57,7 +58,7 @@
         } • Avanzamento: ${completion.value}%`;
       };
       [title, published, visibility, featured, completion].forEach((r) =>
-        r.action(updateStatus)
+        r.action(updateStatus),
       );
       updateStatus();
 
@@ -84,9 +85,9 @@
           _ui.Toolbar(
             _ui.Btn({ icon: "#home", iconAlign: "right" }, "Dashboard"),
             _ui.Btn({ icon: "#search" }, "Cerca"),
-            _ui.Btn({ variant: "primary", icon: "#plus" }, "Nuovo")
-          )
-        )
+            _ui.Btn({ variant: "primary", icon: "#plus" }, "Nuovo"),
+          ),
+        ),
       );
 
       const interactiveCard = _ui.Card(
@@ -99,7 +100,7 @@
           _ui.Btn({ variant: "primary" }, "Primario"),
           _ui.Btn({ variant: "success" }, "Successo"),
           _ui.Btn({ variant: "danger" }, "Pericolo"),
-          _ui.Btn({ outline: true }, "Outline")
+          _ui.Btn({ outline: true }, "Outline"),
         ),
         _h.div(
           {
@@ -113,7 +114,7 @@
           },
           _ui.Input({ placeholder: "Titolo pagina", model: title }),
           _ui.Checkbox({ label: "Pubblicato", model: published }),
-          _ui.Toggle({ label: "In evidenza", model: featured })
+          _ui.Toggle({ label: "In evidenza", model: featured }),
         ),
         _h.div(
           {
@@ -139,19 +140,19 @@
           }),
           _h.div(
             { style: { minWidth: "170px" } },
-            _ui.Slider({ min: 0, max: 100, model: completion })
+            _ui.Slider({ min: 0, max: 100, model: completion }),
           ),
           progress,
-          progressLabel
+          progressLabel,
         ),
-        statusLine
+        statusLine,
       );
 
       const infoList = _ui.List(
         _ui.Item({}, "Dashboard"),
         _ui.Item({}, "Articoli"),
         _ui.Item({}, "Media"),
-        _ui.Item({}, "Impostazioni")
+        _ui.Item({}, "Impostazioni"),
       );
 
       const dataCard = _ui.Card(
@@ -172,9 +173,9 @@
             removable: true,
             onRemove: () => _ui.Notify.info("Tag rimosso"),
           }),
-          _ui.Chip({ label: "Design" })
+          _ui.Chip({ label: "Design" }),
         ),
-        _h.div({ style: { marginTop: "12px" } }, infoList)
+        _h.div({ style: { marginTop: "12px" } }, infoList),
       );
 
       const rows = [
@@ -226,7 +227,7 @@
               outline: true,
               onClick: () => _ui.Notify.info(`Apri: ${row.title}`),
             },
-            "Apri"
+            "Apri",
           ),
       });
 
@@ -242,14 +243,14 @@
             {
               onClick: () => _ui.Notify.success("Operazione completata"),
             },
-            "Notify success"
+            "Notify success",
           ),
           _ui.Btn(
             {
               onClick: () => _ui.Notify.error("Si è verificato un errore"),
             },
-            "Notify error"
-          )
+            "Notify error",
+          ),
         ),
         _h.div(
           {
@@ -261,8 +262,8 @@
             },
           },
           _ui.Spinner({ size: 22 }),
-          _h.span("Caricamento in corso")
-        )
+          _h.span("Caricamento in corso"),
+        ),
       );
 
       const parallax = _ui.Parallax(
@@ -271,9 +272,9 @@
           _h.h2({ style: { margin: 0 } }, "CMSwift UI Kit"),
           _h.p(
             { style: { margin: "6px 0 0" } },
-            "Tutti i componenti in azione su una singola pagina."
-          )
-        )
+            "Tutti i componenti in azione su una singola pagina.",
+          ),
+        ),
       );
 
       const page = _ui.Page(
@@ -283,21 +284,21 @@
             { style: { margin: "16px 0" } },
             _ui.Breadcrumbs({
               items: [{ label: "Home", to: "#" }, { label: "Demo componenti" }],
-            })
+            }),
           ),
           _ui.Grid(
             { gap: "var(--cms-s-lg)" },
             _ui.GridCol({ span: 24, sm: 24, class: "cms-m-b-sm" }, navCard),
             _ui.GridCol(
               { span: 24, sm: 24, class: "cms-m-b-sm" },
-              interactiveCard
+              interactiveCard,
             ),
             _ui.GridCol({ span: 24, sm: 24, class: "cms-m-b-sm" }, dataCard),
             _ui.GridCol({ span: 24, sm: 24, class: "cms-m-b-sm" }, notifyCard),
             _ui.GridCol({ span: 24, sm: 24, class: "cms-m-b-sm" }, table),
-            _ui.GridCol({ span: 24 }, CMSwift.ui.DocTable("Btn"))
-          )
-        )
+            _ui.GridCol({ span: 24 }, CMSwift.ui.DocTable("Btn")),
+          ),
+        ),
       );
 
       const header = _ui.Header({
@@ -309,12 +310,12 @@
               icon: "#bell",
               onClick: () => _ui.Notify.info("Hai nuove notifiche"),
             },
-            "Notifiche"
+            "Notifiche",
           ),
           _ui.Btn(
             { variant: "primary", icon: "#plus", onClick: () => dialog.open() },
-            "Nuovo"
-          )
+            "Nuovo",
+          ),
         ),
       });
 
@@ -362,8 +363,8 @@
       const footer = _ui.Footer(
         _h.div(
           "CMSwift UI Demo • Layout completo con componenti attivi",
-          _ui.Icon({ color: "red", name: "#heart" })
-        )
+          _ui.Icon({ color: "red", name: "#heart" }),
+        ),
       );
 
       CMSwift.mount(
@@ -373,7 +374,7 @@
           aside: drawer,
           page,
           footer,
-        })
+        }),
       );
     });
   </script>

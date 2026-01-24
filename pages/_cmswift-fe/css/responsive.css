@@ -132,8 +132,8 @@
   --cms-s-xxxl: 64px;
 }
 
-.cms-row { display: flex; align-items: center; flex-wrap: wrap; }
-.cms-col { display: flex; flex-direction: column; gap: var(--cms-s-md); box-sizing: border-box; }
+.cms-row { display: flex; align-items: stretch; flex-wrap: wrap; }
+.cms-col { flex-direction: column; gap: var(--cms-s-md); box-sizing: border-box; }
 .cms-col-auto { max-width: 100%; flex: 0 0 auto; width: auto; }
 [class*="cms-col"] { position: relative; box-sizing: border-box; flex: 1; }
 

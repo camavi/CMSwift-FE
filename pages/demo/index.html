@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CMSwift UI Demo</title>
+    <link rel="stylesheet" href="/_cmswift-fe/css/base.css" />
     <link rel="stylesheet" href="/_cmswift-fe/css/responsive.css" />
     <link rel="stylesheet" href="/_cmswift-fe/css/ui.css" />
     <link rel="stylesheet" href="/_cmswift-fe/css/animation.css" />
@@ -32,11 +33,13 @@
   </body>
   <script type="module">
     import { layout } from "../tutorial/layout.cms.js";
+    import { chip } from "../tutorial/chip.cms.js";
+    import { ColorTokensDemoPage } from "../tutorial/color.cms.js";
     function layoutPage(
       _content = null,
       _header = null,
       _drawer = null,
-      _footer = null
+      _footer = null,
     ) {
       let currentLayout = null;
       const header =
@@ -50,7 +53,7 @@
                 icon: "#bell",
                 onClick: () => _ui.Notify.info("Hai nuove notifiche"),
               },
-              "Notifiche"
+              "Notifiche",
             ),
             _ui.Btn(
               {
@@ -62,8 +65,8 @@
                   CMSwift.router.navigate("/demo/component/card");
                 },
               },
-              "Nuovo"
-            )
+              "Nuovo",
+            ),
           ),
         });
       const content =
@@ -72,8 +75,8 @@
           _h.div(
             { style: { margin: "16px 0" } },
             _h.h2("CMSwift UI Kit"),
-            _h.p("Tutti i componenti in azione su una singola pagina.")
-          )
+            _h.p("Tutti i componenti in azione su una singola pagina."),
+          ),
         );
       const drawer =
         _drawer ||
@@ -116,7 +119,7 @@
                   onClick: () =>
                     currentLayout.mainUpdate(
                       cardContent,
-                      "/demo/component/card"
+                      "/demo/component/card",
                     ),
                 },
                 { label: "CardHeader", to: "/demo/component/cardheader" },
@@ -166,7 +169,11 @@
                 { label: "Icon", to: "/demo/component/icon" },
                 { label: "Avatar", to: "/demo/component/avatar" },
                 { label: "Badge", to: "/demo/component/badge" },
-                { label: "Chip", to: "/demo/component/chip" },
+                {
+                  label: "Chip",
+                  onClick: () =>
+                    currentLayout.mainUpdate(chip, "/demo/component/chip"),
+                },
                 { label: "Item", to: "/demo/component/item" },
 
                 { label: "Separator", to: "/demo/component/separator" },
@@ -180,8 +187,8 @@
         _ui.Footer(
           _h.div(
             "CMSwift UI Demo • Layout completo con componenti attivi",
-            _ui.Icon({ color: "red", name: "#heart" })
-          )
+            _ui.Icon({ color: "red", name: "#heart" }),
+          ),
         );
 
       const drawerOpen = _rod(true);
@@ -200,11 +207,14 @@
     let contentPage = _h.div("Start");
 
     CMSwift.mount("#app", layoutPage(contentPage));
-
+    const p = ColorTokensDemoPage();
+    console.log(p);
     CMSwift.router.setOutlet(contentPage);
     CMSwift.router.add("/demo", () => page.home());
     CMSwift.router.add("/demo/component/card", () => page.card());
     CMSwift.router.add("/demo/component/layout", () => layout);
+    CMSwift.router.add("/demo/component/chip", () => chip);
+    CMSwift.router.add("/demo/component/color", () => ColorTokensDemoPage);
     CMSwift.router.start();
     /* */
   </script>

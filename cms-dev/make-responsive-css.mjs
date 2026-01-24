@@ -8,7 +8,7 @@ const MEDIA_BREAKPOINTS = [
   { size: 1200, key: "lg" },
   { size: 1440, key: "xl" },
 ];
-const OUT_FILE = path.resolve("../../pages/_cmswift-fe/css/responsive.css");
+const OUT_FILE = path.resolve("../pages/_cmswift-fe/css/responsive.css");
 
 // prefisso classe
 const CLASS_PREFIX = "cms-";
@@ -343,8 +343,8 @@ function main() {
   lines.push("}");
   lines.push("");
 
-  lines.push(".cms-row { display: flex; align-items: center; flex-wrap: wrap; }");
-  lines.push(".cms-col { display: flex; flex-direction: column; gap: var(--cms-s-md); box-sizing: border-box; }");
+  lines.push(".cms-row { display: flex; align-items: stretch; flex-wrap: wrap; }");
+  lines.push(".cms-col { flex-direction: column; gap: var(--cms-s-md); box-sizing: border-box; }");
   lines.push(".cms-col-auto { max-width: 100%; flex: 0 0 auto; width: auto; }");
   lines.push('[class*="cms-col"] { position: relative; box-sizing: border-box; flex: 1; }');
   lines.push("");

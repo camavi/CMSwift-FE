@@ -1,11 +1,24 @@
 // ===============================
 // CMSwift UI Kit MVP
 // ===============================
-
 (function initCMSwiftUI(app) {
   app.ui = app.ui || {};
   app.services = app.services || {};
   app.services.notify = app.services.notify || {};
+
+  const normalizeArgsBase = CMSwift.uiNormalizeArgs;
+  CMSwift.uiNormalizeArgs = function (args) {
+    const out = normalizeArgsBase(args);
+    const props = out.props || {};
+    if (props && Object.prototype.hasOwnProperty.call(props, "children")) {
+      const propChildren = props.children;
+      if (!out.children || out.children.length === 0) {
+        out.children = Array.isArray(propChildren) ? propChildren : [propChildren];
+      }
+      delete props.children;
+    }
+    return out;
+  };
 
   // --------------------------------
   // 2) UI PRIMITIVES (layout + atoms)
@@ -83,6 +96,7 @@
     content: "Main content node(s) or render function for the component body.",
     contentClass: "Additional CSS classes applied to the content container.",
     control: "Custom control element or render function for the input area.",
+    children: "Default child content (nodes, arrays, or render function).",
     delay: "Delay in milliseconds before showing or hiding.",
     dense: "Uses compact spacing and sizing.",
     disabled: "Disables interaction and applies disabled styling/ARIA.",
@@ -282,6 +296,12 @@
 
   const normalizeMetaEntry = (componentName, meta) => {
     if (!meta || typeof meta !== "object") return meta;
+    if (!meta.props || typeof meta.props !== "object" || Array.isArray(meta.props)) {
+      meta.props = meta.props && typeof meta.props === "object" && !Array.isArray(meta.props) ? meta.props : {};
+    }
+    if (!Object.prototype.hasOwnProperty.call(meta.props, "children")) {
+      meta.props.children = "Node|Array|Function";
+    }
     if (meta.props) meta.props = normalizeMetaFields(meta.props, META_PROP_DESCRIPTIONS, "prop");
     if (meta.slots) meta.slots = normalizeMetaFields(meta.slots, META_SLOT_DESCRIPTIONS, "slot");
     if (!meta.description) {
