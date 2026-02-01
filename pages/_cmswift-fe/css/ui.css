@@ -379,7 +379,7 @@
   background: rgba(255, 255, 255, 0.04);
   color: var(--cms-text);
   padding: 10px 14px;
-  border-radius: var(--cms-r-md);
+  border-radius: var(--set-b-radius, 999px);
   cursor: pointer;
   user-select: none;
   position: relative;
@@ -1285,14 +1285,35 @@
   vertical-align: middle;
   margin: -3px 2px 0 2px;
   box-sizing: border-box;
-  width: var(--cms-icon-size-md, 20px);
-  height: var(--cms-icon-size-md, 20px);
+  width: var(--set-icon-size, 20px);
+  height: var(--set-icon-size, 20px);
+  font-size: var(--set-icon-size);
+}
+
+.cms-icon.material-icons {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.cms-icon.material-icons-fill {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
 .cms-icon>svg {
   display: inline-block;
-  width: var(--cms-icon-size-md, 20px);
-  height: var(--cms-icon-size-md, 20px);
+  width: var(--set-icon-size, 20px);
+  height: var(--set-icon-size, 20px);
   stroke-width: var(--cms-icon-stroke-width, 0.1rem);
   stroke: currentColor;
   fill: none;
@@ -1339,6 +1360,169 @@
 
 .cms-t-justify {
   text-align: justify;
+}
+
+/* =============================
+   Common component utilities
+   ============================= */
+.cms-r-none {
+  border-radius: 0;
+}
+
+.cms-btn.cms-size-xxs {
+  padding: 1px 1px;
+  font-size: var(--cms-font-size-xxs);
+}
+
+.cms-btn.cms-size-xs {
+  padding: 4px 6px;
+  font-size: var(--cms-font-size-xs);
+}
+
+.cms-btn.cms-size-sm {
+  padding: 6px 10px;
+  font-size: var(--cms-font-size-sm);
+}
+
+.cms-btn.cms-size-md {
+  padding: 10px 14px;
+  font-size: var(--cms-font-size-md);
+}
+
+.cms-btn.cms-size-lg {
+  padding: 12px 18px;
+  font-size: var(--cms-font-size-lg);
+}
+
+.cms-btn.cms-size-xl {
+  padding: 14px 22px;
+  font-size: var(--cms-font-size-xl);
+}
+
+.cms-btn.cms-size-xxl {
+  padding: 18px 26px;
+  font-size: var(--cms-font-size-xxl);
+}
+
+.cms-btn.cms-size-xxxl {
+  padding: 22px 30px;
+  font-size: var(--cms-font-size-xxxl);
+}
+
+.cms-badge.cms-size-xs {
+  font-size: 10px;
+  padding: 2px 6px;
+}
+
+.cms-badge.cms-size-sm {
+  font-size: 11px;
+  padding: 2px 7px;
+}
+
+.cms-badge.cms-size-md {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+
+.cms-badge.cms-size-lg {
+  font-size: 13px;
+  padding: 3px 10px;
+}
+
+
+
+.cms-banner.cms-size-sm {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.cms-banner.cms-size-md {
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.cms-banner.cms-size-lg {
+  padding: 12px 16px;
+  font-size: 15px;
+}
+
+.cms-toolbar.cms-size-sm {
+  padding: 6px 10px;
+}
+
+.cms-toolbar.cms-size-md {
+  padding: 10px 12px;
+}
+
+.cms-toolbar.cms-size-lg {
+  padding: 12px 16px;
+}
+
+.cms-avatar.cms-size-xs {
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+}
+
+.cms-avatar.cms-size-sm {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+}
+
+.cms-avatar.cms-size-md {
+  width: 40px;
+  height: 40px;
+  font-size: 13px;
+}
+
+.cms-avatar.cms-size-lg {
+  width: 56px;
+  height: 56px;
+  font-size: 14px;
+}
+
+.cms-avatar.cms-size-xl {
+  width: 72px;
+  height: 72px;
+  font-size: 16px;
+}
+
+.cms-banner.success {
+  border-color: var(--cms-success);
+  background: var(--cms-success-soft);
+  color: var(--cms-success-text);
+}
+
+.cms-banner.warning {
+  border-color: var(--cms-warning);
+  background: var(--cms-warning-soft);
+  color: var(--cms-warning-text);
+}
+
+.cms-banner.error,
+.cms-banner.danger {
+  border-color: var(--cms-danger);
+  background: var(--cms-danger-soft);
+  color: var(--cms-danger-text);
+}
+
+.cms-banner.info {
+  border-color: var(--cms-info);
+  background: var(--cms-info-soft);
+  color: var(--cms-info-text);
+}
+
+.cms-banner.primary {
+  border-color: var(--cms-primary);
+  background: var(--cms-primary-soft);
+  color: var(--cms-primary-text);
+}
+
+.cms-banner.secondary {
+  border-color: var(--cms-secondary);
+  background: var(--cms-secondary-soft);
+  color: var(--cms-secondary-text);
 }
 
 .cms-t-nowrap {
@@ -1458,4 +1642,380 @@
     transform: translateY(0);
     pointer-events: auto;
   }
+}
+
+/* COMPONENTS */
+.cms-chip {
+  display: var(--set-display, inline-flex);
+  align-items: var(--set-align, center);
+  gap: var(--set-gap, var(--cms-s-sm));
+  padding: var(--set-padding, var(--cms-p-xs) var(--cms-p-sm));
+  border-radius: var(--set-radius, var(--cms-r-lg));
+  font-size: var(--set-font-size, var(--cms-font-size, 13px));
+  vertical-align: middle;
+  box-sizing: border-box;
+  margin: 4px;
+  border-width: 0px;
+  border-style: solid;
+  border-color: #9c9c9c3d;
+  transition: all 260ms ease;
+}
+
+.cms-chip.cms-size-xxs {
+  padding: var(--set-padding, var(--cms-p-xxs) var(--cms-p-xs));
+}
+
+.cms-chip.cms-size-xs {
+  padding: var(--set-padding, var(--cms-p-xs) var(--cms-p-xs));
+}
+
+.cms-chip.cms-size-sm {
+  padding: var(--set-padding, var(--cms-p-xs) var(--cms-p-sm));
+}
+
+.cms-chip.cms-size-md {
+  padding: var(--set-padding, var(--cms-p-xs) var(--cms-p-md));
+}
+
+.cms-chip.cms-size-lg {
+  padding: var(--set-padding, var(--cms-p-sm) var(--cms-p-lg));
+}
+
+.cms-chip.cms-size-xl {
+  padding: var(--set-padding, var(--cms-p-md) var(--cms-p-xl));
+}
+
+.cms-chip.cms-size-xxl {
+  padding: var(--set-padding, var(--cms-p-lg) var(--cms-p-xxl));
+}
+
+.cms-chip .cms-icon {
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.cms-chip .cms-btn {
+  margin: -2px;
+}
+
+.cms-chip .cms-chip-remove {
+  padding: 1px 2px;
+  aspect-ratio: 1/1;
+}
+
+/* SHADOW / STATE */
+.cms-shadow-sm {
+  box-shadow: var(--cms-shadow-sm);
+}
+
+.cms-shadow-none {
+  box-shadow: none;
+}
+
+.cms-shadow-md {
+  box-shadow: var(--cms-shadow-md);
+}
+
+.cms-shadow-lg {
+  box-shadow: var(--cms-shadow-lg);
+}
+
+.cms-state-primary {
+  --set-border-color: var(--cms-primary-hover);
+  --set-color: var(--cms-primary-text);
+  --set-background-color: var(--cms-primary);
+  --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-primary-950) 40%, transparent);
+  --set-hover: var(--cms-primary-hover);
+  --set-color-1: var(--cms-primary-100);
+  --set-color-2: var(--cms-primary-400);
+  --set-color-3: var(--cms-primary-700);
+  --set-color-4: var(--cms-primary-900);
+}
+
+.cms-state-primary .cms-btn {
+  color: var(--cms-primary-text);
+}
+
+.cms-state-secondary {
+  --set-border-color: var(--cms-secondary-hover);
+  --set-color: var(--cms-secondary-text);
+  --set-background-color: var(--cms-secondary);
+  --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-gray-600) 40%, transparent);
+  --set-hover: var(--cms-secondary-hover);
+  --set-color-1: var(--cms-gray-100);
+  --set-color-2: var(--cms-gray-400);
+  --set-color-3: var(--cms-gray-700);
+  --set-color-4: var(--cms-gray-900);
+}
+
+.cms-state-secondary .cms-btn {
+  color: var(--cms-secondary-text);
+}
+
+.cms-state-success {
+  --set-color: var(--cms-success-text);
+  --set-border-color: var(--cms-success-hover);
+  --set-background-color: var(--cms-success);
+  --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-success-950) 40%, transparent);
+  --set-hover: var(--cms-success-hover);
+  --set-color-1: var(--cms-success-100);
+  --set-color-2: var(--cms-success-400);
+  --set-color-3: var(--cms-success-700);
+  --set-color-4: var(--cms-success-900);
+}
+
+.cms-state-success .cms-btn {
+  color: var(--cms-success-text);
+}
+
+.cms-state-warning {
+  --set-border-color: var(--cms-warning-hover);
+  --set-color: var(--cms-warning-text);
+  --set-background-color: var(--cms-warning);
+  --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-warning-950) 40%, transparent);
+  --set-hover: var(--cms-warning-hover);
+  --set-color-1: var(--cms-warning-100);
+  --set-color-2: var(--cms-warning-400);
+  --set-color-3: var(--cms-warning-700);
+  --set-color-4: var(--cms-warning-900);
+}
+
+.cms-state-warning .cms-btn {
+  color: var(--cms-warning-text);
+}
+
+.cms-state-danger {
+  --set-border-color: var(--cms-danger-hover);
+  --set-color: var(--cms-danger-text);
+  --set-background-color: var(--cms-danger);
+  --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-danger-950) 40%, transparent);
+  --set-hover: var(--cms-danger-hover);
+  --set-color-1: var(--cms-danger-100);
+  --set-color-2: var(--cms-danger-400);
+  --set-color-3: var(--cms-danger-700);
+  --set-color-4: var(--cms-danger-900);
+}
+
+.cms-state-danger .cms-btn {
+  color: var(--cms-danger-text);
+}
+
+.cms-state-info {
+  --set-border-color: var(--cms-info-hover);
+  --set-color: var(--cms-info-text);
+  --set-background-color: var(--cms-info);
+  --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-info-950) 40%, transparent);
+  --set-hover: var(--cms-info-hover);
+  --set-color-1: var(--cms-info-100);
+  --set-color-2: var(--cms-info-400);
+  --set-color-3: var(--cms-info-700);
+  --set-color-4: var(--cms-info-900);
+}
+
+.cms-state-info .cms-btn {
+  color: var(--cms-info-text);
+}
+
+.cms-state-light {
+  --set-border-color: var(--cms-light);
+  --set-color: var(--cms-light-text);
+  --set-background-color: var(--cms-light-soft);
+  --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-gray-600) 40%, transparent);
+  --set-hover: var(--cms-light-hover);
+  --set-color-1: var(--cms-gray-100);
+  --set-color-2: var(--cms-gray-300);
+  --set-color-3: var(--cms-gray-300);
+  --set-color-4: var(--cms-gray-500);
+}
+
+.cms-state-light .cms-btn {
+  color: var(--cms-light-text);
+}
+
+.cms-state-dark {
+  --set-border-color: var(--cms-dark-hover);
+  --set-color: var(--cms-dark-text);
+  --set-background-color: var(--cms-dark);
+  --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-gray-800) 50%, transparent);
+  --set-hover: var(--cms-dark-hover);
+  --set-color-1: var(--cms-gray-100);
+  --set-color-2: var(--cms-gray-400);
+  --set-color-3: var(--cms-gray-700);
+  --set-color-4: var(--cms-gray-900);
+}
+
+.cms-state-dark .cms-btn {
+  color: var(--cms-dark-text);
+}
+
+.cms-flat {
+  border-width: 0;
+  box-shadow: none;
+}
+
+.cms-dense {
+  padding: 1px 2px;
+  margin: 2px;
+}
+
+.cms-shadow {
+  --set-shadow-active: var(--set-shadow);
+}
+
+.cms-border {
+  border-width: var(--set-border-width);
+}
+
+.cms-glossy {
+  --set-glossy-active: linear-gradient(to bottom, color-mix(in srgb, var(--set-color-1) 20%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 30%, transparent) 50%, color-mix(in srgb, var(--set-color-2) 30%, transparent) 51%, color-mix(in srgb, var(--set-color-4) 60%, transparent) 100%);
+  background-size: 100% 110%;
+  background-position: 0 -1px;
+}
+
+.cms-glow {
+  --set-glow-active: inset 0 0 5px 0 color-mix(in srgb, var(--set-color-1) 70%, transparent), 0 0 3px 3px var(--set-color-1), 0 0 15px 2px var(--set-color-2);
+  text-shadow: 0 0 3px color-mix(in srgb, var(--set-color-1) 70%, transparent);
+}
+
+.cms-glass {
+  position: relative;
+  backdrop-filter: blur(1px);
+  --set-background-color: color-mix(in srgb, var(--set-background-color) 40%, transparent);
+  --set-color: var(--set-border-color);
+}
+
+.cms-glass .cms-btn {
+  color: var(--set-border-color);
+  border-color: var(--set-border-color);
+}
+
+.cms-glass::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  content: "";
+  box-shadow: inset 0 0 3px 2px color-mix(in srgb, var(--set-color-3) 90%, transparent);
+  --set-s-effect-1: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-1) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 40%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 100%);
+  --set-s-effect-2: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-2) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 20%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 80%);
+  --set-s-effect-3: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-2) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 20%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 80%);
+  background: var(--set-s-effect-1), var(--set-s-effect-2), var(--set-s-effect-3);
+  background-position: 50% 20%, 50% 70%, 50% 75%;
+  background-size: 150% 400%, 80% 400%, 600% 200%;
+  background-repeat: no-repeat;
+  border-radius: inherit;
+  z-index: -1;
+  transition: all 0.3s ease-in-out;
+}
+
+.cms-outline {
+  border-width: 1px;
+  --set-background-color: transparent;
+  --set-color: var(--set-border-color);
+}
+
+.cms-outline .cms-btn {
+  color: var(--set-border-color);
+  border-color: var(--set-border-color);
+  transition: all 0.2s ease-in-out;
+}
+
+.cms-outline.cms-glow {
+  --set-glow-active: inset 0 0 7px 2px var(--set-color-1), 0 0 3px 3px var(--set-color-1), 0 0 15px color-mix(in srgb, var(--set-color-1) 100%, transparent);
+}
+
+.cms-outline.cms-glossy {
+  --set-glossy-active: linear-gradient(to bottom, color-mix(in srgb, var(--set-color-1) 20%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 30%, transparent) 50%, color-mix(in srgb, var(--set-color-2) 20%, transparent) 51%, color-mix(in srgb, var(--set-color-2) 50%, transparent) 100%);
+  background-size: 100% 110%;
+  background-position: 0 -1px;
+}
+
+.cms-outline.cms-glass {
+  position: relative;
+  --set-background-color: transparent;
+}
+
+.cms-outline.cms-glass::before {
+  box-shadow: inset 0 0 2px 1px color-mix(in srgb, var(--set-color-3) 50%, transparent);
+  --set-s-effect-1: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-1) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 40%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 100%);
+  --set-s-effect-2: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-2) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 20%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 80%);
+  --set-s-effect-3: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-2) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 20%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 80%);
+}
+
+.cms-gradient {
+  --set-gradient-active: linear-gradient(var(--set-gradient-deg), var(--set-color-2), var(--set-color-3));
+}
+
+.cms-text-gradient {
+  --set-gradient-active: linear-gradient(var(--set-gradient-deg), var(--set-color-2), var(--set-color-3));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cms-text-gradient .cms-btn {
+  background-image: linear-gradient(var(--set-gradient-deg), var(--set-color-2), var(--set-color-3));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cms-light-shadow {
+  --set-shadow-active: inset 2px 1px 4px 0 color-mix(in srgb, var(--set-color-1) 50%, transparent), -4px -4px 12px rgb(255, 255, 255), 4px 4px 12px rgba(121, 130, 160, 0.747);
+}
+
+.cms-clickable {
+  cursor: pointer;
+}
+
+.cms-clickable:hover {
+  --set-background-color: var(--set-hover);
+}
+
+.cms-clickable.cms-gradient:hover {
+  --set-gradient-active: linear-gradient(var(--set-gradient-deg), color-mix(in srgb, var(--set-color-2) 85%, white), color-mix(in srgb, var(--set-color-3) 85%, white));
+}
+
+.cms-clickable.cms-glass:hover {
+  --set-background-color: color-mix(in srgb, var(--set-background-color) 40%, transparent);
+  --set-color: var(--set-border-color);
+}
+
+.cms-clickable.cms-glass:hover::before {
+  background-position: 50% 20%, 50% 90%, 50% 100%;
+}
+
+.cms-clickable.cms-outline:hover {
+  --set-background-color: color-mix(in srgb, var(--set-hover) 8%, transparent);
+  --set-color: var(--set-hover);
+  outline: solid 1px color-mix(in srgb, var(--set-hover) 30%, transparent);
+}
+
+.cms-clickable.cms-text-gradient:hover {
+  --set-gradient-active: linear-gradient(var(--set-gradient-deg), color-mix(in srgb, var(--set-color-2) 85%, white), color-mix(in srgb, var(--set-color-3) 85%, white));
+}
+
+.cms-clickable.cms-text-gradient:hover .cms-btn {
+  background-image: linear-gradient(var(--set-gradient-deg), color-mix(in srgb, var(--set-color-2) 85%, white), color-mix(in srgb, var(--set-color-3) 85%, white));
+}
+
+/* === SINGULARITY === */
+.cms-singularity {
+  background-color: var(--set-background-color);
+  background-image: var(--set-glossy-active, none), var(--set-gradient-active, none);
+  box-shadow: var(--set-shadow-active, 0 0 0 0), var(--set-glow-active, 0 0 0 0);
+  color: var(--set-color);
+  border-color: var(--set-border-color);
+  transition: all 0.2s ease-in-out;
+}
+
+.cms-clickable.cms-singularity:hover {
+  background-color: var(--set-background-color);
+  background-image: var(--set-glossy-active, none), var(--set-gradient-active, none);
+  box-shadow: var(--set-shadow-active, 0 0 0 0), var(--set-glow-active, 0 0 0 0);
+  color: var(--set-color);
+  border-color: var(--set-border-color);
+  transition: all 260ms ease;
 }

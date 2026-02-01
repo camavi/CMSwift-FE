@@ -1,6 +1,6 @@
-const card = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("Card"),
-  _h.p("Card con header/body/footer opzionali, densita e variante flat. Supporta slot `header`, `footer`, `actions` e click routing via `to`."),
+const spinner = _h.div({ class: "cms-panel cms-page" },
+  _h.h1("Spinner"),
+  _h.p("Spinner animato con size, color e thickness. Utile per stati di caricamento puntuali."),
   _h.h2("Props principali"),
   _ui.List(
     _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
@@ -9,10 +9,10 @@ const card = _h.div({ class: "cms-panel cms-page" },
   ),
   _h.h2("Esempio completo"),
   _ui.Card({ header: "Demo" },
-    _ui.Card({ header: "Header", footer: "Footer" }, "Body")
+    _ui.Spinner({ size: 24 })
   ),
   _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Card")
+  CMSwift.ui.DocTable("Spinner")
 );
 
-export { card };
+export { spinner };

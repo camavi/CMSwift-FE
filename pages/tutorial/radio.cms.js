@@ -1,6 +1,6 @@
-const card = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("Card"),
-  _h.p("Card con header/body/footer opzionali, densita e variante flat. Supporta slot `header`, `footer`, `actions` e click routing via `to`."),
+const radio = _h.div({ class: "cms-panel cms-page" },
+  _h.h1("Radio"),
+  _h.p("Radio button con label, value e supporto model. Gestisce onChange/onInput e classi dense."),
   _h.h2("Props principali"),
   _ui.List(
     _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
@@ -9,10 +9,10 @@ const card = _h.div({ class: "cms-panel cms-page" },
   ),
   _h.h2("Esempio completo"),
   _ui.Card({ header: "Demo" },
-    _ui.Card({ header: "Header", footer: "Footer" }, "Body")
+    _ui.Radio({ label: "Opzione A", value: "A" })
   ),
   _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Card")
+  CMSwift.ui.DocTable("Radio")
 );
 
-export { card };
+export { radio };

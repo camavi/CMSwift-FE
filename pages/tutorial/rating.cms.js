@@ -1,6 +1,6 @@
-const card = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("Card"),
-  _h.p("Card con header/body/footer opzionali, densita e variante flat. Supporta slot `header`, `footer`, `actions` e click routing via `to`."),
+const rating = _h.div({ class: "cms-panel cms-page" },
+  _h.h1("Rating"),
+  _h.p("Rating a stelle con `max`, value/model e modalita readonly. Slot `star` per render personalizzato."),
   _h.h2("Props principali"),
   _ui.List(
     _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
@@ -9,10 +9,10 @@ const card = _h.div({ class: "cms-panel cms-page" },
   ),
   _h.h2("Esempio completo"),
   _ui.Card({ header: "Demo" },
-    _ui.Card({ header: "Header", footer: "Footer" }, "Body")
+    _ui.Rating({ value: 4 })
   ),
   _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Card")
+  CMSwift.ui.DocTable("Rating")
 );
 
-export { card };
+export { rating };

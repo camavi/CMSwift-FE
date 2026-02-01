@@ -1,6 +1,6 @@
-const card = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("Card"),
-  _h.p("Card con header/body/footer opzionali, densita e variante flat. Supporta slot `header`, `footer`, `actions` e click routing via `to`."),
+const banner = _h.div({ class: "cms-panel cms-page" },
+  _h.h1("Banner"),
+  _h.p("Banner informativo con messaggio e azioni opzionali. Supporta type, densita e slot message/actions."),
   _h.h2("Props principali"),
   _ui.List(
     _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
@@ -9,10 +9,10 @@ const card = _h.div({ class: "cms-panel cms-page" },
   ),
   _h.h2("Esempio completo"),
   _ui.Card({ header: "Demo" },
-    _ui.Card({ header: "Header", footer: "Footer" }, "Body")
+    _ui.Banner({ type: "success", message: "Operazione completata" })
   ),
   _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Card")
+  CMSwift.ui.DocTable("Banner")
 );
 
-export { card };
+export { banner };

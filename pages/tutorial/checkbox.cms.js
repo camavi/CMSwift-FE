@@ -1,6 +1,6 @@
-const card = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("Card"),
-  _h.p("Card con header/body/footer opzionali, densita e variante flat. Supporta slot `header`, `footer`, `actions` e click routing via `to`."),
+const checkbox = _h.div({ class: "cms-panel cms-page" },
+  _h.h1("Checkbox"),
+  _h.p("Checkbox con label e supporto model reattivo. Espone onChange/onInput e variante dense."),
   _h.h2("Props principali"),
   _ui.List(
     _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
@@ -9,10 +9,10 @@ const card = _h.div({ class: "cms-panel cms-page" },
   ),
   _h.h2("Esempio completo"),
   _ui.Card({ header: "Demo" },
-    _ui.Card({ header: "Header", footer: "Footer" }, "Body")
+    _ui.Checkbox({ label: "Accetta termini" })
   ),
   _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Card")
+  CMSwift.ui.DocTable("Checkbox")
 );
 
-export { card };
+export { checkbox };

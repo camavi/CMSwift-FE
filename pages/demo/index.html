@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark2">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -208,9 +208,8 @@
 
     CMSwift.mount("#app", layoutPage(contentPage));
     const p = ColorTokensDemoPage();
-    console.log(p);
     CMSwift.router.setOutlet(contentPage);
-    CMSwift.router.add("/demo", () => page.home());
+    //CMSwift.router.add("/demo", () => page.home());
     CMSwift.router.add("/demo/component/card", () => page.card());
     CMSwift.router.add("/demo/component/layout", () => layout);
     CMSwift.router.add("/demo/component/chip", () => chip);

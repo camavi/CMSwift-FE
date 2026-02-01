@@ -6,6 +6,118 @@
   app.services = app.services || {};
   app.services.notify = app.services.notify || {};
 
+  const UI_STATE_ALIASES = {
+    error: "danger",
+    danger: "danger",
+    warn: "warning",
+    warning: "warning",
+    success: "success",
+    info: "info",
+    primary: "primary",
+    secondary: "secondary",
+    light: "light",
+    dark: "dark"
+  };
+  const UI_STATE_TOKENS = new Set(Object.values(UI_STATE_ALIASES));
+  const UI_RADIUS_TOKENS = new Set(["none", "xxs", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl", "full"]);
+  const UI_SHADOW_TOKENS = new Set(["none", "sm", "md", "lg"]);
+  const sizeMap = {
+    xxs: { font: "9px", pad: "2px 5px" },
+    xs: { font: "10px", pad: "2px 6px" },
+    sm: { font: "11px", pad: "2px 7px" },
+    md: { font: "12px", pad: "2px 8px" },
+    lg: { font: "13px", pad: "3px 10px" },
+    xl: { font: "14px", pad: "4px 12px" },
+    xxl: { font: "15px", pad: "5px 14px" },
+    xxxl: { font: "16px", pad: "6px 16px" }
+  };
+
+  // normalize color is RGB | RGBA | HEX | color name
+  const isTokenCSS = (value) => {
+    // se la parola contiene un trattino - è un token
+    if (value.indexOf("-") > -1) return true;
+  }
+  const normalizeState = (value) => {
+    if (!value) return "";
+    const key = String(value).toLowerCase();
+    return UI_STATE_ALIASES[key] || "";
+  };
+
+  const normalizeRadius = (value) => {
+    if (value == null) return null;
+    const key = String(value).toLowerCase();
+    if (key === "full") return "xxxl";
+    if (UI_RADIUS_TOKENS.has(key)) return key;
+    return null;
+  };
+
+  const normalizeShadow = (value) => {
+    if (value === true) return "sm";
+    if (value == null || value === false) return null;
+    const key = String(value).toLowerCase();
+    if (UI_SHADOW_TOKENS.has(key)) return key;
+    return null;
+  };
+
+  const applyCommonProps = (props = {}) => {
+    const classTokens = [];
+    const style = {};
+
+    if (props.clickable) classTokens.push("cms-clickable");
+    if (props.dense) classTokens.push("cms-dense");
+    if (props.flat) classTokens.push("cms-flat");
+    if (props.border) classTokens.push("cms-border");
+    if (props.glossy) classTokens.push("cms-glossy");
+    if (props.glow) classTokens.push("cms-glow");
+    if (props.glass) classTokens.push("cms-glass");
+    if (props.shadow) classTokens.push("cms-shadow");
+    if (props.outline) classTokens.push("cms-outline");
+    if (props.rounded) classTokens.push("cms-rounded");
+    if (props.gradient) classTokens.push("cms-gradient");
+    if (props.textGradient) classTokens.push("cms-text-gradient");
+    if (props.lightShadow) classTokens.push("cms-light-shadow");
+
+    const state = normalizeState(props.color);
+    if (state) {
+      classTokens.push(`cms-state-${state}`);
+    } else if (props.color && isTokenCSS(props.color)) {
+      style.backgroundColor = `var(--cms-${props.color})`;
+    } else if (props.color) {
+      style.backgroundColor = props.color;
+    }
+
+    // facciamo text color per i token
+    if (props.textColor && isTokenCSS(props.textColor)) {
+      style.color = `var(--cms-${props.textColor})`;
+    } else if (props.textColor) {
+      style.color = props.textColor;
+    }
+
+    const size = props.size;
+    if (typeof size === "string" && CMSwift.uiSizes?.includes(size)) {
+      classTokens.push(`cms-size-${size}`);
+    }
+
+    const radius = normalizeRadius(props.radius ?? props.borderRadius);
+    if (radius) classTokens.push(`cms-r-${radius}`);
+    else if (props.radius != null || props.borderRadius != null) {
+      style.borderRadius = toCssSize(props.radius ?? props.borderRadius);
+    }
+
+    const shadow = normalizeShadow(props.shadow);
+    if (shadow) classTokens.push(`cms-shadow-${shadow}`);
+    else if (props.shadow && typeof props.shadow === "string") {
+      style.boxShadow = props.shadow;
+    }
+
+    if (classTokens.length) {
+      props.class = [props.class, ...classTokens].filter(Boolean).join(" ");
+    }
+    if (Object.keys(style).length) {
+      props.style = { ...style, ...(props.style || {}) };
+    }
+  };
+
   const normalizeArgsBase = CMSwift.uiNormalizeArgs;
   CMSwift.uiNormalizeArgs = function (args) {
     const out = normalizeArgsBase(args);
@@ -17,6 +129,7 @@
       }
       delete props.children;
     }
+    applyCommonProps(props);
     return out;
   };
 
@@ -125,6 +238,7 @@
     height: "Explicit height (number interpreted as px or CSS length).",
     hint: "Helper text shown near the control.",
     icon: "Icon name or node rendered with the component.",
+    iconRight: "Icon name or node rendered on the right side of the component.",
     iconAlign: "Position of the icon relative to the label.",
     initialSort: "Initial sort configuration for table data.",
     inputmode: "Native inputmode attribute hint for virtual keyboards.",
@@ -175,6 +289,8 @@
     right: "Content or configuration for the right region.",
     rowKey: "Key or function used to derive unique row IDs.",
     rows: "Row data array for table-like components.",
+    radius: "Border radius token or CSS length applied to the component.",
+    borderRadius: "Border radius token or CSS length applied to the component.",
     separator: "Separator string/node between items.",
     showLabel: "Whether to render the label text.",
     size: "Size token, number, or CSS length for sizing.",
@@ -209,13 +325,13 @@
     type: "Variant or native input type.",
     useInput: "Uses an input field to allow custom typing.",
     value: "Current value (controlled).",
-    variant: "Visual variant name.",
     vertical: "Vertical orientation instead of horizontal.",
     warning: "Marks the component with warning state styling.",
     width: "Explicit width (number interpreted as px or CSS length).",
     wrap: "Allows children to wrap to new lines.",
     wrapClass: "Additional CSS classes applied to the outer wrapper.",
-    zIndex: "z-index for overlay stacking."
+    zIndex: "z-index for overlay stacking.",
+    shadow: "Shadow token or CSS box-shadow string applied to the component.",
   };
 
   const META_SLOT_DESCRIPTIONS = {
@@ -237,6 +353,7 @@
     header: "Slot for header content.",
     hint: "Slot for helper/hint text.",
     icon: "Slot for icon content.",
+    iconRight: "Slot for right-aligned icon content.",
     input: "Slot for custom input element/content.",
     item: "Slot for custom item rendering.",
     itemLabel: "Slot for item label rendering.",
@@ -263,6 +380,63 @@
     warning: "Slot for warning message/content."
   };
 
+  const META_PROP_DEFAULTS = {
+    dense: false,
+    disabled: false,
+    readonly: false,
+    outline: false,
+    clickable: false,
+    flat: false,
+    elevated: false
+  };
+
+  const META_PROP_VALUES = {
+    size: CMSwift.uiSizes || ["xxs", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl"],
+    color: ["primary", "secondary", "success", "warning", "danger", "info", "light", "dark"],
+    iconAlign: ["left", "right", "before", "after"],
+    align: ["left", "center", "right"],
+    justify: ["start", "center", "end", "space-between", "space-around", "space-evenly"],
+    placement: ["top", "bottom", "left", "right", "top-start", "top-end", "bottom-start", "bottom-end"],
+    type: ["primary", "secondary", "success", "warning", "danger", "info", "light", "dark"],
+    shadow: ["none", "sm", "md", "lg"]
+  };
+
+  const META_PROP_CATEGORIES = {
+    class: "style",
+    style: "style",
+    size: "style",
+    color: "style",
+    outline: "style",
+    shadow: "style",
+    borderRadius: "style",
+    radius: "style",
+    dense: "layout",
+    flat: "style",
+    elevated: "style",
+    clickable: "behavior",
+    disabled: "state",
+    readonly: "state",
+    loading: "state",
+    active: "state",
+    error: "state",
+    success: "state",
+    warning: "state",
+    note: "state",
+    hint: "state",
+    value: "data",
+    model: "data",
+    items: "data",
+    options: "data",
+    rows: "data",
+    columns: "data",
+    onClick: "events",
+    onChange: "events",
+    onInput: "events",
+    onFocus: "events",
+    onBlur: "events",
+    onSubmit: "events"
+  };
+
   const normalizeMetaType = (value) => {
     if (typeof value === "string") return value;
     if (!value || typeof value !== "object" || Array.isArray(value)) return "unknown";
@@ -282,13 +456,24 @@
     for (const [name, value] of Object.entries(fields)) {
       const description = descriptions[name] || fallbackMetaDescription(name, kind);
       if (value && typeof value === "object" && !Array.isArray(value)) {
+        const type = normalizeMetaType(value);
         out[name] = {
           ...value,
-          type: normalizeMetaType(value),
-          description: value.description || description
+          type,
+          description: value.description || description,
+          default: Object.prototype.hasOwnProperty.call(value, "default") ? value.default : (META_PROP_DEFAULTS[name] ?? null),
+          values: value.values || META_PROP_VALUES[name] || null,
+          category: value.category || META_PROP_CATEGORIES[name] || (kind === "slot" ? "slot" : "general")
         };
       } else {
-        out[name] = { type: normalizeMetaType(value), description };
+        const type = normalizeMetaType(value);
+        out[name] = {
+          type,
+          description,
+          default: META_PROP_DEFAULTS[name] ?? null,
+          values: META_PROP_VALUES[name] || null,
+          category: META_PROP_CATEGORIES[name] || (kind === "slot" ? "slot" : "general")
+        };
       }
     }
     return out;
@@ -302,8 +487,26 @@
     if (!Object.prototype.hasOwnProperty.call(meta.props, "children")) {
       meta.props.children = "Node|Array|Function";
     }
+    const commonProps = {
+      size: meta.props.size || "string|number",
+      color: meta.props.color || "string",
+      outline: meta.props.outline || "boolean",
+      clickable: meta.props.clickable || "boolean",
+      radius: meta.props.radius || "string|number",
+      borderRadius: meta.props.borderRadius || "string|number",
+      shadow: meta.props.shadow || "string|boolean",
+      class: meta.props.class || "string",
+      style: meta.props.style || "object"
+    };
+    meta.props = { ...commonProps, ...meta.props };
+    if (meta.props.icon && !meta.props.iconRight) {
+      meta.props.iconRight = meta.props.icon;
+    }
     if (meta.props) meta.props = normalizeMetaFields(meta.props, META_PROP_DESCRIPTIONS, "prop");
     if (meta.slots) meta.slots = normalizeMetaFields(meta.slots, META_SLOT_DESCRIPTIONS, "slot");
+    if (meta.slots && meta.slots.icon && !meta.slots.iconRight) {
+      meta.slots.iconRight = { type: meta.slots.icon?.type || "Node|Array|Function", description: "Slot for right-aligned icon content." };
+    }
     if (!meta.description) {
       meta.description = `${componentName} component meta definition.`;
     }
@@ -577,24 +780,28 @@
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
 
-    const color = props.color || props.variant || "";
-    const variant = ["primary", "secondary", "warning", "danger", "success", "info", "light", "dark"].includes(color)
+    const color = props.color || props.state || "";
+    const state = ["primary", "secondary", "warning", "danger", "success", "info", "light", "dark"].includes(color)
       ? color
-      : (props.variant || "");
+      : (props.state || "");
 
-    const cls = ["cms-btn", variant, props.outline ? "outline" : "", props.class]
+    const cls = ["cms-btn", state, props.outline ? "outline" : "", props.class]
       .filter(Boolean)
       .join(" ");
 
     const p = CMSwift.omit(props, [
-      "variant", "color", "icon", "label", "loading", "outline", "iconAlign", "slots"
+      "icon", "iconRight", "label", "loading", "outline", "iconAlign", "slots"
     ]);
     p.class = cls;
 
     const iconFallback = props.icon != null
       ? (typeof props.icon === "string" ? UI.Icon({ name: props.icon }) : props.icon)
       : null;
+    const iconRightFallback = props.iconRight != null
+      ? (typeof props.iconRight === "string" ? UI.Icon({ name: props.iconRight }) : props.iconRight)
+      : null;
     const icon = CMSwift.ui.renderSlot(slots, "icon", {}, iconFallback);
+    const iconRight = CMSwift.ui.renderSlot(slots, "iconRight", {}, iconRightFallback);
     const label = CMSwift.ui.renderSlot(slots, "label", {}, props.label);
     const slotChildren = renderSlotToArray(slots, "default", {}, children);
 
@@ -608,7 +815,7 @@
     const align = props.iconAlign;
     const iconAfter = align === "after" || align === "right";
 
-    if (iconAfter) {
+    if (iconAfter && !iconRightFallback) {
       pushAll(label);
       if (slotChildren.length) content.push(...slotChildren);
       pushAll(icon);
@@ -617,6 +824,7 @@
       pushAll(label);
       if (slotChildren.length) content.push(...slotChildren);
     }
+    pushAll(iconRight);
 
     if (content.length === 0) content.push(_h.span("Button"));
 
@@ -657,9 +865,9 @@
       props: {
         label: "String|Node|Function|Array",
         icon: "String|Node|Function|Array",
+        iconRight: "String|Node|Function|Array",
         iconAlign: `before|after|left|right`,
         color: `primary|secondary|warning|danger|success|info|light|dark`,
-        variant: "string (alias di color)",
         outline: "boolean",
         loading: "boolean",
         disabled: "boolean",
@@ -669,6 +877,7 @@
       },
       slots: {
         icon: "Icon slot",
+        iconRight: "Right icon slot",
         label: "Label slot",
         default: "Button content"
       },
@@ -748,7 +957,7 @@
         class: "cms-clear",
         title: "Clear",
         onClick: clear
-      }, UI.Icon({ name: "#x" })) : null;
+      }, UI.Icon({ name: "close" })) : null;
 
       const clearNode = CMSwift.ui.renderSlot(slots, "clear", {
         clear,
@@ -768,7 +977,12 @@
 
       // right addon
       const right = _h.div({ class: "cms-addon" });
+      const iconRightFallback = props.iconRight != null
+        ? (typeof props.iconRight === "string" ? UI.Icon({ name: props.iconRight }) : props.iconRight)
+        : null;
+      const iconRightNode = CMSwift.ui.renderSlot(slots, "iconRight", {}, iconRightFallback);
       const suffixNode = CMSwift.ui.renderSlot(slots, "suffix", {}, props.suffix);
+      renderSlotToArray(null, "default", {}, iconRightNode).forEach(n => right.appendChild(n));
       renderSlotToArray(null, "default", {}, suffixNode).forEach(n => right.appendChild(n));
       if (right.childNodes.length) control.appendChild(right);
     }
@@ -888,6 +1102,7 @@
         warning: "String|Node|Function",
         note: "String|Node|Function",
         icon: "String|Node|Function",
+        iconRight: "String|Node|Function",
         prefix: "String|Node|Function",
         suffix: "String|Node|Function",
         clearable: "boolean",
@@ -898,7 +1113,7 @@
         onClear: "() => void",
         onFocus: "() => void",
         wrapClass: "string",
-        slots: "{ label?, topLabel?, prefix?, suffix?, icon?, clear?, hint?, error?, control? }"
+        slots: "{ label?, topLabel?, prefix?, suffix?, icon?, iconRight?, clear?, hint?, error?, control? }"
       },
       slots: {
         label: "Floating label content",
@@ -906,6 +1121,7 @@
         prefix: "Left addon content",
         suffix: "Right addon content",
         icon: "Left icon content",
+        iconRight: "Right icon content",
         clear: "Clear button slot (ctx: { clear, disabled, readonly, hasValue })",
         hint: "Hint content",
         errorMessage: "Error content",
@@ -1195,6 +1411,7 @@
 
         // addons
         icon: "String|Node|Function",
+        iconRight: "String|Node|Function",
         prefix: "String|Node|Function",
         suffix: "String|Node|Function",
 
@@ -1216,6 +1433,7 @@
         prefix: "Addon a sinistra (via FormField slots.prefix)",
         suffix: "Addon a destra (via FormField slots.suffix)",
         icon: "Icona a sinistra (via FormField slots.icon)",
+        iconRight: "Icona a destra (via FormField slots.iconRight)",
         clear: "Clear button (via FormField slots.clear)",
         hint: "Hint content (via FormField slots.hint)",
         errorMessage: "Error content (via FormField slots.errorMessage)",
@@ -1804,6 +2022,9 @@
         topLabel: "String|Node|Function",
         hint: "String|Node|Function",
         error: "String|Node|Function",
+        success: "String|Node|Function",
+        warning: "String|Node|Function",
+        note: "String|Node|Function",
 
         clearable: "boolean",
         filterable: "boolean",
@@ -1814,6 +2035,11 @@
         allowCustomValue: "boolean (alias allowCustom)",
         filterPlaceholder: "string",
         emptyText: "string",
+
+        icon: "String|Node|Function",
+        iconRight: "String|Node|Function",
+        prefix: "String|Node|Function",
+        suffix: "String|Node|Function",
 
         disabled: "boolean | () => boolean",
         dense: "boolean",
@@ -1831,7 +2057,18 @@
         option: "Option renderer (ctx: { opt, selected, active, disabled, select })",
         group: "Group header (ctx: { label })",
         empty: "Empty state (ctx: { filter })",
-        loading: "Loading state (ctx: {})"
+        loading: "Loading state (ctx: {})",
+        label: "Floating label (via FormField slots.label)",
+        topLabel: "Top label (via FormField slots.topLabel)",
+        prefix: "Left addon (via FormField slots.prefix)",
+        suffix: "Right addon (via FormField slots.suffix)",
+        icon: "Left icon (via FormField slots.icon)",
+        iconRight: "Right icon (via FormField slots.iconRight)",
+        hint: "Hint content (via FormField slots.hint)",
+        errorMessage: "Error content (via FormField slots.errorMessage)",
+        success: "Success content (via FormField slots.success)",
+        warning: "Warning content (via FormField slots.warning)",
+        note: "Note content (via FormField slots.note)"
       },
 
       keyboard: ["Enter/Space", "ArrowUp", "ArrowDown", "Home", "End", "Escape"],
@@ -2248,7 +2485,11 @@
     return Array.isArray(v) ? v : [v];
   };
 
-  const toCssSize = (v) => (typeof v === "number" ? `${v}px` : String(v));
+  const toCssSize = (v) => {
+    if (typeof v === "number") return `${v}px`;
+    if (typeof v === "string" && CMSwift.uiSizes?.includes(v)) return `var(--cms-size-${v})`;
+    return String(v);
+  };
 
   UI.Toolbar = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
@@ -2272,6 +2513,17 @@
     if (props.justify) style.justifyContent = props.justify;
     if (props.wrap != null) style.flexWrap = props.wrap ? "wrap" : "nowrap";
     style.gap = props.gap != null ? toCssSize(props.gap) : "var(--cms-s-md)";
+    if (props.size && typeof props.size === "string") {
+      const sizePadding = {
+        xxs: "4px 6px",
+        xs: "6px 8px",
+        sm: "6px 10px",
+        md: "10px 12px",
+        lg: "12px 16px",
+        xl: "14px 18px"
+      };
+      if (sizePadding[props.size]) style.padding = sizePadding[props.size];
+    }
     if (Object.keys(style).length) p.style = style;
 
     const content = renderSlotToArray(slots, "default", {}, children);
@@ -2396,7 +2648,7 @@
   UI.Icon = (...args) => {
     let props = {};
     let children = [];
-    let name = "#home";
+    let name = "home";
     let hasName = false;
     const a = args[0];
     const b = args[1];
@@ -2433,19 +2685,9 @@
     const isFill = String(name).endsWith("-fill");
     const style = { ...(props.style || {}) };
 
-    if (size != null) {
-      let v = size;
-      if (CMSwift.uiSizes.includes(size)) {
-        v = `var(--cms-icon-size-${size})`;
-      }
-      v = typeof v === "number" ? v + "px" : String(v);
-      style.width = v;
-      style.height = v;
-      style.fontSize = v;
-    }
     if (color) style.color = color;
 
-    const cls = ["cms-icon", props.class].filter(Boolean).join(" ");
+    const cls = ["cms-icon", "material-icons", props.class].filter(Boolean).join(" ");
     const p = CMSwift.omit(props, ["name", "size", "color", "class", "style", "slots"]);
     p.class = cls;
     if (Object.keys(style).length) p.style = style;
@@ -2458,15 +2700,28 @@
 
     const nameStr = String(name);
     const useHref = nameStr.includes("#") ? nameStr : "";
+    let icon = null;
     if (useHref) {
       const svg = _h.svg(
         { width: "100%", height: "100%" },
         _h.use({ href: "/_cmswift-fe/img/svg/tabler-icons-sprite.svg" + useHref })
       );
       if (isFill) svg.style.fill = "currentColor";
-      return _h.span({ ...p, "data-icon": nameStr }, svg, ...children);
+      icon = _h.span({ ...p, "data-icon": nameStr }, svg, ...children);
+    } else {
+      icon = _h.span({ ...p, "data-icon": nameStr }, nameStr, ...children);
     }
-    return _h.span({ ...p, "data-icon": nameStr }, nameStr, ...children);
+
+    if (size != null) {
+      let v = size;
+      if (CMSwift.uiSizes.includes(size)) {
+        v = `var(--cms-icon-size-${size})`;
+      }
+      v = typeof v === "number" ? v + "px" : String(v);
+      icon.style.setProperty("--set-icon-size", v);
+    }
+
+    return icon;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
@@ -2497,18 +2752,43 @@
     p.class = cls;
 
     const color = props.color ?? "primary";
+    const sizeMap = {
+      xxs: { font: "9px", pad: "2px 5px" },
+      xs: { font: "10px", pad: "2px 6px" },
+      sm: { font: "11px", pad: "2px 7px" },
+      md: { font: "12px", pad: "2px 8px" },
+      lg: { font: "13px", pad: "3px 10px" },
+      xl: { font: "14px", pad: "4px 12px" },
+      xxl: { font: "15px", pad: "5px 14px" },
+      xxxl: { font: "16px", pad: "6px 16px" }
+    };
     const style = {
       display: "inline-flex",
       alignItems: "center",
       padding: "2px 8px",
       borderRadius: "999px",
       fontSize: "12px",
+      border: "1px solid var(--cms-border-color)",
       ...(props.style || {})
     };
-    if (props.size) style.fontSize = toCssSize(props.size);
+    if (props.size) {
+      if (typeof props.size === "string" && sizeMap[props.size]) {
+        style.fontSize = sizeMap[props.size].font;
+        style.padding = sizeMap[props.size].pad;
+      } else {
+        style.fontSize = toCssSize(props.size);
+      }
+    }
     if (color) {
-      style.background = color === "primary" ? "var(--cms-primary)" : color;
-      if (!style.color) style.color = "white";
+      const colorValue = color === "primary" ? "var(--cms-primary)" : color;
+      if (props.outline) {
+        style.background = "transparent";
+        style.borderColor = colorValue;
+        style.color = style.color || colorValue;
+      } else {
+        style.background = colorValue;
+        if (!style.color) style.color = "white";
+      }
     }
     p.style = style;
 
@@ -2595,33 +2875,51 @@
   UI.Chip = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-chip", props.dense ? "dense" : "", props.outline ? "outline" : "", props.class]
+    const cls = ["cms-chip", "cms-singularity",
+      props.class
+    ]
       .filter(Boolean).join(" ");
-    const p = CMSwift.omit(props, ["label", "icon", "removable", "onRemove", "dense", "outline", "slots"]);
+    const p = CMSwift.omit(props, ["label", "border", "color", "icon", "iconRight", "removable", "onRemove", "dense", "flat", "glossy", "outline", "slots"]);
     p.class = cls;
     p.style = {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "6px",
-      padding: "4px 10px",
-      borderRadius: "999px",
-      border: "1px solid var(--cms-border)",
       ...(props.style || {})
     };
+    if (props.size && typeof props.size === "string" && sizeMap[props.size]) {
+      p.class += ` ${props.size}`;
+    }
 
     const iconFallback = props.icon
-      ? (typeof props.icon === "string" ? UI.Icon({ name: props.icon, size: 14 }) : CMSwift.ui.slot(props.icon, { as: "icon" }))
+      ? (typeof props.icon === "string" ? UI.Icon({ name: props.icon, size: props?.size ?? null }) : CMSwift.ui.slot(props.icon, { as: "icon" }))
+      : null;
+    const iconRightFallback = props.iconRight
+      ? (typeof props.iconRight === "string" ? UI.Icon({ name: props.iconRight, size: props?.size ?? null }) : CMSwift.ui.slot(props.iconRight, { as: "iconRight" }))
       : null;
     const iconNode = CMSwift.ui.renderSlot(slots, "icon", {}, iconFallback);
+    const iconRightNode = CMSwift.ui.renderSlot(slots, "iconRight", {}, iconRightFallback);
     const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
     const labelNode = labelNodes.length ? labelNodes : renderSlotToArray(slots, "default", {}, children);
 
     const iconNodes = renderSlotToArray(null, "default", {}, iconNode);
-    const wrap = _h.span(p, ...iconNodes, ...(labelNode.length ? labelNode : [""]));
+    const iconRightNodes = renderSlotToArray(null, "default", {}, iconRightNode);
+    const wrap = _h.span(p, ...iconNodes, ...(labelNode.length ? labelNode : [""]), ...iconRightNodes);
     if (props.removable) {
-      const btn = UI.Btn({ class: "cms-chip-remove", onClick: props.onRemove }, "×");
-      btn.style.padding = "2px 6px";
+      const btn = UI.Btn({ class: "cms-chip-remove", onClick: props.onRemove, size: props?.size ?? null }, UI.Icon({ size: props?.size ?? null, name: "close" }));
       wrap.appendChild(btn);
+      btn.onclick = () => {
+        if (props.onRemove) {
+          props.onRemove();
+        }
+        wrap.remove();
+      }
+    }
+
+    if (props.size && typeof props.size === "number") {
+      wrap.style.setProperty("--cms-font-size", `${props.size}px`);
+    } else if (CMSwift.uiSizes.includes(props.size)) {
+      wrap.style.setProperty("--cms-font-size", `var(--cms-font-size-${props.size})`);
+    }
+    if (props.gradient && typeof props.gradient !== "boolean") {
+      wrap.style.setProperty("--set-gradient-deg", `${props.gradient}deg`);
     }
     return wrap;
   };
@@ -2632,6 +2930,7 @@
       props: {
         label: "String|Node|Function|Array",
         icon: "String|Node|Function|Array",
+        iconRight: "String|Node|Function|Array",
         removable: "boolean",
         onRemove: "function",
         dense: "boolean",
@@ -2642,6 +2941,7 @@
       },
       slots: {
         icon: "Chip icon content",
+        iconRight: "Chip right icon content",
         label: "Chip label content",
         default: "Fallback content"
       },
@@ -3669,6 +3969,11 @@
     const cls = ["cms-banner", props.type || "", props.dense ? "dense" : "", props.class].filter(Boolean).join(" ");
     const p = CMSwift.omit(props, ["type", "message", "actions", "dense", "slots"]);
     p.class = cls;
+    const sizeMap = {
+      sm: { pad: "8px 12px", font: "13px" },
+      md: { pad: "10px 14px", font: "14px" },
+      lg: { pad: "12px 16px", font: "15px" }
+    };
     p.style = {
       padding: "10px 14px",
       borderRadius: "var(--cms-r-md)",
@@ -3677,8 +3982,13 @@
       display: "flex",
       alignItems: "center",
       gap: "10px",
+      fontSize: "14px",
       ...(props.style || {})
     };
+    if (props.size && typeof props.size === "string" && sizeMap[props.size]) {
+      p.style.padding = sizeMap[props.size].pad;
+      p.style.fontSize = sizeMap[props.size].font;
+    }
 
     const messageNodes = renderSlotToArray(slots, "message", {}, props.message);
     const message = messageNodes.length ? messageNodes : renderSlotToArray(slots, "default", {}, children);
@@ -3806,7 +4116,7 @@
       const isOpen = setDrawerOpen(!drawerOpen);
       if (iconEl) iconEl.textContent = isOpen ? drawerOpenIcon : drawerCloseIcon;
     };
-    const leftFallback = left != null ? left : UI.Btn({ variant: "", onClick: toggleAside }, iconEl);
+    const leftFallback = left != null ? left : UI.Btn({ onClick: toggleAside }, iconEl);
     const leftNode = left === false && !CMSwift.ui.getSlot(slots, "left")
       ? null
       : CMSwift.ui.renderSlot(slots, "left", { toggleAside }, leftFallback);
@@ -3868,8 +4178,8 @@
     const header = props.header ?? null;
     const stateKey = props.stateKey ?? null;
     const closeOnSelect = props.closeOnSelect ?? true;
-    const groupOpenIcon = props.groupOpenIcon ?? _ui.Icon("#triangle-fill", { size: "xs" });
-    const groupCloseIcon = props.groupCloseIcon ?? _ui.Icon("#triangle-inverted-fill", { size: "xs" });
+    const groupOpenIcon = props.groupOpenIcon ?? _ui.Icon("arrow_drop_down", { size: "lg" });
+    const groupCloseIcon = props.groupCloseIcon ?? _ui.Icon("arrow_drop_up", { size: "lg" });
     const className = props.class ?? null;
 
     if (stateKey) {
@@ -4783,7 +5093,7 @@
       ...contentNodes,
       _h.div({ class: "cms-dialog-actions" },
         showCancel ? CMSwift.ui.Btn({ onClick: onCancel }, cancelText || "Annulla") : null,
-        CMSwift.ui.Btn({ variant: "primary", onClick: onOk }, okText || "OK")
+        CMSwift.ui.Btn({ color: "primary", onClick: onOk }, okText || "OK")
       )
     );
 

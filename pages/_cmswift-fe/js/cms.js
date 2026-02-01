@@ -2983,26 +2983,49 @@
     const meta = CMSwift.ui.meta?.[name];
     if (!meta) return _h.div({ class: "cms-muted" }, `Meta non trovata: ${name}`);
 
+    const formatValues = (values) => {
+      if (!values) return "—";
+      if (Array.isArray(values)) return values.join(" | ");
+      return String(values);
+    };
+
     const propsRows = Object.entries(meta.props || {}).map(([k, v]) =>
-      _h.tr(_h.td(_h.code(k)), _h.td(
-        _h.div({ class: "cms-m-b-lg" }, _ui.Chip({ label: 'Type' }), _h.span(" : "), _h.b(v.type)),
-        _h.div({ class: "cms-m-t-lg" }, _h.code({ class: "cms-m-l-lg" }, v.description)),
-      ))
+      _h.tr(
+        _h.td(_h.code(k)),
+        _h.td(_h.span(v.type || "—")),
+        _h.td(_h.code(v.default == null ? "—" : String(v.default))),
+        _h.td(_h.span(formatValues(v.values))),
+        _h.td(_h.span(v.category || "general")),
+        _h.td(_h.span(v.description || "—"))
+      )
     );
 
-    const eventsRows = (meta.events || []).map(ev =>
-      _h.tr(_h.td(_h.code(ev)), _h.td(_h.span("DOM event")))
-    );
+    let eventsRows = [];
+    if (meta.events) {
+      if (Array.isArray(meta.events)) {
+        eventsRows = meta.events.map((ev) =>
+          _h.tr(_h.td(_h.code(ev)), _h.td(_h.span("DOM event")))
+        );
+      } else {
+        eventsRows = Object.entries(meta.events || {}).map(([k, v]) =>
+          _h.tr(_h.td(_h.code(k)), _h.td(_h.span(String(v || "DOM event"))))
+        );
+      }
+    }
 
     let slotsRows = [];
     if (meta.slots) {
       if (Array.isArray(meta.slots)) {
         slotsRows = meta.slots.map((slot) =>
-          _h.tr(_h.td(_h.code(String(slot))), _h.td(_h.span("Slot")))
+          _h.tr(_h.td(_h.code(String(slot))), _h.td(_h.span("—")), _h.td(_h.span("Slot")))
         );
       } else {
         slotsRows = Object.entries(meta.slots || {}).map(([k, v]) =>
-          _h.tr(_h.td(_h.code(k)), _h.td(_h.span(String(v))))
+          _h.tr(
+            _h.td(_h.code(k)),
+            _h.td(_h.span(v.type || "—")),
+            _h.td(_h.span(v.description || String(v) || "—"))
+          )
         );
       }
     }
@@ -3014,7 +3037,14 @@
 
       _h.h4("Props"),
       _h.table({ class: "cms-table" },
-        _h.thead(_h.tr(_h.th("Name"), _h.th("Type"))),
+        _h.thead(_h.tr(
+          _h.th("Name"),
+          _h.th("Type"),
+          _h.th("Default"),
+          _h.th("Values"),
+          _h.th("Category"),
+          _h.th("Description")
+        )),
         _h.tbody(...propsRows)
       ),
 
@@ -3026,7 +3056,7 @@
 
       slotsRows.length ? _h.h4({ style: { marginTop: "14px" } }, "Slots") : null,
       slotsRows.length ? _h.table({ class: "cms-table" },
-        _h.thead(_h.tr(_h.th("Name"), _h.th("Notes"))),
+        _h.thead(_h.tr(_h.th("Name"), _h.th("Type"), _h.th("Description"))),
         _h.tbody(...slotsRows)
       ) : null,
 
