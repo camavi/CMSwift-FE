@@ -734,6 +734,7 @@
     };
 
     // struttura standard: header/body/footer
+    const headerIdentifier = renderSlotToArray(slots, "header", {}, props.identifier);
     const headerNodes = renderSlotToArray(slots, "header", {}, props.header);
     const footerNodes = renderSlotToArray(slots, "footer", {}, props.footer);
     const actionsNodes = renderSlotToArray(slots, "actions", {}, props.actions);
@@ -743,6 +744,7 @@
 
     const el = _h.div(
       { ...p, class: cls, onClick: (props.clickable || props.to) ? onClick : props.onClick },
+      headerIdentifier.length ? _h.div({ class: "cms-card-identifier" }, ...headerIdentifier) : null,
       headerNodes.length ? _h.div({ class: "cms-card-header" }, ...headerNodes) : null,
       body,
       (footerNodes.length || actionsNodes.length) ? _h.div({ class: "cms-card-footer" }, ...footerNodes, ...actionsNodes) : null
@@ -2875,7 +2877,7 @@
   UI.Chip = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-chip", "cms-singularity",
+    const cls = ["cms-clear-set", "cms-chip", "cms-singularity",
       props.class
     ]
       .filter(Boolean).join(" ");
