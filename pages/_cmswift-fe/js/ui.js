@@ -63,55 +63,118 @@
     const classTokens = [];
     const style = {};
 
-    if (props.clickable) classTokens.push("cms-clickable");
-    if (props.dense) classTokens.push("cms-dense");
-    if (props.flat) classTokens.push("cms-flat");
-    if (props.border) classTokens.push("cms-border");
-    if (props.glossy) classTokens.push("cms-glossy");
-    if (props.glow) classTokens.push("cms-glow");
-    if (props.glass) classTokens.push("cms-glass");
-    if (props.shadow) classTokens.push("cms-shadow");
-    if (props.outline) classTokens.push("cms-outline");
-    if (props.rounded) classTokens.push("cms-rounded");
-    if (props.gradient) classTokens.push("cms-gradient");
-    if (props.textGradient) classTokens.push("cms-text-gradient");
-    if (props.lightShadow) classTokens.push("cms-light-shadow");
+    classTokens.push(
+      uiWhen(props.clickable, "cms-clickable"),
+      uiWhen(props.dense, "cms-dense"),
+      uiWhen(props.flat, "cms-flat"),
+      uiWhen(props.border, "cms-border"),
+      uiWhen(props.glossy, "cms-glossy"),
+      uiWhen(props.glow, "cms-glow"),
+      uiWhen(props.glass, "cms-glass"),
+      uiWhen(props.shadow, "cms-shadow"),
+      uiWhen(props.outline, "cms-outline"),
+      uiWhen(props.rounded, "cms-rounded"),
+      uiWhen(props.gradient, "cms-gradient"),
+      uiWhen(props.textGradient, "cms-text-gradient"),
+      uiWhen(props.lightShadow, "cms-light-shadow")
+    );
 
-    const state = normalizeState(props.color);
-    if (state) {
-      classTokens.push(`cms-state-${state}`);
-    } else if (props.color && isTokenCSS(props.color)) {
-      style.backgroundColor = `var(--cms-${props.color})`;
-    } else if (props.color) {
-      style.backgroundColor = props.color;
+    if (uiIsReactive(props.color)) {
+      classTokens.push(() => {
+        const v = uiUnwrap(props.color);
+        const state = normalizeState(v);
+        return state ? `cms-state-${state}` : "";
+      });
+      style.backgroundColor = () => {
+        const v = uiUnwrap(props.color);
+        const state = normalizeState(v);
+        if (state) return "";
+        if (v && isTokenCSS(String(v))) return `var(--cms-${v})`;
+        return v || "";
+      };
+    } else {
+      const state = normalizeState(props.color);
+      if (state) {
+        classTokens.push(`cms-state-${state}`);
+      } else if (props.color && isTokenCSS(props.color)) {
+        style.backgroundColor = `var(--cms-${props.color})`;
+      } else if (props.color) {
+        style.backgroundColor = props.color;
+      }
     }
 
     // facciamo text color per i token
-    if (props.textColor && isTokenCSS(props.textColor)) {
+    if (uiIsReactive(props.textColor)) {
+      style.color = () => {
+        const v = uiUnwrap(props.textColor);
+        if (v && isTokenCSS(String(v))) return `var(--cms-${v})`;
+        return v || "";
+      };
+    } else if (props.textColor && isTokenCSS(props.textColor)) {
       style.color = `var(--cms-${props.textColor})`;
     } else if (props.textColor) {
       style.color = props.textColor;
     }
 
-    const size = props.size;
-    if (typeof size === "string" && CMSwift.uiSizes?.includes(size)) {
-      classTokens.push(`cms-size-${size}`);
+    if (uiIsReactive(props.size)) {
+      classTokens.push(() => {
+        const v = uiUnwrap(props.size);
+        if (typeof v === "string" && CMSwift.uiSizes?.includes(v)) return `cms-size-${v}`;
+        return "";
+      });
+    } else {
+      const size = props.size;
+      if (typeof size === "string" && CMSwift.uiSizes?.includes(size)) {
+        classTokens.push(`cms-size-${size}`);
+      }
     }
 
-    const radius = normalizeRadius(props.radius ?? props.borderRadius);
-    if (radius) classTokens.push(`cms-r-${radius}`);
-    else if (props.radius != null || props.borderRadius != null) {
-      style.borderRadius = toCssSize(props.radius ?? props.borderRadius);
+    if (uiIsReactive(props.radius) || uiIsReactive(props.borderRadius)) {
+      classTokens.push(() => {
+        const r = uiUnwrap(props.radius);
+        const b = uiUnwrap(props.borderRadius);
+        const v = r != null ? r : b;
+        const radius = normalizeRadius(v);
+        return radius ? `cms-r-${radius}` : "";
+      });
+      style.borderRadius = () => {
+        const r = uiUnwrap(props.radius);
+        const b = uiUnwrap(props.borderRadius);
+        const v = r != null ? r : b;
+        const radius = normalizeRadius(v);
+        if (radius || v == null) return "";
+        return toCssSize(v);
+      };
+    } else {
+      const radius = normalizeRadius(props.radius ?? props.borderRadius);
+      if (radius) classTokens.push(`cms-r-${radius}`);
+      else if (props.radius != null || props.borderRadius != null) {
+        style.borderRadius = toCssSize(props.radius ?? props.borderRadius);
+      }
     }
 
-    const shadow = normalizeShadow(props.shadow);
-    if (shadow) classTokens.push(`cms-shadow-${shadow}`);
-    else if (props.shadow && typeof props.shadow === "string") {
-      style.boxShadow = props.shadow;
+    if (uiIsReactive(props.shadow)) {
+      classTokens.push(() => {
+        const v = uiUnwrap(props.shadow);
+        const shadow = normalizeShadow(v);
+        return shadow ? `cms-shadow-${shadow}` : "";
+      });
+      style.boxShadow = () => {
+        const v = uiUnwrap(props.shadow);
+        const shadow = normalizeShadow(v);
+        if (shadow || v == null || v === false) return "";
+        return typeof v === "string" ? v : "";
+      };
+    } else {
+      const shadow = normalizeShadow(props.shadow);
+      if (shadow) classTokens.push(`cms-shadow-${shadow}`);
+      else if (props.shadow && typeof props.shadow === "string") {
+        style.boxShadow = props.shadow;
+      }
     }
 
     if (classTokens.length) {
-      props.class = [props.class, ...classTokens].filter(Boolean).join(" ");
+      props.class = uiClass([props.class, ...classTokens]);
     }
     if (Object.keys(style).length) {
       props.style = { ...style, ...(props.style || {}) };
@@ -582,7 +645,7 @@
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
     const p = CMSwift.omit(props, ["slots"]);
-    p.class = ["cms-row", props.class].filter(Boolean).join(" ");
+    p.class = uiClass(["cms-row", props.class]);
     const content = renderSlotToArray(slots, "default", {}, children);
     return _h.div(p, ...content);
   };
@@ -602,28 +665,131 @@
       description: "Row layout wrapper."
     };
   }
+  function uiIsSignal(v) {
+    return Array.isArray(v) && v.length === 2 && typeof v[0] === "function" && typeof v[1] === "function";
+  }
 
+  function uiIsRod(v) {
+    return !!v && v.type === "rod";
+  }
+
+  function uiIsReactive(v) {
+    return typeof v === "function" || uiIsRod(v) || uiIsSignal(v);
+  }
+
+  function uiUnwrap(v) {
+    if (typeof v === "function") return v();
+    if (uiIsRod(v)) return v.value;
+    if (uiIsSignal(v)) return v[0]();
+    return v;
+  }
+
+  function uiHasReactive(parts) {
+    const stack = Array.isArray(parts) ? [...parts] : [parts];
+    while (stack.length) {
+      const item = stack.pop();
+      if (uiIsReactive(item)) return true;
+      if (Array.isArray(item)) stack.push(...item);
+    }
+    return false;
+  }
+
+  function uiClass(parts) {
+    const hasReactive = uiHasReactive(parts);
+    const build = () => {
+      const out = [];
+      const stack = Array.isArray(parts) ? [...parts] : [parts];
+      while (stack.length) {
+        const item = stack.shift();
+        if (item == null || item === false) continue;
+        const value = uiUnwrap(item);
+        if (value == null || value === false || value === "") continue;
+        if (Array.isArray(value)) {
+          stack.unshift(...value);
+          continue;
+        }
+        out.push(value);
+      }
+      return out.join(" ");
+    };
+    return hasReactive ? build : build();
+  }
+
+  function uiClassStatic(parts) {
+    const cls = uiClass(parts);
+    return typeof cls === "function" ? cls() : cls;
+  }
+
+  function uiWhen(cond, className, fallback = "") {
+    if (uiIsReactive(cond)) {
+      return () => (uiUnwrap(cond) ? className : fallback);
+    }
+    return cond ? className : fallback;
+  }
+
+  function uiClassValue(value, prefix, suffix = "") {
+    if (uiIsReactive(value)) {
+      return () => {
+        const v = uiUnwrap(value);
+        if (v == null || v === "") return "";
+        return `${prefix}${v}${suffix}`;
+      };
+    }
+    if (value == null || value === "") return "";
+    return `${prefix}${value}${suffix}`;
+  }
+
+  function uiComputed(deps, fn) {
+    const list = Array.isArray(deps) ? deps : [deps];
+    const reactive = list.some(uiIsReactive);
+    if (!reactive) return fn();
+    return () => fn();
+  }
+
+  function uiStyleValue(value, map, empty = "") {
+    if (uiIsReactive(value)) {
+      return () => {
+        const v = uiUnwrap(value);
+        if (v == null || v === false) return empty;
+        return map ? map(v) : v;
+      };
+    }
+    if (value == null || value === false) return null;
+    return map ? map(value) : value;
+  }
+
+  CMSwift.uiIsReactive = uiIsReactive;
+  CMSwift.uiUnwrap = uiUnwrap;
+  CMSwift.uiClass = uiClass;
+  CMSwift.uiClassStatic = uiClassStatic;
+  CMSwift.uiWhen = uiWhen;
+  CMSwift.uiClassValue = uiClassValue;
+  CMSwift.uiComputed = uiComputed;
+  CMSwift.uiStyleValue = uiStyleValue;
   UI.Col = (...args) => {
     try {
       const { props, children } = CMSwift.uiNormalizeArgs(args);
       const slots = props.slots || {};
-      const col = props.auto ? "" : props.col;
       const style = { ...(props.style || {}) };
-      const size = props.size || null;
-      const cls = [
-        col === "" ? "cms-col" : col != null ? `cms-col-${col}` : "cms-col",
-        props.sm ? `cms-sm-col-${props.sm}` : "",
-        props.md ? `cms-md-col-${props.md}` : "",
-        props.lg ? `cms-lg-col-${props.lg}` : "",
+      const colClass = uiComputed([props.auto, props.col], () => {
+        const auto = uiUnwrap(props.auto);
+        const col = auto ? "" : uiUnwrap(props.col);
+        return col === "" ? "cms-col" : col != null ? `cms-col-${col}` : "cms-col";
+      });
+      const cls = uiClass([
+        colClass,
+        uiClassValue(props.sm, "cms-sm-col-"),
+        uiClassValue(props.md, "cms-md-col-"),
+        uiClassValue(props.lg, "cms-lg-col-"),
         props.class
-      ].filter(Boolean).join(" ");
+      ]);
 
       const p = CMSwift.omit(props, ["slots", "col", "sm", "md", "lg", "auto", "size", "style"]);
       p.class = cls;
-      if (size != null) {
-        style.width = unitCover(size, 'w');
-        style.flex = '0 0 auto';
-      };
+      const width = uiStyleValue(props.size, (v) => unitCover(v, "w"));
+      const flex = uiStyleValue(props.size, () => "0 0 auto");
+      if (width != null) style.width = width;
+      if (flex != null) style.flex = flex;
 
       p.style = style;
 
@@ -654,7 +820,7 @@
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
     const p = CMSwift.omit(props, ["slots"]);
-    p.class = ["cms-spacer", props.class].filter(Boolean).join(" ");
+    p.class = uiClass(["cms-spacer", props.class]);
     const content = renderSlotToArray(slots, "default", {}, children);
     return _h.div(p, ...content);
   };
@@ -679,7 +845,7 @@
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
     const p = CMSwift.omit(props, ["slots"]);
-    p.class = ["cms-container", props.class].filter(Boolean).join(" ");
+    p.class = uiClass(["cms-container", props.class]);
     const content = renderSlotToArray(slots, "default", {}, children);
     return _h.div(p, ...content);
   };
@@ -704,14 +870,14 @@
     // usa il tuo normalize se ce l’hai già
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = [
+    const cls = uiClass([
       "cms-panel",
       "cms-card",
-      props.flat ? "cms-card-flat" : "",
-      props.dense ? "cms-card-dense" : "",
-      props.clickable ? "cms-card-clickable" : "",
+      uiWhen(props.flat, "cms-card-flat"),
+      uiWhen(props.dense, "cms-card-dense"),
+      uiWhen(props.clickable, "cms-card-clickable"),
       props.class
-    ].filter(Boolean).join(" ");
+    ]);
 
     // props speciali da non passare come attributi DOM
     const p = CMSwift.omit
@@ -782,14 +948,14 @@
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
 
-    const color = props.color || props.state || "";
-    const state = ["primary", "secondary", "warning", "danger", "success", "info", "light", "dark"].includes(color)
-      ? color
-      : (props.state || "");
+    const state = uiComputed([props.color, props.state], () => {
+      const color = uiUnwrap(props.color) || uiUnwrap(props.state) || "";
+      return ["primary", "secondary", "warning", "danger", "success", "info", "light", "dark"].includes(color)
+        ? color
+        : (uiUnwrap(props.state) || "");
+    });
 
-    const cls = ["cms-btn", state, props.outline ? "outline" : "", props.class]
-      .filter(Boolean)
-      .join(" ");
+    const cls = uiClass(["cms-btn", state, uiWhen(props.outline, "outline"), props.class]);
 
     const p = CMSwift.omit(props, [
       "icon", "iconRight", "label", "loading", "outline", "iconAlign", "slots"
@@ -895,7 +1061,7 @@
 
   UI.FormField = (props = {}) => {
     const slots = props.slots || {};
-    const wrap = _h.div({ class: ["cms-field", props.wrapClass].filter(Boolean).join(" ") });
+    const wrap = _h.div({ class: uiClass(["cms-field", props.wrapClass]) });
 
     const topLabelNodes = renderSlotToArray(slots, "topLabel", {}, props.topLabel);
     if (topLabelNodes.length) {
@@ -1137,7 +1303,7 @@
   }
   UI.InputRaw = (props = {}) => {
     const el = _h.input({
-      class: ["cms-input-raw", props.class].filter(Boolean).join(" "),
+      class: uiClass(["cms-input-raw", props.class]),
       type: props.type || "text",
       name: props.name,
       placeholder: props.placeholder,
@@ -1226,7 +1392,7 @@
   UI.Input = (props = {}) => {
     const slots = props.slots || {};
     const input = _h.input({
-      class: ["cms-input", props.class].filter(Boolean).join(" "),
+      class: uiClass(["cms-input", props.class]),
       type: props.type || "text",
       name: props.name,
       autocomplete: props.autocomplete,
@@ -1640,7 +1806,7 @@
 
     // root select (control + menu)
     const root = _h.div({
-      class: ["cms-select", isMulti ? "multiple" : "", props.class].filter(Boolean).join(" "),
+      class: uiClass(["cms-select", isMulti ? "multiple" : "", props.class]),
       tabIndex: isDisabled() ? -1 : 0,
       role: "combobox",
       "aria-expanded": "false",
@@ -1648,7 +1814,7 @@
     });
 
     const valueNode = _h.div({
-      class: ["cms-select-value", isMulti ? "cms-select-value-multi" : ""].filter(Boolean).join(" ")
+      class: uiClass(["cms-select-value", isMulti ? "cms-select-value-multi" : ""])
     });
     CMSwift.reactive.effect(() => {
       const flat = getFlat();
@@ -2161,13 +2327,13 @@
     window.addEventListener("resize", checkMobile);
 
     // --- elements ---
-    const root = _h.div({ class: ["cms-app", className].filter(Boolean).join(" ") });
+    const root = _h.div({ class: uiClass(["cms-app", className]) });
 
     const createHeaderWrap = () => _h[tagPage ? "header" : "div"]({
-      class: ["cms-layout header", stickyHeader ? "sticky" : ""].filter(Boolean).join(" ")
+      class: uiClass(["cms-layout header", uiWhen(stickyHeader, "sticky")])
     });
     const createFooterWrap = () => _h[tagPage ? "footer" : "div"]({
-      class: ["cms-layout footer", stickyFooter ? "sticky" : ""].filter(Boolean).join(" ")
+      class: uiClass(["cms-layout footer", uiWhen(stickyFooter, "sticky")])
     });
     let headerWrap = H.length ? createHeaderWrap() : null;
     let footerWrap = F.length ? createFooterWrap() : null;
@@ -2182,7 +2348,7 @@
     });
 
     const asideWrap = _h[tagPage ? "aside" : "div"]({
-      class: ["cms-layout-aside", "aside", stickyAside ? "sticky" : ""].filter(Boolean).join(" "),
+      class: uiClass(["cms-layout-aside", "aside", uiWhen(stickyAside, "sticky")]),
       style: { width: `${drawerWidth}px` },
       role: "navigation",
       "aria-hidden": "false"
@@ -2432,14 +2598,14 @@
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
 
-    const cls = [
+    const cls = uiClass([
       "cms-footer",
-      props.sticky ? "sticky" : "",
-      props.dense ? "dense" : "",
-      props.elevated ? "elevated" : "",
-      props.align ? `align-${props.align}` : "",
+      uiWhen(props.sticky, "sticky"),
+      uiWhen(props.dense, "dense"),
+      uiWhen(props.elevated, "elevated"),
+      uiClassValue(props.align, "align-"),
       props.class
-    ].filter(Boolean).join(" ");
+    ]);
 
     // props speciali da non passare al DOM
     const p = CMSwift.omit(props, ["sticky", "dense", "elevated", "align", "slots"]);
@@ -2497,35 +2663,38 @@
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
 
-    const cls = [
+    const cls = uiClass([
       "cms-toolbar",
-      props.dense ? "dense" : "",
-      props.divider ? "divider" : "",
-      props.elevated ? "elevated" : "",
-      props.sticky ? "sticky" : "",
+      uiWhen(props.dense, "dense"),
+      uiWhen(props.divider, "divider"),
+      uiWhen(props.elevated, "elevated"),
+      uiWhen(props.sticky, "sticky"),
       props.class
-    ].filter(Boolean).join(" ");
+    ]);
 
     const p = CMSwift.omit(props, ["dense", "divider", "wrap", "justify", "align", "gap", "elevated", "sticky", "slots"]);
     p.class = cls;
 
     const style = { ...(props.style || {}) };
     style.display = style.display || "flex";
-    if (props.align) style.alignItems = props.align;
-    if (props.justify) style.justifyContent = props.justify;
-    if (props.wrap != null) style.flexWrap = props.wrap ? "wrap" : "nowrap";
-    style.gap = props.gap != null ? toCssSize(props.gap) : "var(--cms-s-md)";
-    if (props.size && typeof props.size === "string") {
-      const sizePadding = {
-        xxs: "4px 6px",
-        xs: "6px 8px",
-        sm: "6px 10px",
-        md: "10px 12px",
-        lg: "12px 16px",
-        xl: "14px 18px"
-      };
-      if (sizePadding[props.size]) style.padding = sizePadding[props.size];
-    }
+    const align = uiStyleValue(props.align);
+    if (align != null) style.alignItems = align;
+    const justify = uiStyleValue(props.justify);
+    if (justify != null) style.justifyContent = justify;
+    const wrap = uiStyleValue(props.wrap, (v) => v ? "wrap" : "nowrap");
+    if (wrap != null) style.flexWrap = wrap;
+    const gap = uiStyleValue(props.gap, toCssSize, "var(--cms-s-md)");
+    style.gap = gap != null ? gap : "var(--cms-s-md)";
+    const sizePadding = {
+      xxs: "4px 6px",
+      xs: "6px 8px",
+      sm: "6px 10px",
+      md: "10px 12px",
+      lg: "12px 16px",
+      xl: "14px 18px"
+    };
+    const padding = uiStyleValue(props.size, (v) => sizePadding[v] || "");
+    if (padding != null) style.padding = padding;
     if (Object.keys(style).length) p.style = style;
 
     const content = renderSlotToArray(slots, "default", {}, children);
@@ -2563,24 +2732,27 @@
   UI.Grid = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = [
+    const cls = uiClass([
       "cms-grid",
-      props.dense ? "dense" : "",
+      uiWhen(props.dense, "dense"),
       props.class
-    ].filter(Boolean).join(" ");
+    ]);
 
     const p = CMSwift.omit(props, ["gap", "cols", "align", "justify", "dense", "slots"]);
     p.class = cls;
 
     const style = { ...(props.style || {}) };
-    if (props.gap != null) style.gap = toCssSize(props.gap);
-    if (props.cols != null) {
-      style.gridTemplateColumns = typeof props.cols === "number"
-        ? `repeat(${props.cols}, minmax(0, 1fr))`
-        : String(props.cols);
-    }
-    if (props.align) style.alignItems = props.align;
-    if (props.justify) style.justifyContent = props.justify;
+    const gap = uiStyleValue(props.gap, toCssSize);
+    if (gap != null) style.gap = gap;
+    const cols = uiStyleValue(props.cols, (v) => typeof v === "number"
+      ? `repeat(${v}, minmax(0, 1fr))`
+      : String(v)
+    );
+    if (cols != null) style.gridTemplateColumns = cols;
+    const align = uiStyleValue(props.align);
+    if (align != null) style.alignItems = align;
+    const justify = uiStyleValue(props.justify);
+    if (justify != null) style.justifyContent = justify;
     if (Object.keys(style).length) p.style = style;
 
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
@@ -2611,14 +2783,18 @@
   UI.GridCol = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const span = props.auto ? "auto" : (props.span || 24);
-    const cls = [
-      span === "auto" ? "cms-col-auto" : `cms-col-${span}`,
-      props.sm ? `cms-sm-col-${props.sm}` : "",
-      props.md ? `cms-md-col-${props.md}` : "",
-      props.lg ? `cms-lg-col-${props.lg}` : "",
+    const spanClass = uiComputed([props.auto, props.span], () => {
+      const auto = uiUnwrap(props.auto);
+      const span = auto ? "auto" : (uiUnwrap(props.span) || 24);
+      return span === "auto" ? "cms-col-auto" : `cms-col-${span}`;
+    });
+    const cls = uiClass([
+      spanClass,
+      uiClassValue(props.sm, "cms-sm-col-"),
+      uiClassValue(props.md, "cms-md-col-"),
+      uiClassValue(props.lg, "cms-lg-col-"),
       props.class
-    ].filter(Boolean).join(" ");
+    ]);
 
     const p = CMSwift.omit(props, ["span", "sm", "md", "lg", "auto", "slots"]);
     p.class = cls;
@@ -2682,14 +2858,14 @@
 
     const slots = props.slots || {};
 
-    const size = props.size;
-    const color = props.color;
+    const size = uiUnwrap(props.size);
+    const color = uiUnwrap(props.color);
     const isFill = String(name).endsWith("-fill");
     const style = { ...(props.style || {}) };
 
     if (color) style.color = color;
 
-    const cls = ["cms-icon", "material-icons", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-icon", "material-icons", props.class]);
     const p = CMSwift.omit(props, ["name", "size", "color", "class", "style", "slots"]);
     p.class = cls;
     if (Object.keys(style).length) p.style = style;
@@ -2749,7 +2925,7 @@
   UI.Badge = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-badge", props.outline ? "outline" : "", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-badge", uiWhen(props.outline, "outline"), props.class]);
     const p = CMSwift.omit(props, ["label", "color", "outline", "size", "slots"]);
     p.class = cls;
 
@@ -2824,11 +3000,11 @@
   UI.Avatar = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-avatar", props.elevated ? "elevated" : "", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-avatar", uiWhen(props.elevated, "elevated"), props.class]);
     const p = CMSwift.omit(props, ["src", "label", "size", "rounded", "square", "elevated", "slots"]);
     p.class = cls;
 
-    const size = props.size ?? 32;
+    const size = uiUnwrap(props.size) ?? 32;
     const style = {
       width: toCssSize(size),
       height: toCssSize(size),
@@ -2877,18 +3053,22 @@
   UI.Chip = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-clear-set", "cms-chip", "cms-singularity",
+    const sizeClass = uiComputed(props.size, () => {
+      const v = uiUnwrap(props.size);
+      return (typeof v === "string" && sizeMap[v]) ? v : "";
+    });
+    const cls = uiClass([
+      "cms-clear-set",
+      "cms-chip",
+      "cms-singularity",
+      sizeClass,
       props.class
-    ]
-      .filter(Boolean).join(" ");
+    ]);
     const p = CMSwift.omit(props, ["label", "border", "color", "icon", "iconRight", "removable", "onRemove", "dense", "flat", "glossy", "outline", "slots"]);
     p.class = cls;
     p.style = {
       ...(props.style || {})
     };
-    if (props.size && typeof props.size === "string" && sizeMap[props.size]) {
-      p.class += ` ${props.size}`;
-    }
 
     const iconFallback = props.icon
       ? (typeof props.icon === "string" ? UI.Icon({ name: props.icon, size: props?.size ?? null }) : CMSwift.ui.slot(props.icon, { as: "icon" }))
@@ -3034,7 +3214,7 @@
         closeOnBackdrop: false,
         closeOnEsc: false,
         autoFocus: false,
-        className: ["cms-tooltip", props.class].filter(Boolean).join(" "),
+        className: uiClassStatic(["cms-tooltip", props.class]),
         onClose: () => { entry = null; }
       });
       if (props.style) Object.assign(entry.panel.style, props.style);
@@ -3080,7 +3260,7 @@
 
     const targetNode = props.target || (children && children.length ? children[0] : null);
     if (targetNode) {
-      const cls = ["cms-tooltip-wrap", props.class].filter(Boolean).join(" ");
+      const cls = uiClass(["cms-tooltip-wrap", props.class]);
       const p = CMSwift.omit(props, ["text", "content", "target", "placement", "delay", "offsetX", "offsetY", "offset", "class", "style", "slots"]);
       p.class = cls;
       p.style = { display: "inline-flex", alignItems: "center", ...(props.style || {}) };
@@ -3124,7 +3304,7 @@
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
     const number = props.number || false;
-    const cls = ["cms-list", props.dense ? "dense" : "", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-list", uiWhen(props.dense, "dense"), props.class]);
     const p = CMSwift.omit(props, ["dense", "slots"]);
     p.class = cls;
     return _h[number ? "ol" : "ul"](p, ...renderSlotToArray(slots, "default", {}, children));
@@ -3152,7 +3332,7 @@
   UI.Item = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-item", props.divider ? "divider" : "", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-item", uiWhen(props.divider, "divider"), props.class]);
     const p = CMSwift.omit(props, ["divider", "slots"]);
     p.class = cls;
     return _h.li(p, ...renderSlotToArray(slots, "default", {}, children));
@@ -3178,13 +3358,15 @@
 
   UI.Separator = (...args) => {
     const { props } = CMSwift.uiNormalizeArgs(args);
-    const cls = ["cms-separator", props.vertical ? "vertical" : "", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-separator", uiWhen(props.vertical, "vertical"), props.class]);
     const p = CMSwift.omit(props, ["vertical", "size", "slots"]);
     p.class = cls;
     const style = { borderColor: "var(--cms-border)", ...(props.style || {}) };
-    if (props.size != null) {
-      const size = toCssSize(props.size);
-      if (props.vertical) style.width = size;
+    const sizeValue = uiUnwrap(props.size);
+    const vertical = uiUnwrap(props.vertical);
+    if (sizeValue != null) {
+      const size = toCssSize(sizeValue);
+      if (vertical) style.width = size;
       else style.height = size;
     }
     p.style = style;
@@ -3219,7 +3401,7 @@
     const inputProps = CMSwift.omit(props, ["model", "label", "checked", "class", "style", "dense", "onChange", "onInput", "slots"]);
     inputProps.type = "checkbox";
     inputProps.id = id;
-    inputProps.class = ["cms-checkbox", props.inputClass].filter(Boolean).join(" ");
+    inputProps.class = uiClass(["cms-checkbox", props.inputClass]);
     const input = _h.input(inputProps);
 
     if (model) {
@@ -3238,7 +3420,7 @@
     const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
     const labelContent = labelNodes.length ? labelNodes : renderSlotToArray(slots, "default", {}, children);
     const wrapProps = CMSwift.omit(props, ["model", "label", "checked", "onChange", "onInput", "value", "name", "id", "type", "dense", "inputClass", "slots"]);
-    wrapProps.class = ["cms-checkbox-wrap", props.dense ? "dense" : "", props.class].filter(Boolean).join(" ");
+    wrapProps.class = uiClass(["cms-checkbox-wrap", uiWhen(props.dense, "dense"), props.class]);
     wrapProps.style = { display: "inline-flex", alignItems: "center", gap: "8px", ...(props.style || {}) };
 
     return _h.label(
@@ -3284,7 +3466,7 @@
     inputProps.type = "radio";
     inputProps.id = id;
     inputProps.name = props.name;
-    inputProps.class = ["cms-radio", props.inputClass].filter(Boolean).join(" ");
+    inputProps.class = uiClass(["cms-radio", props.inputClass]);
     const input = _h.input(inputProps);
 
     if (model) {
@@ -3305,7 +3487,7 @@
     const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
     const labelContent = labelNodes.length ? labelNodes : renderSlotToArray(slots, "default", {}, children);
     const wrapProps = CMSwift.omit(props, ["model", "label", "checked", "onChange", "onInput", "value", "name", "id", "type", "dense", "inputClass", "slots"]);
-    wrapProps.class = ["cms-radio-wrap", props.dense ? "dense" : "", props.class].filter(Boolean).join(" ");
+    wrapProps.class = uiClass(["cms-radio-wrap", uiWhen(props.dense, "dense"), props.class]);
     wrapProps.style = { display: "inline-flex", alignItems: "center", gap: "8px", ...(props.style || {}) };
 
     return _h.label(
@@ -3350,7 +3532,7 @@
 
     const inputProps = CMSwift.omit(props, ["model", "label", "checked", "class", "style", "dense", "onChange", "onInput", "slots"]);
     inputProps.type = "checkbox";
-    inputProps.class = ["cms-toggle", props.inputClass].filter(Boolean).join(" ");
+    inputProps.class = uiClass(["cms-toggle", props.inputClass]);
     const input = _h.input(inputProps);
 
     input.checked = !!props.checked;
@@ -3369,7 +3551,7 @@
     const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
     const labelContent = labelNodes.length ? labelNodes : renderSlotToArray(slots, "default", {}, children);
     const wrapProps = CMSwift.omit(props, ["model", "label", "checked", "onChange", "onInput", "value", "name", "id", "type", "dense", "inputClass", "slots"]);
-    wrapProps.class = ["cms-toggle-wrap", props.dense ? "dense" : "", props.class].filter(Boolean).join(" ");
+    wrapProps.class = uiClass(["cms-toggle-wrap", uiWhen(props.dense, "dense"), props.class]);
     wrapProps.style = { display: "inline-flex", alignItems: "center", gap: "8px", ...(props.style || {}) };
 
     return _h.label(
@@ -3414,7 +3596,7 @@
     inputProps.min = props.min ?? 0;
     inputProps.max = props.max ?? 100;
     inputProps.step = props.step ?? 1;
-    inputProps.class = ["cms-slider", props.class].filter(Boolean).join(" ");
+    inputProps.class = uiClass(["cms-slider", props.class]);
     inputProps.style = props.style;
     const input = _h.input(inputProps);
 
@@ -3466,7 +3648,7 @@
     const max = props.max || 5;
     const model = resolveModel(props.model, "UI.Rating:model");
     const wrap = _h.div({
-      class: ["cms-rating", props.class].filter(Boolean).join(" "),
+      class: uiClass(["cms-rating", props.class]),
       style: { display: "inline-flex", gap: "6px", ...(props.style || {}) }
     });
     const stars = [];
@@ -3531,7 +3713,7 @@
     const { props } = CMSwift.uiNormalizeArgs(args);
     const p = CMSwift.omit(props, ["class", "slots"]);
     p.type = "date";
-    p.class = ["cms-input", props.class].filter(Boolean).join(" ");
+    p.class = uiClass(["cms-input", props.class]);
     return _h.input(p);
   };
   if (CMSwift.isDev?.()) {
@@ -3557,7 +3739,7 @@
     const { props } = CMSwift.uiNormalizeArgs(args);
     const p = CMSwift.omit(props, ["class", "slots"]);
     p.type = "time";
-    p.class = ["cms-input", props.class].filter(Boolean).join(" ");
+    p.class = uiClass(["cms-input", props.class]);
     return _h.input(p);
   };
   if (CMSwift.isDev?.()) {
@@ -3585,7 +3767,7 @@
     const tabs = props.tabs || [];
     const model = resolveModel(props.model, "UI.Tabs:model");
     const wrap = _h.div({
-      class: ["cms-tabs", props.dense ? "dense" : "", props.class].filter(Boolean).join(" "),
+      class: uiClass(["cms-tabs", uiWhen(props.dense, "dense"), props.class]),
       style: {
         display: "flex",
         gap: props.gap != null ? toCssSize(props.gap) : "8px",
@@ -3653,7 +3835,7 @@
   UI.RouteTab = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-route-tab", props.active ? "active" : "", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-route-tab", uiWhen(props.active, "active"), props.class]);
     const p = CMSwift.omit(props, ["active", "label", "to", "slots"]);
     p.href = props.to || props.href || "#";
     p.class = cls;
@@ -3698,7 +3880,7 @@
     const slots = props.slots || {};
     const items = props.items || [];
     const sep = props.separator || "/";
-    const wrap = _h.nav({ class: ["cms-breadcrumbs", props.class].filter(Boolean).join(" ") });
+    const wrap = _h.nav({ class: uiClass(["cms-breadcrumbs", props.class]) });
     items.forEach((it, i) => {
       const label = it.label || it.title || it.to || it.href || "";
       const defaultNode = it.to || it.href
@@ -3740,7 +3922,7 @@
     const max = Math.max(1, props.max || 1);
     const model = resolveModel(props.model, "UI.Pagination:model");
     const wrap = _h.div({
-      class: ["cms-pagination", props.dense ? "dense" : "", props.class].filter(Boolean).join(" "),
+      class: uiClass(["cms-pagination", uiWhen(props.dense, "dense"), props.class]),
       style: { display: "flex", gap: "8px", alignItems: "center", ...(props.style || {}) }
     });
     const label = _h.span("");
@@ -3813,18 +3995,20 @@
   UI.Spinner = (...args) => {
     const { props } = CMSwift.uiNormalizeArgs(args);
     ensureSpinnerStyles();
-    const size = props.size || 18;
+    const size = uiUnwrap(props.size) || 18;
+    const thickness = uiUnwrap(props.thickness);
+    const color = uiUnwrap(props.color);
     const style = {
       width: toCssSize(size),
       height: toCssSize(size),
       borderRadius: "50%",
-      border: props.thickness ? `${toCssSize(props.thickness)} solid rgba(255,255,255,0.25)` : "2px solid rgba(255,255,255,0.25)",
-      borderTopColor: props.color || "var(--cms-primary)",
+      border: thickness ? `${toCssSize(thickness)} solid rgba(255,255,255,0.25)` : "2px solid rgba(255,255,255,0.25)",
+      borderTopColor: color || "var(--cms-primary)",
       animation: "cmsSpin 0.9s linear infinite",
       ...(props.style || {})
     };
     const p = CMSwift.omit(props, ["size", "color", "thickness", "slots"]);
-    p.class = ["cms-spinner", props.class].filter(Boolean).join(" ");
+    p.class = uiClass(["cms-spinner", props.class]);
     p.style = style;
     return _h.div(p);
   };
@@ -3851,12 +4035,12 @@
 
   UI.Progress = (...args) => {
     const { props } = CMSwift.uiNormalizeArgs(args);
-    const value = Math.max(0, Math.min(100, Number(props.value ?? 0)));
+    const value = Math.max(0, Math.min(100, Number(uiUnwrap(props.value) ?? 0)));
     const wrap = _h.div({
-      class: ["cms-progress", props.class].filter(Boolean).join(" "),
+      class: uiClass(["cms-progress", props.class]),
       style: {
-        width: props.width || "100%",
-        height: props.size || "6px",
+        width: uiUnwrap(props.width) || "100%",
+        height: uiUnwrap(props.size) || "6px",
         background: "rgba(255,255,255,0.08)",
         borderRadius: "999px",
         overflow: "hidden",
@@ -3864,11 +4048,11 @@
       }
     });
     const bar = _h.div({
-      class: ["cms-progress-bar", props.striped ? "striped" : ""].filter(Boolean).join(" "),
+      class: uiClass(["cms-progress-bar", uiWhen(props.striped, "striped")]),
       style: {
         width: value + "%",
         height: "100%",
-        background: props.color || "var(--cms-primary)",
+        background: uiUnwrap(props.color) || "var(--cms-primary)",
         transition: "width 200ms ease"
       }
     });
@@ -3901,14 +4085,14 @@
   UI.LoadingBar = function LoadingBar(...args) {
     const { props } = CMSwift.uiNormalizeArgs(args);
     const root = _h.div({
-      class: ["cms-loading-bar", props.class].filter(Boolean).join(" "),
+      class: uiClass(["cms-loading-bar", props.class]),
       style: {
         position: "fixed",
         top: "0",
         left: "0",
         width: "100%",
-        height: props.height || "3px",
-        zIndex: props.zIndex || 10002,
+        height: uiUnwrap(props.height) || "3px",
+        zIndex: uiUnwrap(props.zIndex) || 10002,
         pointerEvents: "none"
       }
     });
@@ -3917,7 +4101,7 @@
       style: {
         width: "0%",
         height: "100%",
-        background: props.color || "var(--cms-primary)",
+        background: uiUnwrap(props.color) || "var(--cms-primary)",
         transition: "width 200ms ease, opacity 200ms ease",
         opacity: "0"
       }
@@ -3968,7 +4152,7 @@
   UI.Banner = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-banner", props.type || "", props.dense ? "dense" : "", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-banner", props.type || "", uiWhen(props.dense, "dense"), props.class]);
     const p = CMSwift.omit(props, ["type", "message", "actions", "dense", "slots"]);
     p.class = cls;
     const sizeMap = {
@@ -3987,9 +4171,10 @@
       fontSize: "14px",
       ...(props.style || {})
     };
-    if (props.size && typeof props.size === "string" && sizeMap[props.size]) {
-      p.style.padding = sizeMap[props.size].pad;
-      p.style.fontSize = sizeMap[props.size].font;
+    const sizeValue = uiUnwrap(props.size);
+    if (sizeValue && typeof sizeValue === "string" && sizeMap[sizeValue]) {
+      p.style.padding = sizeMap[sizeValue].pad;
+      p.style.fontSize = sizeMap[sizeValue].font;
     }
 
     const messageNodes = renderSlotToArray(slots, "message", {}, props.message);
@@ -4098,15 +4283,15 @@
     const iconEl = left == null ? _h.span(drawerOpen ? drawerOpenIcon : drawerCloseIcon) : null;
     if (iconEl) drawerToggleIcons.add({ el: iconEl, openIcon: drawerOpenIcon, closeIcon: drawerCloseIcon });
 
-    const cls = [
+    const cls = uiClass([
       "cms-panel",
       "cms-header",
-      props.sticky ? "sticky" : "",
-      props.dense ? "dense" : "",
-      props.elevated ? "elevated" : "",
-      props.divider ? "divider" : "",
+      uiWhen(props.sticky, "sticky"),
+      uiWhen(props.dense, "dense"),
+      uiWhen(props.elevated, "elevated"),
+      uiWhen(props.divider, "divider"),
       props.class
-    ].filter(Boolean).join(" ");
+    ]);
     const p = CMSwift.omit(props, [
       "title", "subtitle", "left", "right",
       "drawerOpenIcon", "drawerCloseIcon", "drawerStateKey",
@@ -4203,7 +4388,7 @@
     const shouldClose = (it) => closeOnSelect && !it.keepOpen;
 
     const makeIcon = (icon, side = "left") => (icon ? _h.span({
-      class: ["cms-drawer-item-icon", side === "right" ? "right" : "left"].filter(Boolean).join(" "),
+      class: uiClass(["cms-drawer-item-icon", side === "right" ? "right" : "left"]),
     }, icon) : null);
 
     const getItemIcons = (it) => {
@@ -4276,7 +4461,7 @@
             writeGroupOpen(stateKey, open);
           };
           const groupWrap = _h.div({
-            class: ["cms-drawer-group", open ? "open" : "", it.class].filter(Boolean).join(" ")
+            class: uiClass(["cms-drawer-group", open ? "open" : "", it.class])
           }, toggleBtn, groupItems);
           setToggleIcon(open);
           return groupWrap;
@@ -4290,7 +4475,7 @@
 
         if (it.button || it.type === "button") {
           return UI.Btn({
-            class: ["cms-drawer-btn", it.class].filter(Boolean).join(" "),
+            class: uiClass(["cms-drawer-btn", it.class]),
             style: itemStyle,
             onClick: () => {
               if (shouldClose(it)) setDrawerOpen(false);
@@ -4309,7 +4494,7 @@
         if (itemStyle) attr.style = itemStyle;
 
         return _h.a({
-          class: ["cms-drawer-link", it.class].filter(Boolean).join(" "),
+          class: uiClass(["cms-drawer-link", it.class]),
           ...attr,
           onClick: (e) => {
             it.onClick?.(e);
@@ -4325,8 +4510,13 @@
 
     const drawerEl = _h.div(
       {
-        class: ["cms-panel", "cms-drawer", drawerOpen ? "open" : "", props.sticky ? "sticky" : "", className]
-          .filter(Boolean).join(" "),
+        class: uiClass([
+          "cms-panel",
+          "cms-drawer",
+          drawerOpen ? "open" : "",
+          uiWhen(props.sticky, "sticky"),
+          className
+        ]),
         style: props.style
       },
       ...renderSlotToArray(slots, "header", {}, header),
@@ -4367,7 +4557,7 @@
   UI.Page = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-panel", "cms-page", props.dense ? "dense" : "", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-panel", "cms-page", uiWhen(props.dense, "dense"), props.class]);
     const p = CMSwift.omit(props, ["dense", "slots"]);
     p.class = cls;
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
@@ -4398,8 +4588,8 @@
     const page = renderSlotToArray(slots, "page", {}, props.page);
     const noDrawer = props.noDrawer === true;
     const drawerNodes = noDrawer ? [] : drawer;
-    const shellCls = ["cms-shell", noDrawer ? "no-drawer" : ""].filter(Boolean).join(" ");
-    return _h.div({ class: ["cms-app", props.class].filter(Boolean).join(" "), style: props.style },
+    const shellCls = uiClass(["cms-shell", noDrawer ? "no-drawer" : ""]);
+    return _h.div({ class: uiClass(["cms-app", props.class]), style: props.style },
       ...header,
       _h.div({ class: shellCls },
         ...drawerNodes,
@@ -4433,29 +4623,33 @@
   UI.Parallax = function Parallax(...args) {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const height = props.height || "220px";
-    const speed = props.speed ?? 0.3;
-    const startTop = props.startTop ?? 0;
-    const image = props.image || props.src || "";
+    const height = uiUnwrap(props.height) || "220px";
+    const speed = uiUnwrap(props.speed) ?? 0.3;
+    const startTop = uiUnwrap(props.startTop) ?? 0;
+    const image = uiUnwrap(props.image) || uiUnwrap(props.src) || "";
     const bgImage = props.background || (image ? `url(${image})` : "");
     const style = Object.assign({}, props.style || {}, {
       "--cms-parallax-height": height,
     });
 
     if (bgImage) style["--cms-parallax-image"] = bgImage;
-    if (props.overlay) style["--cms-parallax-overlay"] = props.overlay;
-    if (props.color) style["--cms-parallax-color"] = props.color;
-    if (props.bgPosition) style["--cms-parallax-position"] = props.bgPosition;
-    if (props.bgSize) style["--cms-parallax-size"] = props.bgSize;
+    const overlay = uiUnwrap(props.overlay);
+    if (overlay) style["--cms-parallax-overlay"] = overlay;
+    const color = uiUnwrap(props.color);
+    if (color) style["--cms-parallax-color"] = color;
+    const bgPosition = uiUnwrap(props.bgPosition);
+    if (bgPosition) style["--cms-parallax-position"] = bgPosition;
+    const bgSize = uiUnwrap(props.bgSize);
+    if (bgSize) style["--cms-parallax-size"] = bgSize;
 
     const bg = _h.div({
-      class: ["cms-parallax-bg", props.bgClass].filter(Boolean).join(" "),
+      class: uiClass(["cms-parallax-bg", props.bgClass]),
     });
     const contentNodes = children.length
       ? renderSlotToArray(slots, "default", {}, children)
       : renderSlotToArray(slots, "content", {}, props.content);
     const content = _h.div(
-      { class: ["cms-parallax-content", props.contentClass].filter(Boolean).join(" ") },
+      { class: uiClass(["cms-parallax-content", props.contentClass]) },
       ...contentNodes
     );
     const wrapProps = CMSwift.omit(props, [
@@ -4463,7 +4657,7 @@
       "overlay", "color", "bgPosition", "bgSize",
       "bgClass", "contentClass", "content", "class", "style", "slots"
     ]);
-    wrapProps.class = ["cms-parallax", props.class].filter(Boolean).join(" ");
+    wrapProps.class = uiClass(["cms-parallax", props.class]);
     const wrap = _h.div(wrapProps, bg, content);
     Object.entries(style).forEach((v) => { wrap.style.setProperty(v[0], v[1]); });
     let ticking = false;
@@ -4818,7 +5012,7 @@
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const form = props.form; // required-ish
     const onSubmit = props.onSubmit; // async (model, form) => ...
-    const cls = ["cms-form", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-form", props.class]);
 
     const p = CMSwift.omit(props, ["form", "onSubmit"]);
     p.class = cls;
@@ -4891,15 +5085,19 @@
   UI.CardHeader = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-card-header", props.divider ? "divider" : "", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-card-header", uiWhen(props.divider, "divider"), props.class]);
     const p = CMSwift.omit(props, ["divider", "align", "justify", "gap", "wrap", "slots"]);
     p.class = cls;
 
     const style = { ...(props.style || {}) };
-    if (props.align) style.alignItems = props.align;
-    if (props.justify) style.justifyContent = props.justify;
-    if (props.wrap != null) style.flexWrap = props.wrap ? "wrap" : "nowrap";
-    if (props.gap != null) style.gap = toCssSize(props.gap);
+    const align = uiStyleValue(props.align);
+    if (align != null) style.alignItems = align;
+    const justify = uiStyleValue(props.justify);
+    if (justify != null) style.justifyContent = justify;
+    const wrap = uiStyleValue(props.wrap, (v) => v ? "wrap" : "nowrap");
+    if (wrap != null) style.flexWrap = wrap;
+    const gap = uiStyleValue(props.gap, toCssSize);
+    if (gap != null) style.gap = gap;
     if (Object.keys(style).length) p.style = style;
 
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
@@ -4907,7 +5105,7 @@
   UI.CardBody = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-card-body", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-card-body", props.class]);
     const p = CMSwift.omit(props, ["slots"]);
     p.class = cls;
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
@@ -4915,15 +5113,19 @@
   UI.CardFooter = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = ["cms-card-footer", props.divider ? "divider" : "", props.class].filter(Boolean).join(" ");
+    const cls = uiClass(["cms-card-footer", uiWhen(props.divider, "divider"), props.class]);
     const p = CMSwift.omit(props, ["divider", "align", "justify", "gap", "wrap", "slots"]);
     p.class = cls;
 
     const style = { ...(props.style || {}) };
-    if (props.align) style.alignItems = props.align;
-    if (props.justify) style.justifyContent = props.justify;
-    if (props.wrap != null) style.flexWrap = props.wrap ? "wrap" : "nowrap";
-    if (props.gap != null) style.gap = toCssSize(props.gap);
+    const align = uiStyleValue(props.align);
+    if (align != null) style.alignItems = align;
+    const justify = uiStyleValue(props.justify);
+    if (justify != null) style.justifyContent = justify;
+    const wrap = uiStyleValue(props.wrap, (v) => v ? "wrap" : "nowrap");
+    if (wrap != null) style.flexWrap = wrap;
+    const gap = uiStyleValue(props.gap, toCssSize);
+    if (gap != null) style.gap = gap;
     if (Object.keys(style).length) p.style = style;
 
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
@@ -5019,7 +5221,7 @@
         closeOnOutside: !persistent,
         closeOnBackdrop: !persistent,
         closeOnEsc: !persistent,
-        className: ["cms-dialog", props.class].filter(Boolean).join(" "),
+        className: uiClassStatic(["cms-dialog", props.class]),
         onClose: () => {
           entry = null;
           props.onClose?.();
@@ -5361,7 +5563,7 @@ transition: width 200ms ease;
       "actions", "emptyText", "loadingText", "onRowClick", "onRowDblClick",
       "tableClass", "cardClass", "dense", "striped", "hover", "slots"
     ]);
-    wrapProps.class = ["cms-table-card", props.class, props.cardClass].filter(Boolean).join(" ");
+    wrapProps.class = uiClass(["cms-table-card", props.class, props.cardClass]);
     if (props.dense != null) wrapProps.dense = props.dense;
     const wrap = UI.Card(wrapProps);
 
@@ -5383,7 +5585,7 @@ transition: width 200ms ease;
             ? col.label
             : (col.key || "");
           return _h.th({
-            class: ["cms-table-sort", col.headerClass].filter(Boolean).join(" "),
+            class: uiClass(["cms-table-sort", col.headerClass]),
             style: thStyle,
             onClick: () => {
               const s = getSort();
@@ -5405,7 +5607,7 @@ transition: width 200ms ease;
 
     const tbody = _h.tbody();
 
-    const tableClass = ["cms-table", props.dense ? "dense" : "", props.tableClass].filter(Boolean).join(" ");
+    const tableClass = uiClass(["cms-table", uiWhen(props.dense, "dense"), props.tableClass]);
     const table = _h.table({ class: tableClass }, thead, tbody);
 
     const wrapTable = _h.div({ class: "cms-table-wrap" }, table);
@@ -5590,7 +5792,7 @@ transition: width 200ms ease;
       let nodes = renderSlotToArray(slots, "content", ctx, raw);
       if (!nodes.length) nodes = renderSlotToArray(slots, "default", ctx, raw);
       const box = _h.div(
-        { class: ["cms-menu", props.class].filter(Boolean).join(" "), style: props.style || {} },
+        { class: uiClass(["cms-menu", props.class]), style: props.style || {} },
         ...nodes
       );
 
@@ -5723,7 +5925,7 @@ transition: width 200ms ease;
         trapFocus: props.trapFocus === true,
         closeOnOutside: props.closeOnOutside !== false,
         closeOnEsc: props.closeOnEsc !== false,
-        className: ["cms-dialog", props.class].filter(Boolean).join(" "),
+        className: uiClassStatic(["cms-dialog", props.class]),
         onClose: () => {
           entry = null;
           props.onClose?.();
@@ -5790,7 +5992,7 @@ transition: width 200ms ease;
       let nodes = renderSlotToArray(slots, "content", ctx, raw);
       if (!nodes.length) nodes = renderSlotToArray(slots, "default", ctx, raw);
       const box = _h.div(
-        { class: ["cms-menu", props.class].filter(Boolean).join(" "), style: props.style || {} },
+        { class: uiClass(["cms-menu", props.class]), style: props.style || {} },
         ...nodes
       );
       box.addEventListener("click", (e) => {
