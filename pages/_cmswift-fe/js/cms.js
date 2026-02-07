@@ -35,6 +35,7 @@
     return { props, children };
   }
   CMSwift.uiSizes = ["xxs", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl"];
+  CMSwift.uiColors = ["primary", "secondary", "success", "warning", "danger", "info", "light", "dark"];
 
   CMSwift.omit = (obj, keys) => {
     const out = {};

@@ -12,6 +12,14 @@
     <script src="/config-fe/setting.js"></script>
     <script src="/_cmswift-fe/js/cms.js"></script>
     <script src="/_cmswift-fe/js/ui.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+
+    <!-- and it's easy to individually load additional languages -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
     <style>
       body {
         margin: 0;
@@ -31,9 +39,63 @@
   <body>
     <div id="app"></div>
   </body>
+  <script>
+    const boxCode = (title, content) => {
+      const openCode = _rod(false);
+      return _ui.Card(
+        {
+          class: "cms-m-t-sm",
+          gradient: true,
+          identifier: title,
+          header: [
+            _ui.Spacer(),
+            _ui.Btn({
+              icon: "code",
+              class: "cms-m-l-auto",
+              dense: true,
+              onClick: () => {
+                openCode.value = !openCode.value;
+              },
+            }),
+            _ui.Btn({
+              icon: "#brand-github",
+              class: "cms-m-l-auto",
+              dense: true,
+            }),
+            _ui.Btn({
+              icon: "#brand-codepen",
+              class: "cms-m-l-auto",
+              dense: true,
+            }),
+          ],
+        },
+        _ui.Row(
+          _ui.Col(content.code),
+          _ui.Col(
+            {
+              col: 24,
+              class: "cms-scroll-locked",
+              style: {
+                height: () => (openCode.value ? "fit-content" : "0px"),
+              },
+            },
+            _h.pre(
+              _h.code(
+                {
+                  class: "cms-r-md language-javascript",
+                },
+                content.sample.join("\n"),
+              ),
+            ),
+          ),
+        ),
+      );
+    };
+  </script>
   <script type="module">
     import { layout } from "../tutorial/layout.cms.js";
     import { chip } from "../tutorial/chip.cms.js";
+    import { tapPanel } from "../tutorial/tap-panel.cms.js";
     import { ColorTokensDemoPage } from "../tutorial/color.cms.js";
     function layoutPage(
       _content = null,
@@ -90,6 +152,15 @@
             {
               label: "Component",
               items: [
+                {
+                  label: "tapPanel",
+                  onClick: () => {
+                    currentLayout.mainUpdate(
+                      tapPanel,
+                      "/demo/component/tap-panel",
+                    );
+                  },
+                },
                 {
                   label: "AppShell",
                   onClick: () => {
@@ -171,8 +242,10 @@
                 { label: "Badge", to: "/demo/component/badge" },
                 {
                   label: "Chip",
-                  onClick: () =>
-                    currentLayout.mainUpdate(chip, "/demo/component/chip"),
+                  onClick: () => {
+                    currentLayout.mainUpdate(chip, "/demo/component/chip");
+                    hljs.highlightAll();
+                  },
                 },
                 { label: "Item", to: "/demo/component/item" },
 
@@ -214,8 +287,10 @@
     CMSwift.router.add("/demo/component/layout", () => layout);
     CMSwift.router.add("/demo/component/chip", () => chip);
     CMSwift.router.add("/demo/component/color", () => ColorTokensDemoPage);
+    CMSwift.router.add("/demo/component/tap-panel", () => tapPanel);
     CMSwift.router.start();
     /* */
+    hljs.highlightAll();
   </script>
 </html>
 

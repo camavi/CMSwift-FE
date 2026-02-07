@@ -452,16 +452,22 @@
     flat: false,
     elevated: false
   };
-
+  const DEFAULT_SIZE = [...CMSwift.uiSizes];
+  const DEFAULT_COLOR = [...CMSwift.uiColors];
   const META_PROP_VALUES = {
-    size: CMSwift.uiSizes || ["xxs", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl"],
-    color: ["primary", "secondary", "success", "warning", "danger", "info", "light", "dark"],
+    size: ["number", "CSS units", ...DEFAULT_SIZE],
+    color: DEFAULT_COLOR,
     iconAlign: ["left", "right", "before", "after"],
     align: ["left", "center", "right"],
     justify: ["start", "center", "end", "space-between", "space-around", "space-evenly"],
     placement: ["top", "bottom", "left", "right", "top-start", "top-end", "bottom-start", "bottom-end"],
-    type: ["primary", "secondary", "success", "warning", "danger", "info", "light", "dark"],
-    shadow: ["none", "sm", "md", "lg"]
+    type: DEFAULT_COLOR,
+    shadow: ["none", ...DEFAULT_SIZE],
+    outline: ["number", "CSS units", ...DEFAULT_SIZE],
+    borderRadius: ["number", "CSS units", ...DEFAULT_SIZE],
+    radius: ["number", "CSS units", ...DEFAULT_SIZE],
+    icon: ["#name_tabler", "name_material", "class"],
+    iconRight: ["#name_tabler", "name_material", "class"]
   };
 
   const META_PROP_CATEGORIES = {
@@ -3116,7 +3122,7 @@
         removable: "boolean",
         onRemove: "function",
         dense: "boolean",
-        outline: "boolean",
+        outline: "boolean|string|number",
         slots: "{ icon?, label?, default? }",
         class: "string",
         style: "object"
@@ -5271,6 +5277,359 @@
       },
       description: "Dialog overlay con focus trap e scroll lock.",
       returns: "Object { open(), close(), isOpen() }"
+    };
+  }
+
+  UI.TabPanel = (...args) => {
+    const { props, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = props.slots || {};
+    const rawTabs = Array.isArray(props.tabs) ? props.tabs : [];
+    const model = resolveModel(props.model, "UI.TabPanel:model");
+
+    const orientationRaw = (props.orientation || props.orient || props.direction || "vertical");
+    const orientation = String(orientationRaw).toLowerCase() === "horizontal" ? "horizontal" : "vertical";
+    const navPositionRaw = props.navPosition || props.barPosition || props.position || "before";
+    const navPosition = String(navPositionRaw).toLowerCase() === "after" ? "after" : "before";
+
+    const wrapTabs = !!props.wrap;
+    const swipeable = !!props.swipeable;
+    const infinite = !!props.infinite;
+    const animated = !!props.animated;
+
+    const transitionDurationRaw = uiUnwrap(props.transitionDuration ?? props["transition-duration"]);
+    const transitionDuration = (() => {
+      if (transitionDurationRaw == null) return 220;
+      if (typeof transitionDurationRaw === "number") return transitionDurationRaw;
+      const parsed = parseFloat(transitionDurationRaw);
+      return Number.isFinite(parsed) ? parsed : 220;
+    })();
+    const transitionEasing = uiUnwrap(props.transitionEasing ?? props["transition-easing"]) || "ease";
+    const transitionPrev = props.transitionPrev ?? props["transition-prev"] ?? null;
+    const transitionNext = props.transitionNext ?? props["transition-next"] ?? null;
+
+    const tabs = rawTabs.map((tab, index) => {
+      if (tab == null) return null;
+      if (typeof tab !== "object") {
+        return {
+          name: tab,
+          labelFallback: tab,
+          panelFallback: null,
+          raw: tab,
+          index
+        };
+      }
+      const name = tab.name ?? tab.value ?? tab.id ?? tab.key ?? tab.label ?? tab.title ?? `tab-${index}`;
+      const hasLabel = tab.label != null || tab.title != null;
+      const labelFallback = hasLabel
+        ? (tab.label ?? tab.title)
+        : (tab.children != null && tab.content == null && tab.panel == null ? tab.children : (tab.name ?? tab.value ?? `Tab ${index + 1}`));
+      const panelFallback = tab.content ?? tab.panel ?? tab.body ?? (hasLabel ? tab.children : null);
+      return {
+        ...tab,
+        name,
+        labelFallback,
+        panelFallback,
+        index
+      };
+    }).filter(Boolean);
+
+    const cls = uiClass([
+      "cms-tabpanel",
+      orientation,
+      uiWhen(wrapTabs, "wrap"),
+      uiWhen(animated, "animated"),
+      uiWhen(navPosition === "after", "nav-after"),
+      props.class
+    ]);
+    const wrapProps = CMSwift.omit(props, [
+      "tabs", "value", "default", "model",
+      "orientation", "orient", "direction",
+      "navPosition", "barPosition", "position",
+      "wrap", "swipeable", "infinite", "animated",
+      "transitionDuration", "transition-duration",
+      "transitionEasing", "transition-easing",
+      "transitionPrev", "transition-prev",
+      "transitionNext", "transition-next",
+      "slots", "class", "style"
+    ]);
+    wrapProps.class = cls;
+    wrapProps.style = props.style;
+    const wrap = _h.div(wrapProps);
+
+    if (animated) {
+      wrap.style.setProperty("--cms-tabpanel-duration", `${transitionDuration}ms`);
+      wrap.style.setProperty("--cms-tabpanel-easing", transitionEasing);
+    }
+
+    const nav = _h.div({ class: "cms-tabpanel-nav", role: "tablist" });
+    const panelsWrap = _h.div({ class: "cms-tabpanel-panels" });
+
+    const tabButtons = [];
+    const panelNodes = [];
+    let activeIndex = -1;
+
+    const hasTabSlot = CMSwift.ui.getSlot(slots, "tab") != null;
+
+    const makeLabelNodes = (tab, index, isActive) => {
+      const ctx = { tab, name: tab.name, index, active: isActive, select: () => setActiveByIndex(index) };
+      const labelNode = CMSwift.ui.renderSlot(slots, "label", ctx, tab.labelFallback);
+      return renderSlotToArray(null, "default", {}, labelNode);
+    };
+
+    const makeTabNode = (tab, index) => {
+      const isActive = index === activeIndex;
+      const labelNodes = makeLabelNodes(tab, index, isActive);
+      const defaultBtn = _h.button({
+        class: uiClass([
+          "cms-tabpanel-tab",
+          uiWhen(isActive, "active"),
+          uiWhen(tab.disabled, "disabled"),
+          tab.tabClass || tab.class
+        ]),
+        type: "button",
+        disabled: !!tab.disabled,
+        "aria-selected": isActive ? "true" : "false",
+        onClick: () => {
+          if (tab.disabled) return;
+          setActiveByIndex(index);
+        }
+      }, ...labelNodes);
+      if (!hasTabSlot) tabButtons.push({ btn: defaultBtn, index });
+      const ctx = {
+        tab,
+        name: tab.name,
+        index,
+        active: isActive,
+        label: labelNodes,
+        select: () => setActiveByIndex(index)
+      };
+      const tabNode = CMSwift.ui.renderSlot(slots, "tab", ctx, defaultBtn);
+      return renderSlotToArray(null, "default", {}, tabNode);
+    };
+
+    const makePanelNode = (tab, index) => {
+      const isActive = index === activeIndex;
+      const ctx = { tab, name: tab.name, index, active: isActive };
+      const panelNode = CMSwift.ui.renderSlot(slots, "panel", ctx, tab.panelFallback);
+      const panel = _h.div({
+        class: uiClass(["cms-tabpanel-panel", uiWhen(isActive, "active"), tab.panelClass]),
+        style: tab.panelStyle,
+        "data-name": tab.name,
+        role: "tabpanel",
+        "aria-hidden": isActive ? "false" : "true"
+      }, ...renderSlotToArray(null, "default", {}, panelNode));
+      panelNodes[index] = panel;
+      return panel;
+    };
+
+    const defaultNavNodes = [];
+    tabs.forEach((tab, index) => {
+      defaultNavNodes.push(...makeTabNode(tab, index));
+    });
+    const navContent = CMSwift.ui.renderSlot(slots, "nav", {
+      tabs,
+      active: () => (activeIndex >= 0 ? tabs[activeIndex]?.name : null),
+      select: (nameOrIndex) => {
+        if (typeof nameOrIndex === "number") setActiveByIndex(nameOrIndex);
+        else setActiveByValue(nameOrIndex);
+      },
+      orientation,
+      position: navPosition
+    }, defaultNavNodes);
+
+    renderSlotToArray(null, "default", {}, navContent).forEach(n => nav.appendChild(n));
+    tabs.forEach((tab, index) => panelsWrap.appendChild(makePanelNode(tab, index)));
+
+    const setDirectionVars = (dir) => {
+      if (!animated) return;
+      const enter = dir === "next" ? "18px" : "-18px";
+      const leave = dir === "next" ? "-18px" : "18px";
+      wrap.style.setProperty("--cms-tabpanel-enter", enter);
+      wrap.style.setProperty("--cms-tabpanel-leave", leave);
+    };
+
+    const cleanCustomTransitions = () => {
+      const classes = [];
+      if (transitionPrev) classes.push(...String(transitionPrev).split(/\s+/));
+      if (transitionNext) classes.push(...String(transitionNext).split(/\s+/));
+      if (classes.length) panelsWrap.classList.remove(...classes.filter(Boolean));
+    };
+
+    const applyCustomTransition = (dir) => {
+      cleanCustomTransitions();
+      const cls = dir === "prev" ? transitionPrev : transitionNext;
+      if (!cls) return;
+      const parts = String(cls).split(/\s+/).filter(Boolean);
+      if (!parts.length) return;
+      panelsWrap.classList.add(...parts);
+      setTimeout(() => panelsWrap.classList.remove(...parts), transitionDuration + 40);
+    };
+
+    const updateNavButtons = (nextIndex) => {
+      if (hasTabSlot) return;
+      tabButtons.forEach(({ btn, index }) => {
+        const isActive = index === nextIndex;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+    };
+
+    const updatePanels = (prevIndex, nextIndex, dir) => {
+      setDirectionVars(dir);
+      panelNodes.forEach((panel, index) => {
+        if (!panel) return;
+        const isNext = index === nextIndex;
+        const isPrev = index === prevIndex;
+        if (isNext) {
+          panel.classList.add("active");
+          panel.classList.remove("leaving");
+          panel.setAttribute("aria-hidden", "false");
+        } else {
+          panel.classList.remove("active");
+          panel.setAttribute("aria-hidden", "true");
+          if (animated && isPrev) {
+            panel.classList.add("leaving");
+            setTimeout(() => panel.classList.remove("leaving"), transitionDuration + 40);
+          } else {
+            panel.classList.remove("leaving");
+          }
+        }
+      });
+    };
+
+    const computeDir = (prevIndex, nextIndex) => {
+      if (prevIndex < 0 || prevIndex === nextIndex) return "next";
+      if (infinite && prevIndex === tabs.length - 1 && nextIndex === 0) return "next";
+      if (infinite && prevIndex === 0 && nextIndex === tabs.length - 1) return "prev";
+      return nextIndex > prevIndex ? "next" : "prev";
+    };
+
+    const setActiveByIndex = (nextIndex, opts = {}) => {
+      if (nextIndex == null || nextIndex < 0 || nextIndex >= tabs.length) return;
+      const prevIndex = activeIndex;
+      if (prevIndex === nextIndex) return;
+      activeIndex = nextIndex;
+      const nextTab = tabs[nextIndex];
+      const dir = opts.dir || computeDir(prevIndex, nextIndex);
+      if (model && !opts.fromModel) model.set(nextTab.name);
+      updateNavButtons(nextIndex);
+      updatePanels(prevIndex, nextIndex, dir);
+      applyCustomTransition(dir);
+      props.onChange?.(nextTab.name);
+    };
+
+    const setActiveByValue = (value, opts = {}) => {
+      if (!tabs.length) return;
+      const idx = tabs.findIndex(t => t.name == value);
+      if (idx === -1) return;
+      setActiveByIndex(idx, opts);
+    };
+
+    const goNext = () => {
+      if (!tabs.length) return;
+      let nextIndex = activeIndex + 1;
+      if (nextIndex >= tabs.length) {
+        if (!infinite) return;
+        nextIndex = 0;
+      }
+      setActiveByIndex(nextIndex, { dir: "next" });
+    };
+
+    const goPrev = () => {
+      if (!tabs.length) return;
+      let nextIndex = activeIndex - 1;
+      if (nextIndex < 0) {
+        if (!infinite) return;
+        nextIndex = tabs.length - 1;
+      }
+      setActiveByIndex(nextIndex, { dir: "prev" });
+    };
+
+    if (swipeable) {
+      let startX = 0;
+      let startY = 0;
+      let tracking = false;
+      const threshold = 42;
+      panelsWrap.addEventListener("pointerdown", (e) => {
+        if (e.button != null && e.button !== 0) return;
+        tracking = true;
+        startX = e.clientX;
+        startY = e.clientY;
+      });
+      panelsWrap.addEventListener("pointerup", (e) => {
+        if (!tracking) return;
+        tracking = false;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (Math.abs(dx) < threshold || Math.abs(dx) < Math.abs(dy)) return;
+        if (dx < 0) goNext();
+        else goPrev();
+      });
+      panelsWrap.addEventListener("pointercancel", () => { tracking = false; });
+      panelsWrap.addEventListener("pointerleave", () => { tracking = false; });
+    }
+
+    const initialValue = model ? model.get() : (props.value ?? props.default ?? null);
+    if (tabs.length) {
+      const initialIndex = tabs.findIndex(t => t.name == initialValue);
+      if (initialIndex >= 0) {
+        setActiveByIndex(initialIndex, { fromModel: true });
+      } else {
+        setActiveByIndex(0, { fromModel: true });
+        if (model) model.set(tabs[0].name);
+      }
+    }
+
+    if (model) {
+      model.watch((v) => setActiveByValue(v, { fromModel: true }), "UI.TabPanel:watch");
+    }
+
+    if (navPosition === "after") {
+      wrap.appendChild(panelsWrap);
+      wrap.appendChild(nav);
+    } else {
+      wrap.appendChild(nav);
+      wrap.appendChild(panelsWrap);
+    }
+
+    const extra = renderSlotToArray(slots, "default", {}, children);
+    extra.forEach((n) => wrap.appendChild(n));
+    return wrap;
+  };
+  if (CMSwift.isDev?.()) {
+    UI.meta = UI.meta || {};
+    UI.meta.TabPanel = {
+      signature: "UI.TabPanel(props) | UI.TabPanel(props, ...children)",
+      props: {
+        tabs: "Array<{name,label,content,children,disabled}>",
+        value: "any",
+        model: "[get,set] signal",
+        orientation: "vertical|horizontal",
+        navPosition: "before|after",
+        wrap: "boolean",
+        swipeable: "boolean",
+        infinite: "boolean",
+        animated: "boolean",
+        transitionDuration: "number",
+        transitionEasing: "string",
+        transitionPrev: "string",
+        transitionNext: "string",
+        slots: "{ nav?, tab?, label?, panel?, default? }",
+        class: "string",
+        style: "object"
+      },
+      slots: {
+        nav: "Navigation renderer (ctx: { tabs, active, select, orientation, position })",
+        tab: "Tab renderer (ctx: { tab, name, index, active, label, select })",
+        label: "Tab label renderer (ctx: { tab, name, index, active, select })",
+        panel: "Panel renderer (ctx: { tab, name, index, active })",
+        default: "Extra content appended to the component"
+      },
+      events: {
+        onChange: "(name)"
+      },
+      returns: "HTMLDivElement",
+      description: "Tab panel con navigazione, contenuto e supporto model/animazioni."
     };
   }
 
