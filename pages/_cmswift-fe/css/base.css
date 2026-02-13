@@ -401,6 +401,8 @@
   --cms-input-bg: rgba(255, 255, 255, 0.02);
   --cms-input-border: var(--cms-border);
   --cms-input-text: var(--cms-text);
+
+  --cms-b-radius-default: 2px;
 }
 
 /* =====================================================================

@@ -2990,26 +2990,55 @@
       return String(values);
     };
 
-    const propsRows = Object.entries(meta.props || {}).map(([k, v]) =>
-      _h.tr(
-        _h.td(_h.code(k)),
-        _h.td(_h.span(v.type || "—")),
-        _h.td(_h.code(v.default == null ? "—" : String(v.default))),
-        _h.td(_h.span(formatValues(v.values))),
-        _h.td(_h.span(v.category || "general")),
-        _h.td(_h.span(v.description || "—"))
-      )
-    );
+    const list = {};
+    Object.entries(meta.props || {}).forEach(([k, v]) => {
+      const cat = v.category || "general";
+      if (!list[cat]) list[cat] = [];
+      list[cat].push({
+        name: k,
+        ...v
+      });
+    });
+    const propsTab = Object.keys(list).map((v) => {
+      return {
+        name: v, wrap: true, label: v, content: _ui.TabPanel({
+          orientation: "vertical",
+          animated: true,
+          radius: "0 0 0 var(--cms-r-default)",
+          tabs: list[v].map((p) => {
+            return {
+              name: p.name,
+              wrap: true,
+              label: p.name,
+              content: _h.div({ class: "cms-p-md" },
+                _h.p(_h.b("Type: "), p.type ? p.type.split("|").map((v) => _ui.Chip({ color: "secondary", dense: true }, v)) : "—"),
+                _h.p(_h.b("Default: "), _h.span(p.default == null ? "—" : String(p.default))),
+                _h.p(
+                  _h.h3("Values: "),
+                  _h.div({ class: "cms-p-l-md" }, _h.span(formatValues(p.values)))
+                ),
+                _h.p(
+                  _h.h3("Description: "),
+                  _h.div({ class: "cms-p-l-md" }, p.description || "—")
+                )
+              )
+            }
+          })
+        })
+      };
+    });
 
     let eventsRows = [];
     if (meta.events) {
       if (Array.isArray(meta.events)) {
-        eventsRows = meta.events.map((ev) =>
-          _h.tr(_h.td(_h.code(ev)), _h.td(_h.span("DOM event")))
+        eventsRows = meta.events.map((ev) => {
+          return { name: ev.name, wrap: true, label: ev.name, content: _h.div({ class: "cms-p-md" }, ev.description) }
+        }
         );
       } else {
-        eventsRows = Object.entries(meta.events || {}).map(([k, v]) =>
-          _h.tr(_h.td(_h.code(k)), _h.td(_h.span(String(v || "DOM event"))))
+        eventsRows = Object.entries(meta.events || {}).map(([k, v]) => {
+          return { name: k, wrap: true, label: k, content: _h.div({ class: "cms-p-md" }, v) }
+        }
         );
       }
     }
@@ -3017,50 +3046,63 @@
     let slotsRows = [];
     if (meta.slots) {
       if (Array.isArray(meta.slots)) {
-        slotsRows = meta.slots.map((slot) =>
-          _h.tr(_h.td(_h.code(String(slot))), _h.td(_h.span("—")), _h.td(_h.span("Slot")))
+        slotsRows = meta.slots.map((slot) => {
+          return { name: slot.name, wrap: true, label: slot.type, content: slot.description };
+        }
         );
       } else {
-        slotsRows = Object.entries(meta.slots || {}).map(([k, v]) =>
-          _h.tr(
-            _h.td(_h.code(k)),
-            _h.td(_h.span(v.type || "—")),
-            _h.td(_h.span(v.description || String(v) || "—"))
-          )
-        );
+        slotsRows = Object.entries(meta.slots || {}).map(([k, v]) => {
+          return {
+            name: k, wrap: true, label: k, content:
+              _h.div({ class: "cms-p-md", },
+                _h.div(
+                  _h.h3("Type: "),
+                  _h.div({ class: "cms-p-l-md" }, v.type || "—")
+                ),
+                _h.div(
+                  _h.h3("Description:"),
+                  _h.div({ class: "cms-p-l-md" }, v.description || "—"))
+              )
+          };
+        });
       }
     }
+    const tabPanelModel = _rod(null);
+    const taps = [];
+    if (slotsRows.length) taps.push({
+      name: "Slots",
+      wrap: true,
+      label: "Slots",
+      content: _ui.TabPanel({
+        animated: true,
+        radius: "0 0 0 var(--cms-r-default)",
+        orientation: "vertical",
+        tabs: slotsRows
+      })
+    });
+    if (propsTab.length) taps.push(...propsTab);
+    if (eventsRows.length) taps.push({
+      name: "Events",
+      wrap: true,
+      label: "Events",
+      content: _ui.TabPanel({
+        animated: true,
+        radius: "0 0 0 var(--cms-r-default)",
+        orientation: "vertical",
+        tabs: eventsRows
+      })
+    });
 
     return CMSwift.ui.Card(
-      _h.h3(`UI.${name}`),
-      meta.description ? _h.p({ class: "cms-muted" }, meta.description) : null,
+      _h.h3(`_ui.${name}`),
       meta.signature ? _h.p({ class: "cms-muted" }, meta.signature) : null,
-
       _h.h4("Props"),
-      _h.table({ class: "cms-table" },
-        _h.thead(_h.tr(
-          _h.th("Name"),
-          _h.th("Type"),
-          _h.th("Default"),
-          _h.th("Values"),
-          _h.th("Category"),
-          _h.th("Description")
-        )),
-        _h.tbody(...propsRows)
-      ),
-
-      _h.h4({ style: { marginTop: "14px" } }, "Events"),
-      _h.table({ class: "cms-table" },
-        _h.thead(_h.tr(_h.th("Event"), _h.th("Notes"))),
-        _h.tbody(...eventsRows)
-      ),
-
-      slotsRows.length ? _h.h4({ style: { marginTop: "14px" } }, "Slots") : null,
-      slotsRows.length ? _h.table({ class: "cms-table" },
-        _h.thead(_h.tr(_h.th("Name"), _h.th("Type"), _h.th("Description"))),
-        _h.tbody(...slotsRows)
-      ) : null,
-
+      _ui.TabPanel({
+        border: true,
+        animated: true,
+        orientation: "horizontal",
+        tabs: taps, model: tabPanelModel
+      }),
       meta.returns ? _h.p({ class: "cms-muted", style: { marginTop: "14px" } }, `Returns: ${meta.returns}`) : null
     );
   };

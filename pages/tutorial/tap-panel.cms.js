@@ -49,11 +49,13 @@ const tapPanel = _h.div({ class: "cms-panel cms-page" },
     _ui.Item("wrap, swipeable, infinite, animated, transitionDuration, transitionEasing"),
     _ui.Item("slots: nav, tab, label, panel, default")
   ),
+  _h.h2("Documentazione API"),
+  CMSwift.ui.DocTable("TabPanel"),
   _h.h2("Esempi completi"),
-  _ui.Card({ header: "Base (verticale, nav before)" },
-    _ui.TabPanel({ navPosition: "before", tabs: basicTabs, model: tabPanelModel })
+  _ui.Card({ header: "Base (verticale, nav before)", class: 'cms-m-b-md' },
+    _ui.TabPanel({ tabs: basicTabs, model: tabPanelModel, orientation: "horizontal", })
   ),
-  _ui.Card({ header: "Horizontal + wrap + nav after (label slot)" },
+  _ui.Card({ header: "Horizontal + wrap + nav after (label slot)", class: 'cms-m-b-md' },
     _ui.TabPanel({
       tabs: wrapTabs,
       orientation: "horizontal",
@@ -69,7 +71,7 @@ const tapPanel = _h.div({ class: "cms-panel cms-page" },
       }
     })
   ),
-  _ui.Card({ header: "Swipe + infinite + animated" },
+  _ui.Card({ header: "Swipe + infinite + animated", class: 'cms-m-b-md' },
     _ui.TabPanel({
       tabs: swipeTabs,
       model: tabPanelSwipeModel,
@@ -80,7 +82,7 @@ const tapPanel = _h.div({ class: "cms-panel cms-page" },
       transitionEasing: "cubic-bezier(0.2, 0.7, 0.2, 1)"
     })
   ),
-  _ui.Card({ header: "Slots avanzati (nav + panel)" },
+  _ui.Card({ header: "Slots avanzati (nav + panel)", class: 'cms-m-b-md' },
     _ui.TabPanel({
       tabs: slotTabs,
       model: tabPanelSlotsModel,
@@ -101,9 +103,7 @@ const tapPanel = _h.div({ class: "cms-panel cms-page" },
         )
       }
     })
-  ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("TabPanel")
+  )
 );
 
 export { tapPanel };

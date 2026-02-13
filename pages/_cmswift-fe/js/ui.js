@@ -129,30 +129,6 @@
       }
     }
 
-    if (uiIsReactive(props.radius) || uiIsReactive(props.borderRadius)) {
-      classTokens.push(() => {
-        const r = uiUnwrap(props.radius);
-        const b = uiUnwrap(props.borderRadius);
-        const v = r != null ? r : b;
-        const radius = normalizeRadius(v);
-        return radius ? `cms-r-${radius}` : "";
-      });
-      style.borderRadius = () => {
-        const r = uiUnwrap(props.radius);
-        const b = uiUnwrap(props.borderRadius);
-        const v = r != null ? r : b;
-        const radius = normalizeRadius(v);
-        if (radius || v == null) return "";
-        return toCssSize(v);
-      };
-    } else {
-      const radius = normalizeRadius(props.radius ?? props.borderRadius);
-      if (radius) classTokens.push(`cms-r-${radius}`);
-      else if (props.radius != null || props.borderRadius != null) {
-        style.borderRadius = toCssSize(props.radius ?? props.borderRadius);
-      }
-    }
-
     if (uiIsReactive(props.shadow)) {
       classTokens.push(() => {
         const v = uiUnwrap(props.shadow);
@@ -619,6 +595,33 @@
       else out.push(item);
     }
     return out.length ? out : null;
+  }
+  function setPropertyProps(obj, props) {
+    if (props.size) {
+      if (typeof props.size === "number") {
+        obj.style.setProperty("--cms-font-size", `${props.size}px`);
+      } else if (CMSwift.uiSizes.includes(props.size)) {
+        obj.style.setProperty("--cms-font-size", `var(--cms-font-size-${props.size})`);
+      }
+    }
+
+    // gradient
+    if (props.gradient) {
+      if (typeof props.gradient == "number") {
+        obj.style.setProperty("--set-gradient-deg", `${props.gradient}deg`);
+      }
+    }
+    // radius
+    if (props.radius) {
+      if (typeof props.radius == "number") {
+        obj.style.setProperty("--set-border-radius", `${props.radius}px`);
+      } else if (CMSwift.uiSizes.includes(props.radius)) {
+        obj.style.setProperty("--set-border-radius", `var(--cms-r-${props.radius})`);
+      } else {
+        obj.style.setProperty("--set-border-radius", `${props.radius}`);
+      }
+    }
+
   }
 
   CMSwift.ui.getSlot = (slots, name) => {
@@ -3100,15 +3103,7 @@
         wrap.remove();
       }
     }
-
-    if (props.size && typeof props.size === "number") {
-      wrap.style.setProperty("--cms-font-size", `${props.size}px`);
-    } else if (CMSwift.uiSizes.includes(props.size)) {
-      wrap.style.setProperty("--cms-font-size", `var(--cms-font-size-${props.size})`);
-    }
-    if (props.gradient && typeof props.gradient !== "boolean") {
-      wrap.style.setProperty("--set-gradient-deg", `${props.gradient}deg`);
-    }
+    setPropertyProps(wrap, props);
     return wrap;
   };
   if (CMSwift.isDev?.()) {
@@ -5334,7 +5329,9 @@
     }).filter(Boolean);
 
     const cls = uiClass([
+      "cms-clear-set",
       "cms-tabpanel",
+      "cms-singularity",
       orientation,
       uiWhen(wrapTabs, "wrap"),
       uiWhen(animated, "animated"),
@@ -5489,7 +5486,7 @@
           panel.setAttribute("aria-hidden", "true");
           if (animated && isPrev) {
             panel.classList.add("leaving");
-            setTimeout(() => panel.classList.remove("leaving"), transitionDuration + 40);
+            //setTimeout(() => panel.classList.remove("leaving"), transitionDuration + 40);
           } else {
             panel.classList.remove("leaving");
           }
@@ -5594,6 +5591,7 @@
 
     const extra = renderSlotToArray(slots, "default", {}, children);
     extra.forEach((n) => wrap.appendChild(n));
+    setPropertyProps(wrap, props);
     return wrap;
   };
   if (CMSwift.isDev?.()) {
