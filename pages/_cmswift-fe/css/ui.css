@@ -1594,6 +1594,65 @@
 .cms-tabpanel.horizontal>.cms-tabpanel-tabs {
   flex-direction: row;
   align-items: center;
+  position: relative;
+}
+
+.cms-tabpanel.horizontal>.cms-tabpanel-nav>.cms-tabpanel-nav-btn .tab-indicator {
+  height: 2px;
+  background-color: var(--cms-primary);
+  transform-origin: left center;
+  width: 100%;
+  opacity: 0;
+}
+
+.cms-tabpanel.vertical>.cms-tabpanel-nav>.cms-tabpanel-nav-btn {
+  display: flex;
+}
+
+.cms-tabpanel.vertical>.cms-tabpanel-nav>.cms-tabpanel-nav-btn .cms-btn {
+  width: 100%;
+}
+
+.cms-tabpanel.vertical>.cms-tabpanel-nav>.cms-tabpanel-nav-btn .tab-indicator {
+  width: 2px;
+  background-color: var(--cms-primary);
+  transform-origin: center top;
+  height: 100%;
+  opacity: 0;
+
+}
+
+.cms-tabpanel>.cms-tabpanel-nav>.cms-tabpanel-nav-btn.active .tab-indicator {
+  opacity: 1;
+  animation-fill-mode: forwards;
+}
+
+.cms-tabpanel.horizontal>.cms-tabpanel-nav>.cms-tabpanel-nav-btn.active .tab-indicator {
+  animation: nav-pos-x 360ms ease;
+}
+
+@keyframes nav-pos-x {
+  from {
+    transform: translateX(var(--nav-pos-x, 0));
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.cms-tabpanel.vertical>.cms-tabpanel-nav>.cms-tabpanel-nav-btn.active .tab-indicator {
+  animation: nav-pos-y 360ms ease;
+}
+
+@keyframes nav-pos-y {
+  from {
+    transform: translateY(var(--nav-pos-y, 0));
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 
 .cms-tabpanel.vertical>.cms-tabpanel-nav,

@@ -97,6 +97,7 @@
     import { chip } from "../tutorial/chip.cms.js";
     import { tapPanel } from "../tutorial/tap-panel.cms.js";
     import { ColorTokensDemoPage } from "../tutorial/color.cms.js";
+    import { btn } from "../tutorial/btn.cms.js";
     function layoutPage(
       _content = null,
       _header = null,
@@ -216,7 +217,13 @@
                 { label: "Form", to: "/demo/component/form" },
                 { label: "FormField", to: "/demo/component/formfield" },
                 { label: "InputRaw", to: "/demo/component/inputraw" },
-                { label: "Btn", to: "/demo/component/btn" },
+                {
+                  label: "Btn",
+                  onClick: () => {
+                    currentLayout.mainUpdate(btn, "/demo/component/btn");
+                    hljs.highlightAll();
+                  },
+                },
                 { label: "Input", to: "/demo/component/input" },
                 { label: "Select", to: "/demo/component/select" },
 
@@ -288,6 +295,7 @@
     CMSwift.router.add("/demo/component/chip", () => chip);
     CMSwift.router.add("/demo/component/color", () => ColorTokensDemoPage);
     CMSwift.router.add("/demo/component/tap-panel", () => tapPanel);
+    CMSwift.router.add("/demo/component/btn", () => btn);
     CMSwift.router.start();
     /* */
     hljs.highlightAll();

@@ -5367,6 +5367,13 @@
 
     const hasTabSlot = CMSwift.ui.getSlot(slots, "tab") != null;
 
+    const effectPosBefore = _h.div({ class: "cms-tabpanel-effectPosBefore" });
+    const effectPosAfter = _h.div({ class: "cms-tabpanel-effectPosAfter" });
+    if (!hasTabSlot) {
+      nav.appendChild(effectPosBefore);
+      nav.appendChild(effectPosAfter);
+    }
+
     const makeLabelNodes = (tab, index, isActive) => {
       const ctx = { tab, name: tab.name, index, active: isActive, select: () => setActiveByIndex(index) };
       const labelNode = CMSwift.ui.renderSlot(slots, "label", ctx, tab.labelFallback);
@@ -5376,7 +5383,7 @@
     const makeTabNode = (tab, index) => {
       const isActive = index === activeIndex;
       const labelNodes = makeLabelNodes(tab, index, isActive);
-      const defaultBtn = _h.button({
+      const defaultBtn = UI.Btn({
         class: uiClass([
           "cms-tabpanel-tab",
           uiWhen(isActive, "active"),
@@ -5400,7 +5407,10 @@
         label: labelNodes,
         select: () => setActiveByIndex(index)
       };
-      const tabNode = CMSwift.ui.renderSlot(slots, "tab", ctx, defaultBtn);
+      const tabNode = CMSwift.ui.renderSlot(
+        slots, "tab", ctx,
+        _h.div({ class: "cms-tabpanel-nav-btn" }, defaultBtn, _h.div({ class: "tab-indicator" }))
+      );
       return renderSlotToArray(null, "default", {}, tabNode);
     };
 
@@ -5464,8 +5474,16 @@
 
     const updateNavButtons = (nextIndex) => {
       if (hasTabSlot) return;
+      //cerco chi è attivo per la class active e prendo il parent
+      const active = tabButtons.find(({ btn }) => btn.classList.contains("active"));
+      const rectPrev = active?.btn.parentNode?.getBoundingClientRect();
       tabButtons.forEach(({ btn, index }) => {
         const isActive = index === nextIndex;
+        const parent = btn.parentNode;
+        const rect = parent.getBoundingClientRect();
+        parent.style.setProperty("--nav-pos-x", (rectPrev?.left - rect?.left) + "px");
+        parent.style.setProperty("--nav-pos-y", (rectPrev?.top - rect?.top) + "px");
+        parent.classList.toggle("active", isActive);
         btn.classList.toggle("active", isActive);
         btn.setAttribute("aria-selected", isActive ? "true" : "false");
       });
@@ -5486,7 +5504,7 @@
           panel.setAttribute("aria-hidden", "true");
           if (animated && isPrev) {
             panel.classList.add("leaving");
-            //setTimeout(() => panel.classList.remove("leaving"), transitionDuration + 40);
+            setTimeout(() => panel.classList.remove("leaving"), transitionDuration + 40);
           } else {
             panel.classList.remove("leaving");
           }
