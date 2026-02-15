@@ -29,9 +29,9 @@ const DEFAULT_SIZE_GROUPS = [
   { prefix: "h", unit: "%" },
   { prefix: "min-h", unit: "%" },
   { prefix: "max-h", unit: "%" },
-  { prefix: "g", unit: "px" },
   { prefix: "r", unit: "px" },
   { prefix: "s", unit: "px" },
+  { prefix: "gap", unit: "px" },
 ];
 
 function parseSizeValue(value, unit, key, invalid) {
@@ -225,15 +225,6 @@ const DEFAULT_SIZE = {
   'max-h-xl': '120%',
   'max-h-xxl': '140%',
   'max-h-xxxl': '160%',
-  //gap
-  'g-xxs': '2px',
-  'g-xs': '4px',
-  'g-sm': '6px',
-  'g-md': '10px',
-  'g-lg': '16px',
-  'g-xl': '24px',
-  'g-xxl': '32px',
-  'g-xxxl': '64px',
   //border-radius
   'r-xxs': '2px',
   'r-xs': '4px',
@@ -252,53 +243,73 @@ const DEFAULT_SIZE = {
   's-xl': '24px',
   's-xxl': '32px',
   's-xxxl': '64px',
+  //gap
+  'gap-xxs': '2px',
+  'gap-xs': '4px',
+  'gap-sm': '6px',
+  'gap-md': '10px',
+  'gap-lg': '16px',
+  'gap-xl': '24px',
+  'gap-xxl': '32px',
+  'gap-xxxl': '64px',
 };
 
 const list_class = [
   //margin
-  { name: 'margin', value: 'm', var: 'm' },
-  { name: 'margin-left', value: 'm-l', var: 'm' },
-  { name: 'margin-right', value: 'm-r', var: 'm' },
-  { name: 'margin-top', value: 'm-t', var: 'm' },
-  { name: 'margin-bottom', value: 'm-b', var: 'm' },
+  { class: 'm', name: 'margin', var: 'm' },
+  { class: 'm-l', name: 'margin-left', var: 'm' },
+  { class: 'm-r', name: 'margin-right', var: 'm' },
+  { class: 'm-t', name: 'margin-top', var: 'm' },
+  { class: 'm-b', name: 'margin-bottom', var: 'm' },
   //padding
-  { name: 'padding', value: 'p', var: 'p' },
-  { name: 'padding-left', value: 'p-l', var: 'p' },
-  { name: 'padding-right', value: 'p-r', var: 'p' },
-  { name: 'padding-top', value: 'p-t', var: 'p' },
-  { name: 'padding-bottom', value: 'p-b', var: 'p' },
+  { class: 'p', name: 'padding', var: 'p' },
+  { class: 'p-l', name: 'padding-left', var: 'p' },
+  { class: 'p-r', name: 'padding-right', var: 'p' },
+  { class: 'p-t', name: 'padding-top', var: 'p' },
+  { class: 'p-b', name: 'padding-bottom', var: 'p' },
   //border
-  { name: 'border', value: 'b', var: 'b' },
-  { name: 'border-left', value: 'b-l', var: 'b' },
-  { name: 'border-right', value: 'b-r', var: 'b' },
-  { name: 'border-top', value: 'b-t', var: 'b' },
-  { name: 'border-bottom', value: 'b-b', var: 'b' },
+  { class: 'b', name: 'border', var: 'b' },
+  { class: 'b-l', name: 'border-left', var: 'b' },
+  { class: 'b-r', name: 'border-right', var: 'b' },
+  { class: 'b-t', name: 'border-top', var: 'b' },
+  { class: 'b-b', name: 'border-bottom', var: 'b' },
   //font
-  { name: 'font-size', value: 'f', var: 'f' },
-  { name: 'font-weight', value: 'fw', var: 'fw' },
-  { name: 'line-height', value: 'lh', var: 'lh' },
-  { name: 'letter-spacing', value: 'ls', var: 'ls' },
+  { class: 'f', name: 'font-size', var: 'f' },
+  { class: 'fw', name: 'font-weight', var: 'fw' },
+  { class: 'lh', name: 'line-height', var: 'lh' },
+  { class: 'ls', name: 'letter-spacing', var: 'ls' },
   //dimension
-  { name: 'width', value: 'w', var: 'w' },
-  { name: 'min-width', value: 'min-w', var: 'min-w' },
-  { name: 'max-width', value: 'max-w', var: 'max-w' },
-  { name: 'height', value: 'h', var: 'h' },
-  { name: 'min-height', value: 'min-h', var: 'min-h' },
-  { name: 'max-height', value: 'max-h', var: 'max-h' },
+  { class: 'w', name: 'width', var: 'w' },
+  { class: 'min-w', name: 'min-width', var: 'min-w' },
+  { class: 'max-w', name: 'max-width', var: 'max-w' },
+  { class: 'h', name: 'height', var: 'h' },
+  { class: 'min-h', name: 'min-height', var: 'min-h' },
+  { class: 'max-h', name: 'max-height', var: 'max-h' },
   //layout spacing
-  { name: 'gap', value: 'g', var: 'g' },
-  { name: 'column-gap', value: 'g-x', var: 'g' },
-  { name: 'row-gap', value: 'g-y', var: 'g' },
+  { class: 'gap', name: 'gap', var: 'gap' },
+  { class: 'gap-x', name: 'column-gap', var: 'gap' },
+  { class: 'gap-y', name: 'row-gap', var: 'gap' },
   //radius
-  { name: 'border-radius', value: 'r', var: 'r' },
+  { class: 'r', name: 'border-radius', var: 'r' },
+  { class: 'gutter', condition: '>*', name: ['margin-top', 'margin-left'], var: 'm' },
+  { class: 'gutter-x', condition: '>*', name: 'margin-left', var: 'm' },
+  { class: 'gutter-y', condition: '>*', name: 'margin-top', var: 'm' },
 ];
 function buildClassTemplates(classes, sizes) {
   const templates = [];
   for (const c of classes) {
     for (const size of sizes) {
+      let decl = '';
+      if (Array.isArray(c.name)) {
+        for (const n of c.name) {
+          decl += `${n}: var(--cms-${c.var}-${size});`;
+        }
+      } else {
+        decl = `${c.name}: var(--cms-${c.var}-${size});`;
+      }
       templates.push({
-        suffix: `${c.value}-${size}`,
-        decl: `${c.name}: var(--cms-${c.var}-${size});`,
+        suffix: `${c.class}-${size}` + (c.condition ? `${c.condition}` : ''),
+        decl: decl,
       });
     }
   }

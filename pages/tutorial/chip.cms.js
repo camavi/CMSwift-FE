@@ -1,6 +1,3 @@
-const coseBasic = _rod(false);
-const classCode = "cms-r-md";
-
 const listSample = {
   basic: {
     code: [_ui.Chip("None"),

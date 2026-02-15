@@ -964,7 +964,7 @@
         : (uiUnwrap(props.state) || "");
     });
 
-    const cls = uiClass(["cms-btn", state, uiWhen(props.outline, "outline"), props.class]);
+    const cls = uiClass(["cms-clear-set", "cms-btn", "cms-singularity", "cms-clickable", state, uiWhen(props.outline, "outline"), props.class]);
 
     const p = CMSwift.omit(props, [
       "icon", "iconRight", "label", "loading", "outline", "iconAlign", "slots"
@@ -1027,7 +1027,7 @@
       content.unshift(_h.span({ class: "cms-muted", style: { marginRight: "8px" } }, "⏳"));
     }
 
-    return _h.button({
+    const btn = _h.button({
       ...p,
       disabled,
       onClick,
@@ -1035,6 +1035,9 @@
       "aria-disabled": disabled ? "true" : null,
       "aria-busy": props.loading ? "true" : null
     }, ...content);
+
+    setPropertyProps(btn, props);
+    return btn;
   }
   if (CMSwift.isDev?.()) {
     UI.meta.Btn = {

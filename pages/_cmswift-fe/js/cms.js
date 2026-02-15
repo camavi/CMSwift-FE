@@ -3092,7 +3092,12 @@
         tabs: eventsRows
       })
     });
-
+    const first = "general";
+    taps.sort((a, b) => {
+      if (a.name === first) return -1;
+      if (b.name === first) return 1;
+      return a.name.localeCompare(b.name);
+    })
     return CMSwift.ui.Card(
       _h.h3(`_ui.${name}`),
       meta.signature ? _h.p({ class: "cms-muted" }, meta.signature) : null,

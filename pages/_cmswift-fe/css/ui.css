@@ -1,4 +1,15 @@
 /* - CSS BASE */
+.cms-d-flex {
+  display: flex;
+}
+
+.cms-d-none {
+  display: none;
+}
+
+.cms-d-block {
+  display: block;
+}
 
 .cms-overlay-root {
   position: fixed;
@@ -349,21 +360,19 @@
 }
 
 .cms-btn {
-  border: 1px solid var(--cms-border-color);
-  background: rgba(255, 255, 255, 0.04);
   color: var(--cms-text);
   padding: 10px 14px;
-  border-radius: var(--set-b-radius, 999px);
   cursor: pointer;
   user-select: none;
   position: relative;
   overflow: hidden;
   transition: transform 120ms ease, box-shadow 160ms ease, background 160ms ease;
+  border-width: 0px;
 }
 
 .cms-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
 }
 
 .cms-btn:active {
@@ -400,54 +409,6 @@
     height: 260px;
     opacity: 0;
   }
-}
-
-.cms-btn.primary {
-  background: var(--cms-primary);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: white;
-}
-
-.cms-btn.secondary {
-  background: var(--cms-secondary);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: white;
-}
-
-.cms-btn.success {
-  background: var(--cms-success);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: white;
-}
-
-.cms-btn.warning {
-  background: var(--cms-warning);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: white;
-}
-
-.cms-btn.danger {
-  background: var(--cms-danger);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: white;
-}
-
-.cms-btn.info {
-  background: var(--cms-info);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: white;
-}
-
-.cms-btn.light {
-  background: var(--cms-light);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: black;
-}
-
-.cms-btn.dark {
-  background: var(--cms-dark);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: white;
 }
 
 .cms-btn:disabled {
@@ -1671,12 +1632,8 @@
 }
 
 .cms-tabpanel-tab {
-  border: 1px solid transparent;
   background: transparent;
   color: var(--cms-text);
-  border-radius: var(--cms-r-md);
-  padding: 8px 12px;
-  cursor: pointer;
   text-align: left;
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
 }
@@ -1684,12 +1641,6 @@
 .cms-tabpanel-tab:hover {
   background: rgba(255, 255, 255, 0.04);
   border-color: var(--cms-border-color);
-}
-
-.cms-tabpanel-tab.active {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--cms-primary);
-  color: var(--cms-primary);
 }
 
 .cms-tabpanel-tab:disabled {

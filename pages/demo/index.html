@@ -70,7 +70,7 @@
           ],
         },
         _ui.Row(
-          _ui.Col(content.code),
+          _ui.Col({ class: "cms-gutter-sm" }, content.code),
           _ui.Col(
             {
               col: 24,
@@ -171,8 +171,10 @@
                 },
                 {
                   label: "Layout",
-                  onClick: () =>
-                    currentLayout.mainUpdate(layout, "/demo/component/layout"),
+                  onClick: () => {
+                    //CMSwift.router.navigate("/demo/component/layout");
+                    currentLayout.mainUpdate(layout, "/demo/component/layout");
+                  },
                 },
                 { label: "Page", to: "/demo/component/page" },
                 { label: "Header", to: "/demo/component/header" },
