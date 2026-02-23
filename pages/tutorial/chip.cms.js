@@ -395,7 +395,17 @@ const listSample = {
       _ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "secondary" }, "Secondary"),
       _ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "dark", }, "Dark"),
       _ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "light" }, "Light"),],
-    sample: []
+    sample: [
+      '_ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true }, "None");',
+      '_ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "success" }, "Success");',
+      '_ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "warning" }, "Warning");',
+      '_ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "danger" }, "Danger");',
+      '_ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "info" }, "Info");',
+      '_ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "primary" }, "Primary");',
+      '_ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "secondary" }, "Secondary");',
+      '_ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "dark", }, "Dark");',
+      '_ui.Chip({ icon: "token", removable: true, lightShadow: true, outline: true, color: "light" }, "Light");',
+    ]
   },
   textGradient: {
     code: [

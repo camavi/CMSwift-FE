@@ -1072,8 +1072,18 @@
 
 
   UI.FormField = (props = {}) => {
+
+    applyCommonProps(props);
+
     const slots = props.slots || {};
-    const wrap = _h.div({ class: uiClass(["cms-field", props.wrapClass]) });
+    const state = uiComputed([props.color, props.state], () => {
+      const color = uiUnwrap(props.color) || uiUnwrap(props.state) || "";
+      return ["primary", "secondary", "warning", "danger", "success", "info", "light", "dark"].includes(color)
+        ? color
+        : (uiUnwrap(props.state) || "");
+    });
+
+    const wrap = _h.div({ class: uiClass(["cms-clear-field-set", "cms-field", "cms-singularity-field", state, uiWhen(props.outline, "outline"), props.wrapClass, props.class]) });
 
     const topLabelNodes = renderSlotToArray(slots, "topLabel", {}, props.topLabel);
     if (topLabelNodes.length) {
@@ -1110,7 +1120,7 @@
       control = _h.div({ class: "cms-control" });
 
       // left addon
-      const left = _h.div({ class: "cms-addon" });
+      const left = _h.div({ class: "cms-addon cms-addon-left" });
       const iconFallback = props.icon != null
         ? (typeof props.icon === "string" ? UI.Icon({ name: props.icon }) : props.icon)
         : null;
@@ -1121,7 +1131,7 @@
       if (left.childNodes.length) control.appendChild(left);
 
       // middle: controlEl + floating label
-      const mid = _h.div({ style: { position: "relative", flex: "1", minWidth: "0" } });
+      const mid = _h.div({ class: "cms-mid" + (left.childNodes.length > 0 ? " cms-with-left" : ""), style: { position: "relative", flex: "1", minWidth: "0" } });
       if (controlEl) mid.appendChild(controlEl);
 
       const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
@@ -1156,15 +1166,18 @@
       }
 
       // right addon
-      const right = _h.div({ class: "cms-addon" });
+      const right = _h.div({ class: "cms-addon cms-addon-right" });
       const iconRightFallback = props.iconRight != null
         ? (typeof props.iconRight === "string" ? UI.Icon({ name: props.iconRight }) : props.iconRight)
         : null;
       const iconRightNode = CMSwift.ui.renderSlot(slots, "iconRight", {}, iconRightFallback);
       const suffixNode = CMSwift.ui.renderSlot(slots, "suffix", {}, props.suffix);
-      renderSlotToArray(null, "default", {}, iconRightNode).forEach(n => right.appendChild(n));
       renderSlotToArray(null, "default", {}, suffixNode).forEach(n => right.appendChild(n));
-      if (right.childNodes.length) control.appendChild(right);
+      renderSlotToArray(null, "default", {}, iconRightNode).forEach(n => right.appendChild(n));
+      if (right.childNodes.length) {
+        control.appendChild(right);
+        mid.classList.add("cms-with-right");
+      }
     }
 
     const resolveValue = (value) => {

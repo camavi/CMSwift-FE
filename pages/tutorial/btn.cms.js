@@ -396,7 +396,17 @@ const listSample = {
       _ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "secondary" }, "Secondary"),
       _ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "dark", }, "Dark"),
       _ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "light" }, "Light"),],
-    sample: []
+    sample: [
+      '_ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true }, "None");',
+      '_ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "success" }, "Success");',
+      '_ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "warning" }, "Warning");',
+      '_ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "danger" }, "Danger");',
+      '_ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "info" }, "Info");',
+      '_ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "primary" }, "Primary");',
+      '_ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "secondary" }, "Secondary");',
+      '_ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "dark", }, "Dark");',
+      '_ui.Btn({ icon: "token", removable: true, lightShadow: true, outline: true, color: "light" }, "Light");',
+    ]
   },
   textGradient: {
     code: [

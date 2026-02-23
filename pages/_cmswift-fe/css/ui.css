@@ -94,7 +94,7 @@
   line-height: 1.3;
   border-radius: var(--cms-r-sm);
   background: var(--cms-panel);
-  border: 1px solid var(--cms-border);
+  border: 1px solid var(--cms-border-color);
   box-shadow: var(--cms-shadow-sm);
   pointer-events: none;
   max-width: 240px;
@@ -122,6 +122,7 @@
   border: 1px solid var(--cms-border-color);
   box-shadow: var(--cms-shadow-sm);
   flex: 1;
+  z-index: 1;
 }
 
 .cms-header {
@@ -314,7 +315,7 @@
 }
 
 .cms-toolbar.divider {
-  border-bottom: 1px solid var(--cms-border);
+  border-bottom: 1px solid var(--cms-border-color);
 }
 
 .cms-page {
@@ -449,7 +450,7 @@
 
 .cms-field-control {
   position: relative;
-  border: 1px solid var(--cms-border);
+  border: 1px solid var(--cms-border-color);
   background: rgba(255, 255, 255, 0.03);
   border-radius: var(--cms-r-md);
   padding: 12px;
@@ -528,7 +529,7 @@
 }
 
 .cms-field-clear:hover {
-  border-color: var(--cms-border);
+  border-color: var(--cms-border-color);
   background: rgba(255, 255, 255, .04);
 }
 
@@ -544,13 +545,12 @@
 
 .cms-control {
   position: relative;
-  border: 1px solid var(--cms-border);
+  border: 1px solid var(--cms-border-color);
   background: rgba(255, 255, 255, 0.03);
   border-radius: var(--cms-r-md);
   /*padding: 12px;*/
   display: flex;
   align-items: center;
-  gap: 10px;
   transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
@@ -593,7 +593,7 @@
   color: var(--cms-text);
   font-size: 14px;
   min-width: 0;
-  min-height: 35px;
+  min-height: var(--cms-input-height-default, 32px);
   padding: 0 12px;
   margin-top: 5px;
   box-sizing: border-box;
@@ -651,7 +651,7 @@
 
 .cms-select-filter {
   padding: 10px;
-  border-bottom: 1px solid var(--cms-border);
+  border-bottom: 1px solid var(--cms-border-color);
 }
 
 .cms-select-option.active {
@@ -694,6 +694,7 @@
   align-items: center;
   gap: 8px;
   color: var(--cms-muted);
+  min-height: calc(var(--cms-input-height-default, 32px) + 5px);
 }
 
 .cms-clear {
@@ -705,7 +706,7 @@
 }
 
 .cms-clear:hover {
-  border-color: var(--cms-border);
+  border-color: var(--cms-border-color);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -859,6 +860,7 @@
 .cms-card {
   position: relative;
   padding: var(--cms-s-lg);
+  border-radius: var(--cms-b-radius-default);
 }
 
 .cms-card>.cms-card-identifier {
@@ -872,7 +874,7 @@
 
 .cms-card-header {
   padding: var(--cms-s-md) var(--cms-s-lg);
-  border-bottom: 1px solid var(--cms-border);
+  border-bottom: 1px solid var(--cms-border-color);
   display: flex;
   align-items: center;
   gap: var(--cms-s-md);
@@ -884,7 +886,7 @@
 
 .cms-card-footer {
   padding: var(--cms-s-md) var(--cms-s-lg);
-  border-top: 1px solid var(--cms-border);
+  border-top: 1px solid var(--cms-border-color);
   display: flex;
   align-items: center;
   justify-content: end;
@@ -1676,6 +1678,7 @@
   transform: translateX(var(--cms-tabpanel-enter, 12px));
   transition: opacity var(--cms-tabpanel-duration, 220ms) var(--cms-tabpanel-easing, ease),
     transform var(--cms-tabpanel-duration, 220ms) var(--cms-tabpanel-easing, ease);
+  z-index: 0;
 }
 
 .cms-tabpanel.animated .cms-tabpanel-panel.active {
@@ -1683,6 +1686,7 @@
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
+  z-index: 1;
 }
 
 .cms-tabpanel.animated .cms-tabpanel-panel.leaving {
@@ -1751,19 +1755,19 @@
 }
 
 /* SHADOW / STATE */
-.cms-shadow-sm {
+.cms-singularity.cms-shadow-sm {
   box-shadow: var(--cms-shadow-sm);
 }
 
-.cms-shadow-none {
+.cms-singularity.cms-shadow-none {
   box-shadow: none;
 }
 
-.cms-shadow-md {
+.cms-singularity.cms-shadow-md {
   box-shadow: var(--cms-shadow-md);
 }
 
-.cms-shadow-lg {
+.cms-singularity.cms-shadow-lg {
   box-shadow: var(--cms-shadow-lg);
 }
 
@@ -1924,19 +1928,22 @@
   text-shadow: 0 0 3px color-mix(in srgb, var(--set-color-1) 70%, transparent);
 }
 
-.cms-glass {
+.cms-singularity.cms-glass,
+.cms-singularity-field.cms-glass>.cms-control {
   position: relative;
   backdrop-filter: blur(1px);
   --set-background-color: color-mix(in srgb, var(--set-background-color) 40%, transparent);
   --set-color: var(--set-border-color);
 }
 
-.cms-glass .cms-btn {
+.cms-singularity.cms-glass .cms-btn,
+.cms-singularity-field.cms-glass>.cms-control .cms-btn {
   color: var(--set-border-color);
   border-color: var(--set-border-color);
 }
 
-.cms-glass::before {
+.cms-singularity.cms-glass::before,
+.cms-singularity-field.cms-glass .cms-control::before {
   position: absolute;
   top: 0;
   left: 0;
@@ -1959,7 +1966,7 @@
 .cms-outline {
   border-width: 1px;
   --set-background-color: transparent;
-  --set-color: var(--set-border-color);
+  --set-color: var(--set-color-3);
 }
 
 .cms-outline .cms-btn {
@@ -2009,7 +2016,11 @@
 }
 
 .cms-light-shadow {
-  --set-shadow-active: inset 2px 1px 4px 0 color-mix(in srgb, var(--set-color-1) 50%, transparent), -4px -4px 12px rgb(255, 255, 255), 4px 4px 12px rgba(121, 130, 160, 0.747);
+  --set-shadow-active: inset 2px 1px 4px 0 color-mix(in srgb, var(--set-color-1) 50%, transparent), -4px -4px 12px color-mix(in srgb, var(--set-color-2) 10%, white), 4px 4px 12px color-mix(in srgb, var(--set-color-4) 60%, transparent);
+}
+
+.cms-outline.cms-light-shadow {
+  --set-border-color: var(--set-color-1) var(--set-color-2) var(--set-color-2) var(--set-color-1);
 }
 
 .cms-clickable {
@@ -2056,6 +2067,59 @@
   border-color: var(--set-border-color);
   border-radius: var(--set-border-radius, var(--cms-b-radius-default, 2px));
   transition: all 0.2s ease-in-out;
+}
+
+.cms-singularity-field>.cms-control {
+  box-shadow: var(--set-shadow-active, 0 0 0 0), var(--set-glow-active, 0 0 0 0);
+  border-color: var(--set-border-color, var(--cms-border-color));
+  border-radius: var(--set-border-radius, var(--cms-b-radius-default, 2px));
+  background-color: color-mix(in srgb, var(--set-background-color) 5%, transparent);
+  color: var(--set-color);
+  transition: all 0.2s ease-in-out;
+}
+
+.cms-singularity-field>.cms-control>.cms-mid.cms-with-left {
+  border-left-color: var(--set-border-color, var(--cms-border-color));
+  border-left-width: 1px;
+  border-left-style: solid;
+}
+
+.cms-singularity-field>.cms-control>.cms-mid.cms-with-right {
+  border-right-color: var(--set-border-color, var(--cms-border-color));
+  border-right-width: 1px;
+  border-right-style: solid;
+}
+
+.cms-singularity-field>.cms-control .cms-addon-left {
+  padding-left: 10px;
+  padding-right: 5px;
+  --temp-rr: var(--set-border-radius, var(--cms-b-radius-default, 2px));
+  border-radius: calc(var(--temp-rr) - 1px) 0 0 calc(var(--temp-rr) - 1px);
+}
+
+.cms-singularity-field>.cms-control .cms-addon-right {
+  padding-right: 5px;
+  padding-left: 10px;
+  --temp-rr: var(--set-border-radius, var(--cms-b-radius-default, 2px));
+  border-radius: 0 calc(var(--temp-rr) - 1px) calc(var(--temp-rr) - 1px) 0;
+}
+
+.cms-singularity-field>.cms-control .cms-addon {
+  background-color: color-mix(in srgb, var(--set-background-color) 80%, transparent);
+  background-image: var(--set-glossy-active, none), var(--set-gradient-active, none);
+  color: var(--set-color);
+}
+
+.cms-singularity-field>.cms-control>.cms-mid {
+  color: var(--set-color-4);
+}
+
+.cms-singularity-field>.cms-control>.cms-mid input {
+  color: var(--set-color-4);
+}
+
+.cms-singularity-field>.cms-control>.cms-mid>.cms-float-label {
+  color: color-mix(in srgb, var(--set-color-4) 70%, transparent);
 }
 
 .cms-clickable.cms-singularity:hover {

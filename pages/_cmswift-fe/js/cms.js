@@ -2062,14 +2062,6 @@
     }
   };
 
-  CMSwift.plugins.router = {
-    install(app, opts = {}) {
-      if (opts.mode) app.router.setMode(opts.mode);
-      if (opts.outlet) app.router.setOutlet(opts.outlet);
-      if (opts.base) app.router.setBase(opts.base);
-      app.router.start();
-    }
-  };
   // ===============================
   // Plugin Forms (validation + UX)
   // ===============================
@@ -3353,9 +3345,6 @@
       const fullPath = url.pathname + url.search + url.hash;
 
       // aggiorna address bar
-      if (replace) history.replaceState({}, "", base + fullPath);
-      else history.pushState({}, "", base + fullPath);
-
       updateURL(url, replace);
 
       const pathname = stripBase(url.pathname);
@@ -3434,12 +3423,11 @@
         };
 
         // mount layout sul root outlet
-        unmountCurrent = CMSwift.mount(outlet, () => parent.view(ctx), { clear: true });
-
+        CMSwift.mount(outlet, () => parent.view(ctx), { clear: true });
       } else {
         // non nested
         ctx._child = null;
-        unmountCurrent = CMSwift.mount(outlet, () => view(ctx), { clear: true });
+        CMSwift.mount(outlet, () => view(ctx), { clear: true });
       }
 
       notifyRoute(ctx);

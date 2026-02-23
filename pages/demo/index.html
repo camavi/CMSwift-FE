@@ -98,6 +98,7 @@
     import { tapPanel } from "../tutorial/tap-panel.cms.js";
     import { ColorTokensDemoPage } from "../tutorial/color.cms.js";
     import { btn } from "../tutorial/btn.cms.js";
+    import { input } from "../tutorial/input.cms.js";
     function layoutPage(
       _content = null,
       _header = null,
@@ -156,10 +157,7 @@
                 {
                   label: "tapPanel",
                   onClick: () => {
-                    currentLayout.mainUpdate(
-                      tapPanel,
-                      "/demo/component/tap-panel",
-                    );
+                    CMSwift.router.navigate("/demo/component/tap-panel");
                   },
                 },
                 {
@@ -172,8 +170,7 @@
                 {
                   label: "Layout",
                   onClick: () => {
-                    //CMSwift.router.navigate("/demo/component/layout");
-                    currentLayout.mainUpdate(layout, "/demo/component/layout");
+                    CMSwift.router.navigate("/demo/component/layout");
                   },
                 },
                 { label: "Page", to: "/demo/component/page" },
@@ -190,11 +187,9 @@
 
                 {
                   label: "Card",
-                  onClick: () =>
-                    currentLayout.mainUpdate(
-                      cardContent,
-                      "/demo/component/card",
-                    ),
+                  onClick: () => {
+                    CMSwift.router.navigate("/demo/component/card");
+                  },
                 },
                 { label: "CardHeader", to: "/demo/component/cardheader" },
                 { label: "CardBody", to: "/demo/component/cardbody" },
@@ -222,7 +217,7 @@
                 {
                   label: "Btn",
                   onClick: () => {
-                    currentLayout.mainUpdate(btn, "/demo/component/btn");
+                    CMSwift.router.navigate("/demo/component/btn");
                     hljs.highlightAll();
                   },
                 },
@@ -252,7 +247,7 @@
                 {
                   label: "Chip",
                   onClick: () => {
-                    currentLayout.mainUpdate(chip, "/demo/component/chip");
+                    CMSwift.router.navigate("/demo/component/chip");
                     hljs.highlightAll();
                   },
                 },
@@ -287,10 +282,12 @@
       return currentLayout;
     }
     let contentPage = _h.div("Start");
-
-    CMSwift.mount("#app", layoutPage(contentPage));
+    console.log("contentPage", contentPage);
+    const layoutApp = layoutPage(contentPage);
+    CMSwift.mount("#app", layoutApp);
     const p = ColorTokensDemoPage();
     CMSwift.router.setOutlet(contentPage);
+
     //CMSwift.router.add("/demo", () => page.home());
     CMSwift.router.add("/demo/component/card", () => page.card());
     CMSwift.router.add("/demo/component/layout", () => layout);
@@ -298,6 +295,7 @@
     CMSwift.router.add("/demo/component/color", () => ColorTokensDemoPage);
     CMSwift.router.add("/demo/component/tap-panel", () => tapPanel);
     CMSwift.router.add("/demo/component/btn", () => btn);
+    CMSwift.router.add("/demo/component/input", () => input);
     CMSwift.router.start();
     /* */
     hljs.highlightAll();
