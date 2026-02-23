@@ -20,8 +20,8 @@ const input = _h.div({ class: "cms-panel cms-page" },
     _ui.Input({ label: "Nome", color: "warning", placeholder: "Inserisci nome", hint: "Helper text", icon: "#home", prefix: "home", iconRight: "#home", suffix: "home" }),
     _ui.Input({ label: "Nome", color: "info", placeholder: "Inserisci nome", hint: "Helper text", icon: "#home", prefix: "home", iconRight: "#home", suffix: "home" }),
     _ui.Input({ label: "Nome", color: "success", placeholder: "Inserisci nome", hint: "Helper text", icon: "#home", prefix: "home", iconRight: "#home", suffix: "home" }),
-    _ui.Input({ label: "Nome", color: "black", placeholder: "Inserisci nome", hint: "Helper text", icon: "#home", prefix: "home", iconRight: "#home", suffix: "home" }),
-    _ui.Input({ label: "Nome", color: "light", placeholder: "Inserisci nome", hint: "Helper text", icon: "#home", prefix: "home", iconRight: "#home", suffix: "home" }),
+    _ui.Input({ label: "Nome", color: "dark", lightShadow: true, placeholder: "Inserisci nome", hint: "Helper text", icon: "#home", prefix: "home", iconRight: "#home", suffix: "home" }),
+    _ui.Input({ label: "Nome", color: "light", lightShadow: true, placeholder: "Inserisci nome", hint: "Helper text", icon: "#home", prefix: "home", iconRight: "#home", suffix: "home" }),
     _ui.Input({ label: "Nome", color: "primary" })
   ),
 

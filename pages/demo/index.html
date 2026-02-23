@@ -99,6 +99,7 @@
     import { ColorTokensDemoPage } from "../tutorial/color.cms.js";
     import { btn } from "../tutorial/btn.cms.js";
     import { input } from "../tutorial/input.cms.js";
+    import { select } from "../tutorial/select.cms.js";
     function layoutPage(
       _content = null,
       _header = null,
@@ -296,6 +297,7 @@
     CMSwift.router.add("/demo/component/tap-panel", () => tapPanel);
     CMSwift.router.add("/demo/component/btn", () => btn);
     CMSwift.router.add("/demo/component/input", () => input);
+    CMSwift.router.add("/demo/component/select", () => select);
     CMSwift.router.start();
     /* */
     hljs.highlightAll();
