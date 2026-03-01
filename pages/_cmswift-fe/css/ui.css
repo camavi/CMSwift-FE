@@ -637,13 +637,19 @@
   margin-top: 6px;
   background: var(--cms-panel);
   border: 1px solid var(--cms-border-color);
-  border-radius: var(--cms-r-lg);
+  border-radius: var(--cms-b-radius-default);
   box-shadow: var(--cms-shadow-sm);
   display: none;
   z-index: 20;
 }
 
 .cms-select-menu {}
+
+.cms-select-menu.portal {
+  position: fixed;
+  display: block;
+  z-index: 2000;
+}
 
 .cms-select.open .cms-select-menu {
   display: block;
@@ -751,19 +757,15 @@
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  /*border-radius: var(--cms-r-md);*/
-  /*border: 1px solid var(--cms-border-color);*/
-  /*background: rgba(255, 255, 255, 0.03);*/
-  cursor: pointer;
   user-select: none;
-  height: 40px;
+  height: calc(var(--cms-input-height-default, 32px) + 5px);
   box-sizing: border-box;
   cursor: pointer;
 }
 
 .cms-select.multiple .cms-select-control {
   height: auto;
-  min-height: 40px;
+  min-height: calc(var(--cms-input-height-default, 32px) + 5px);
   flex-wrap: wrap;
   align-items: center;
 }
@@ -2078,6 +2080,11 @@
   transition: all 0.2s ease-in-out;
 }
 
+.cms-singularity-field.cms-field-fill>.cms-control {
+  background-color: var(--set-background-color);
+  background-image: var(--set-glossy-active, none), var(--set-gradient-active, none);
+}
+
 .cms-singularity-field>.cms-control>.cms-mid.cms-with-left {
   border-left-color: var(--set-border-color, var(--cms-border-color));
   border-left-width: 1px;
@@ -2110,16 +2117,71 @@
   color: var(--set-color);
 }
 
-.cms-singularity-field>.cms-control>.cms-mid {
-  color: var(--set-color-4);
-}
-
+.cms-singularity-field>.cms-control>.cms-mid,
 .cms-singularity-field>.cms-control>.cms-mid input {
   color: var(--set-color-4);
 }
 
 .cms-singularity-field>.cms-control>.cms-mid>.cms-float-label {
   color: color-mix(in srgb, var(--set-color-4) 70%, transparent);
+}
+
+.cms-singularity-field.cms-field-fill>.cms-control>.cms-mid>.cms-select>.cms-select-control {
+  color: var(--set-color-1);
+}
+
+.cms-singularity-field.cms-field-fill>.cms-control>.cms-mid>.cms-float-label {
+  color: color-mix(in srgb, var(--set-color-1) 80%, transparent);
+}
+
+.cms-singularity-field.cms-glass.cms-field-fill>.cms-control>.cms-mid>.cms-select>.cms-select-control {
+  color: var(--set-color-2);
+}
+
+.cms-singularity-field.cms-glass.cms-field-fill>.cms-control>.cms-mid>.cms-float-label {
+  color: color-mix(in srgb, var(--set-color-2) 80%, transparent);
+}
+
+.cms-singularity-menu-select {
+  box-shadow: var(--set-shadow-active, 0 0 0 0), var(--set-glow-active, 0 0 0 0);
+  color: var(--set-color);
+  border-color: var(--set-border-color);
+  border-radius: var(--set-border-radius, var(--cms-b-radius-default, 2px));
+  background-color: color-mix(in srgb, var(--set-background-color) 4%, var(--cms-panel));
+  box-shadow: var(--set-shadow-active, 0 0 0 0), var(--set-glow-active, 0 0 0 0);
+}
+
+.cms-singularity-menu-select>.cms-select-options>.cms-select-option {
+  color: var(--set-color-4);
+  border-radius: var(--set-border-radius, var(--cms-b-radius-default, 2px));
+}
+
+.cms-singularity-menu-select>.cms-select-options>.cms-select-option.selected {
+  border-color: var(--set-border-color);
+  background-color: var(--set-background-color);
+  background-image: var(--set-glossy-active, none), var(--set-gradient-active, none);
+  box-shadow: var(--set-shadow-active, 0 0 0 0), var(--set-glow-active, 0 0 0 0);
+  color: var(--set-color);
+}
+
+.cms-singularity-menu-select>.cms-select-options>.cms-select-option.active {
+  outline: 2px solid color-mix(in srgb, var(--set-border-color) 50%, transparent);
+}
+
+.cms-singularity-menu-select>.cms-select-filter {
+  border-bottom-color: var(--set-border-color);
+}
+
+.cms-singularity-menu-select>.cms-select-filter .cms-input {
+  color: var(--set-color-4);
+}
+
+.cms-singularity-menu-select>.cms-select-filter .cms-input::placeholder {
+  color: color-mix(in srgb, var(--set-color-3) 50%, transparent);
+}
+
+.cms-singularity-field>.cms-control>.cms-mid>.cms-select>.cms-select-control>.cms-select-value>.cms-chip {
+  margin: -2px 0;
 }
 
 .cms-clickable.cms-singularity:hover {

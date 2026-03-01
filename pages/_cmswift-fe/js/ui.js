@@ -1083,7 +1083,7 @@
         : (uiUnwrap(props.state) || "");
     });
 
-    const wrap = _h.div({ class: uiClass(["cms-clear-field-set", "cms-field", "cms-singularity-field", state, uiWhen(props.outline, "outline"), props.wrapClass, props.class]) });
+    const wrap = _h.div({ class: uiClass(["cms-clear-field-set", "cms-field", "cms-singularity-field", state, uiWhen(props.fill, "cms-field-fill"), uiWhen(props.outline, "outline"), props.wrapClass, props.class]) });
 
     const topLabelNodes = renderSlotToArray(slots, "topLabel", {}, props.topLabel);
     if (topLabelNodes.length) {
@@ -1852,6 +1852,20 @@
           const chip = UI.Chip({
             label,
             dense: true,
+            color: props.chipColor || props.color,
+            icon: props.chipIcon || null,
+            iconRight: props.chipIconRight || null,
+            glossy: props.glossy,
+            glow: props.glow,
+            class: props.chipClass,
+            flat: props.flat,
+            rounded: props.rounded,
+            outline: props.outline,
+            shadow: props.shadow,
+            shadowLight: props.shadowLight,
+            gloss: props.gloss,
+            border: props.border,
+            size: props.chipSize,
             removable: true,
             onRemove: (e) => {
               e?.stopPropagation?.();
@@ -1924,9 +1938,93 @@
       });
       filterable.value ? filterWrap.classList.remove("cms-d-none") : filterWrap.classList.add("cms-d-none");;
     }
-    const menu = _h.div({ class: "cms-select-menu", onClick: (e) => e.stopPropagation() },
+    //copia del props
+    const menuProps = { ...props };
+    applyCommonProps(menuProps);
+
+    const stateMenu = uiComputed([menuProps.color, menuProps.state], () => {
+      const color = uiUnwrap(menuProps.color) || uiUnwrap(menuProps.state) || "";
+      return ["primary", "secondary", "warning", "danger", "success", "info", "light", "dark"].includes(color)
+        ? color
+        : (uiUnwrap(menuProps.state) || "");
+    });
+    const menu = _h.div({ class: uiClass(["cms-select-menu", "cms-singularity-menu-select", stateMenu, menuProps.class]), onClick: (e) => e.stopPropagation() },
       filterWrap, optionsWrap
     );
+    let menuPortalFrame = 0;
+    let menuPortalBound = false;
+
+    const scheduleMenuPosition = () => {
+      if (!getOpen() || menu.parentNode !== document.body) return;
+      if (menuPortalFrame) return;
+      menuPortalFrame = requestAnimationFrame(() => {
+        menuPortalFrame = 0;
+        if (!getOpen() || !root.isConnected || menu.parentNode !== document.body) return;
+        const anchor = root.getBoundingClientRect();
+        const gap = 6;
+        const pad = 8;
+        const maxWidth = Math.max(160, window.innerWidth - (pad * 2));
+        const width = Math.min(Math.max(anchor.width, 180), maxWidth);
+        const left = Math.max(pad, Math.min(anchor.left, window.innerWidth - width - pad));
+
+        menu.style.width = `${width}px`;
+        menu.style.left = `${left}px`;
+        menu.style.right = "auto";
+        menu.style.marginTop = "0";
+
+        const menuHeight = menu.getBoundingClientRect().height || 0;
+        const spaceBelow = window.innerHeight - anchor.bottom - gap - pad;
+        const spaceAbove = anchor.top - gap - pad;
+        const placeAbove = spaceBelow < 180 && spaceAbove > spaceBelow;
+        let top = placeAbove ? (anchor.top - gap - menuHeight) : (anchor.bottom + gap);
+        top = Math.max(pad, Math.min(top, window.innerHeight - menuHeight - pad));
+        menu.style.top = `${top}px`;
+      });
+    };
+
+    const bindMenuPortalPosition = () => {
+      if (menuPortalBound) return;
+      menuPortalBound = true;
+      window.addEventListener("resize", scheduleMenuPosition);
+      window.addEventListener("scroll", scheduleMenuPosition, true);
+    };
+
+    const unbindMenuPortalPosition = () => {
+      if (!menuPortalBound) return;
+      menuPortalBound = false;
+      window.removeEventListener("resize", scheduleMenuPosition);
+      window.removeEventListener("scroll", scheduleMenuPosition, true);
+    };
+
+    const mountMenuPortal = () => {
+      if (menu.parentNode === document.body) return;
+      if (menuPortalFrame) {
+        cancelAnimationFrame(menuPortalFrame);
+        menuPortalFrame = 0;
+      }
+      menu.classList.add("portal");
+      menu.style.display = "block";
+      document.body.appendChild(menu);
+      bindMenuPortalPosition();
+      scheduleMenuPosition();
+    };
+
+    const unmountMenuPortal = () => {
+      if (menuPortalFrame) {
+        cancelAnimationFrame(menuPortalFrame);
+        menuPortalFrame = 0;
+      }
+      unbindMenuPortalPosition();
+      if (menu.parentNode !== root) root.appendChild(menu);
+      menu.classList.remove("portal");
+      menu.style.display = "";
+      menu.style.position = "";
+      menu.style.top = "";
+      menu.style.left = "";
+      menu.style.right = "";
+      menu.style.width = "";
+      menu.style.marginTop = "";
+    };
 
     root.appendChild(control);
     root.appendChild(menu);
@@ -1936,6 +2034,8 @@
       const o = getOpen();
       root.classList.toggle("open", o);
       root.setAttribute("aria-expanded", o ? "true" : "false");
+      if (o) mountMenuPortal();
+      else unmountMenuPortal();
     }, "UI.Select:open");
 
     CMSwift.reactive.effect(() => {
@@ -2021,6 +2121,7 @@
         if (filtered.length === 0) {
           const emptyNode = CMSwift.ui.renderSlot(slots, "empty", { filter }, props.emptyText || "Nessuna opzione");
           optionsWrap.appendChild(_h.div({ class: "cms-select-empty" }, ...renderSlotToArray(null, "default", {}, emptyNode)));
+          if (getOpen()) scheduleMenuPosition();
           return;
         }
         for (const opt of filtered) pushOption(opt);
@@ -2039,6 +2140,7 @@
         if (!hadAnyOption) {
           const emptyNode = CMSwift.ui.renderSlot(slots, "empty", { filter }, props.emptyText || "Nessuna opzione");
           optionsWrap.appendChild(_h.div({ class: "cms-select-empty" }, ...renderSlotToArray(null, "default", {}, emptyNode)));
+          if (getOpen()) scheduleMenuPosition();
           return;
         }
       }
@@ -2046,11 +2148,13 @@
       if (loading) {
         const loadingNode = CMSwift.ui.renderSlot(slots, "loading", {}, "Caricamento...");
         optionsWrap.appendChild(_h.div({ class: "cms-select-empty" }, ...renderSlotToArray(null, "default", {}, loadingNode)));
+        if (getOpen()) scheduleMenuPosition();
         return;
       }
 
       for (const n of nodes) optionsWrap.appendChild(n);
       paintActive();
+      if (getOpen()) scheduleMenuPosition();
     }, "UI.Select:render");
 
     CMSwift.reactive.effect(() => {
@@ -2060,7 +2164,10 @@
     // outside click + escape cleanup
     const onDocClick = (e) => {
       if (!root.isConnected) return;
-      if (!root.contains(e.target)) close();
+      const t = e.target;
+      if (root.contains(t)) return;
+      if (menu.contains(t)) return;
+      close();
     };
     document.addEventListener("click", onDocClick, true);
 
@@ -2168,6 +2275,7 @@
       document.removeEventListener("click", onDocClick, true);
       root.removeEventListener("keydown", onKeyDown);
       filterWrap.removeEventListener("keydown", onKeyDown);
+      unmountMenuPortal();
     };
 
     // Wrap in FormField

@@ -9,12 +9,12 @@ const select = _h.div({ class: "cms-panel cms-page" },
     _ui.Item("state: success, warning, danger, info, primary, secondary"),
     _ui.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
+  _h.h2("Documentazione API"),
+  CMSwift.ui.DocTable("Select"),
   _h.h2("Esempio completo"),
   _ui.Card({ header: "Demo" },
-    _ui.Select({ label: "Stato", icon: "home", prefix: "Home", color: "primary", options: ["Draft", "Live", "Archived"], value: "Live" })
-  ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Select")
+    _ui.Select({ label: "Stato", icon: "home", shadow: true, glossy: true, filterable: true, multi: true, color: "primary", prefix: "Home", suffix: "Home", options: ["Draft", "Live", "Archived"], value: "Live" })
+  )
 );
 
 export { select };
