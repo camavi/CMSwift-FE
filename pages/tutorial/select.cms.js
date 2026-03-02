@@ -13,7 +13,7 @@ const select = _h.div({ class: "cms-panel cms-page" },
   CMSwift.ui.DocTable("Select"),
   _h.h2("Esempio completo"),
   _ui.Card({ header: "Demo" },
-    _ui.Select({ label: "Stato", icon: "home", shadow: true, glossy: true, filterable: true, multi: true, color: "primary", prefix: "Home", suffix: "Home", options: ["Draft", "Live", "Archived"], value: "Live" })
+    _ui.Select({ label: "Stato", icon: "home", glow: true, multi: true, color: "primary", prefix: "Home", suffix: "Home", options: ["Draft", "Live", "Archived"], value: "Live" })
   )
 );
 

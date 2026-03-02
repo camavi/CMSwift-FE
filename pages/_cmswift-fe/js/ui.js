@@ -1089,6 +1089,7 @@
     if (topLabelNodes.length) {
       wrap.appendChild(_h.div({ class: "cms-field-label" }, ...topLabelNodes));
     }
+    const isMulti = props.multi || props.multiple;
 
     const controlEl = typeof props.control === "function" ? props.control() : props.control;
     const getHasValue = () => {
@@ -1136,7 +1137,7 @@
 
       const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
       if (labelNodes.length) {
-        const floatLabel = _h.div({ class: "cms-float-label" }, ...labelNodes);
+        const floatLabel = _h.div({ class: uiClass(["cms-float-label", uiWhen(isMulti, "cms-multiselect")]) }, ...labelNodes);
         mid.appendChild(floatLabel);
       }
 
@@ -1849,6 +1850,7 @@
         for (const val of list) {
           const opt = flat.find(o => o.value == val);
           const label = opt ? opt.label : (val == null ? "" : String(val));
+          let removing = false;
           const chip = UI.Chip({
             label,
             dense: true,
@@ -1857,18 +1859,23 @@
             iconRight: props.chipIconRight || null,
             glossy: props.glossy,
             glow: props.glow,
+            glass: props.chipGlass || props.glass,
             class: props.chipClass,
             flat: props.flat,
             rounded: props.rounded,
             outline: props.outline,
-            shadow: props.shadow,
-            shadowLight: props.shadowLight,
+            shadow: props.chipShadow,
+            lightShadow: props.lightShadow,
             gloss: props.gloss,
             border: props.border,
             size: props.chipSize,
             removable: true,
             onRemove: (e) => {
+              e?.preventDefault?.();
               e?.stopPropagation?.();
+              e?.stopImmediatePropagation?.();
+              if (removing) return;
+              removing = true;
               toggleValue(val);
             }
           });
@@ -1948,7 +1955,7 @@
         ? color
         : (uiUnwrap(menuProps.state) || "");
     });
-    const menu = _h.div({ class: uiClass(["cms-select-menu", "cms-singularity-menu-select", stateMenu, menuProps.class]), onClick: (e) => e.stopPropagation() },
+    const menu = _h.div({ class: uiClass(["cms-select-menu", "cms-singularity-menu-select", stateMenu, menuProps.class, uiWhen(props.fill, "cms-select-menu-fill")]), onClick: (e) => e.stopPropagation() },
       filterWrap, optionsWrap
     );
     let menuPortalFrame = 0;

@@ -694,6 +694,11 @@
   opacity: 0.9;
 }
 
+.cms-control.has-value .cms-multiselect.cms-float-label,
+.cms-control:focus-within .cms-multiselect.cms-float-label {
+  line-height: 1;
+}
+
 /* Icons / addons */
 .cms-addon {
   display: flex;
@@ -1930,9 +1935,16 @@
   text-shadow: 0 0 3px color-mix(in srgb, var(--set-color-1) 70%, transparent);
 }
 
+
 .cms-singularity.cms-glass,
 .cms-singularity-field.cms-glass>.cms-control {
   position: relative;
+  backdrop-filter: blur(1px);
+  --set-background-color: color-mix(in srgb, var(--set-background-color) 40%, transparent);
+  --set-color: var(--set-border-color);
+}
+
+.cms-singularity-menu-select.cms-glass {
   backdrop-filter: blur(1px);
   --set-background-color: color-mix(in srgb, var(--set-background-color) 40%, transparent);
   --set-color: var(--set-border-color);
@@ -1944,6 +1956,8 @@
   border-color: var(--set-border-color);
 }
 
+.cms-glass.cms-singularity-menu-select>.cms-select-options>.cms-select-option.selected::before,
+.cms-singularity-menu-select.cms-glass::before,
 .cms-singularity.cms-glass::before,
 .cms-singularity-field.cms-glass .cms-control::before {
   position: absolute;
@@ -1952,7 +1966,7 @@
   right: 0;
   bottom: 0;
   content: "";
-  box-shadow: inset 0 0 3px 2px color-mix(in srgb, var(--set-color-3) 90%, transparent);
+  box-shadow: inset 0 0 3px 2px color-mix(in srgb, var(--set-color-3) 40%, transparent);
   --set-s-effect-1: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-1) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 40%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 100%);
   --set-s-effect-2: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-2) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 20%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 80%);
   --set-s-effect-3: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-2) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 20%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 80%);
@@ -2151,6 +2165,16 @@
   box-shadow: var(--set-shadow-active, 0 0 0 0), var(--set-glow-active, 0 0 0 0);
 }
 
+.cms-gradient.cms-singularity-menu-select.cms-select-menu-fill {
+  background-image: linear-gradient(var(--set-gradient-deg), color-mix(in srgb, var(--set-color-2) 15%, transparent), color-mix(in srgb, var(--set-color-2) 40%, transparent));
+}
+
+.cms-glass.cms-singularity-menu-select {
+  backdrop-filter: blur(1px);
+  --set-background-color: color-mix(in srgb, var(--set-background-color) 40%, transparent);
+  --set-color: var(--set-border-color);
+}
+
 .cms-singularity-menu-select>.cms-select-options>.cms-select-option {
   color: var(--set-color-4);
   border-radius: var(--set-border-radius, var(--cms-b-radius-default, 2px));
@@ -2168,6 +2192,21 @@
   outline: 2px solid color-mix(in srgb, var(--set-border-color) 50%, transparent);
 }
 
+.cms-glow.cms-singularity-menu-select>.cms-select-options>.cms-select-option {
+  box-shadow: none;
+}
+
+.cms-glass.cms-singularity-menu-select>.cms-select-options>.cms-select-option {
+  backdrop-filter: blur(2px);
+  background-color: var(--set-background-color);
+  background-image: var(--set-glossy-active, none), var(--set-gradient-active, none);
+}
+
+.cms-singularity-menu-select>.cms-select-options>.cms-select-option.selected {
+  outline: none;
+  box-shadow: none;
+}
+
 .cms-singularity-menu-select>.cms-select-filter {
   border-bottom-color: var(--set-border-color);
 }
@@ -2181,7 +2220,8 @@
 }
 
 .cms-singularity-field>.cms-control>.cms-mid>.cms-select>.cms-select-control>.cms-select-value>.cms-chip {
-  margin: -2px 0;
+  margin: 0 0 -4px 0;
+  box-shadow: none;
 }
 
 .cms-clickable.cms-singularity:hover {
