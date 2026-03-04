@@ -1646,6 +1646,10 @@
     const isMulti = !!props.multiple || !!props.multi;
     const allowCustom = !!props.allowCustom || !!props.allowCustomValue;
     const slots = props.slots || {};
+    const isBoundValue = (v) => !!v && ((typeof v === "object" && typeof v._bind === "function") || uiIsSignal(v));
+    const valueBinding = isBoundValue(props.model)
+      ? props.model
+      : (isBoundValue(props.value) ? props.value : null);
 
     const toArray = (v) => {
       if (Array.isArray(v)) return v.slice();
@@ -1653,11 +1657,14 @@
       return [v];
     };
     const normalizeValue = (v) => isMulti ? toArray(v) : v;
+    const initialValue = valueBinding
+      ? (typeof valueBinding === "object" && typeof valueBinding._bind === "function" ? valueBinding.value : valueBinding[0]())
+      : props.value;
 
     // state
     const [getOpen, setOpen] = CMSwift.reactive.signal(false);
     const [getFilter, setFilter] = CMSwift.reactive.signal("");
-    const [getValue, setValue] = CMSwift.reactive.signal(isMulti ? toArray(props.value) : (props.value ?? ""));
+    const [getValue, setValue] = CMSwift.reactive.signal(isMulti ? toArray(initialValue) : (initialValue ?? ""));
     const [getLoading, setLoading] = CMSwift.reactive.signal(false);
     const [getList, setList] = CMSwift.reactive.signal([]);      // normalized flat list
     const [getFlat, setFlat] = CMSwift.reactive.signal([]);      // flat selectable options only (no groups)
@@ -1666,18 +1673,17 @@
     let modelSet = null;
 
     // model binding
-    const model = props.model;
-    if (model) {
-      if (typeof model === "object" && typeof model._bind === "function") {
-        setValue(normalizeValue(model.value));
-        model.action((v) => setValue(normalizeValue(v)));
+    if (valueBinding) {
+      if (typeof valueBinding === "object" && typeof valueBinding._bind === "function") {
+        setValue(normalizeValue(valueBinding.value));
+        valueBinding.action((v) => setValue(normalizeValue(v)));
         modelSet = (v) => {
           const next = normalizeValue(v);
-          if (model.value !== next) model.value = next;
+          if (valueBinding.value !== next) valueBinding.value = next;
         };
-      } else if (Array.isArray(model) && typeof model[0] === "function" && typeof model[1] === "function") {
-        const get = model[0];
-        const set = model[1];
+      } else if (Array.isArray(valueBinding) && typeof valueBinding[0] === "function" && typeof valueBinding[1] === "function") {
+        const get = valueBinding[0];
+        const set = valueBinding[1];
         CMSwift.reactive.effect(() => { setValue(normalizeValue(get())); }, "UI.Select:model");
         modelSet = (v) => set(normalizeValue(v));
       }
