@@ -390,6 +390,66 @@
     return v;
   }
 
+  const ROD_INTERPOLATION_BUFFER_LIMIT = 128;
+  const rodInterpolationBuffer = [];
+
+  function trackRodInterpolation(rod, value) {
+    rodInterpolationBuffer.push({ rod, value: String(value ?? "") });
+    if (rodInterpolationBuffer.length > ROD_INTERPOLATION_BUFFER_LIMIT) {
+      rodInterpolationBuffer.splice(0, rodInterpolationBuffer.length - ROD_INTERPOLATION_BUFFER_LIMIT);
+    }
+  }
+
+  function createRodInterpolationCursor() {
+    if (!rodInterpolationBuffer.length) return null;
+    const items = rodInterpolationBuffer.slice();
+    rodInterpolationBuffer.length = 0;
+    return { items, index: 0 };
+  }
+
+  function takeInterpolatedSegments(text, cursor) {
+    if (!cursor || !text || cursor.index >= cursor.items.length) return null;
+
+    const segments = [];
+    const source = String(text);
+    let offset = 0;
+    let nextIndex = cursor.index;
+    let matched = false;
+
+    while (nextIndex < cursor.items.length) {
+      const entry = cursor.items[nextIndex];
+      const needle = entry.value;
+      if (!needle) break;
+
+      const pos = source.indexOf(needle, offset);
+      if (pos === -1) break;
+
+      if (pos > offset) segments.push(source.slice(offset, pos));
+      segments.push(entry.rod);
+      offset = pos + needle.length;
+      nextIndex++;
+      matched = true;
+    }
+
+    if (!matched) return null;
+    if (offset < source.length) segments.push(source.slice(offset));
+    cursor.index = nextIndex;
+    return segments;
+  }
+
+  function renderInterpolatedSegments(segments) {
+    let out = "";
+    for (const part of segments) {
+      if (typeof part === "string") out += part;
+      else out += part?.value ?? "";
+    }
+    return out;
+  }
+
+  function isContentProp(key) {
+    return key === "innerHTML" || key === "innerText" || key === "textContent";
+  }
+
   function createElement(tag, ...args) {
     const isSVG = SVG_TAGS.has(tag);
     const el = tag === "text"
@@ -399,8 +459,14 @@
         : document.createElement(tag);
 
     const isRod = (v) => !!v && v.type === "rod";
+    const interpolationCursor = createRodInterpolationCursor();
 
     function setProp(key, value) {
+      if (isContentProp(key)) {
+        el[key] = value ?? "";
+        console.log("setProp", key, value);
+        return;
+      }
       if (key === "class") {
         el.setAttribute("class", normalizeClass(value));
         return;
@@ -424,6 +490,12 @@
         });
         return;
       }
+      if (isContentProp(key) && isRod(value)) {
+        CMSwift.reactive.effect(() => {
+          setProp(key, value.value);
+        });
+        return;
+      }
       if (isRod(value)) {
         CMSwift.rodBind(el, value, { key });
         return;
@@ -431,48 +503,77 @@
       setProp(key, value);
     }
 
+    function appendRodText(rod) {
+      const t = document.createTextNode("");
+      el.appendChild(t);
+      CMSwift.rodBind(t, rod);
+    }
+
+    function appendInterpolatedText(segments) {
+      const t = document.createTextNode("");
+      el.appendChild(t);
+      CMSwift.reactive.effect(() => {
+        t.textContent = renderInterpolatedSegments(segments);
+      });
+    }
+
+    function appendChildValue(value) {
+      if (value == null) return;
+
+      if (Array.isArray(value)) {
+        for (const item of value) appendChildValue(item);
+        return;
+      }
+
+      if (typeof value === "string") {
+        const segments = takeInterpolatedSegments(value, interpolationCursor);
+        if (segments) appendInterpolatedText(segments);
+        else el.appendChild(document.createTextNode(value));
+        return;
+      }
+
+      if (typeof value === "number") {
+        el.appendChild(document.createTextNode(String(value)));
+        return;
+      }
+
+      if (typeof value === "function") {
+        const t = document.createTextNode("");
+        el.appendChild(t);
+        CMSwift.reactive.effect(() => { t.textContent = value(); });
+        return;
+      }
+
+      if (isRod(value)) {
+        appendRodText(value);
+        return;
+      }
+
+      if (value.nodeType) {
+        el.appendChild(value);
+      }
+    }
+
     for (const arg of args) {
       if (arg == null) continue;
 
-      // array di children (anche nidificati)
       if (Array.isArray(arg)) {
-        const stack = [...arg];
-        while (stack.length) {
-          const item = stack.shift();
-          if (item == null) continue;
-
-          if (Array.isArray(item)) {
-            // flatten
-            stack.unshift(...item);
-            continue;
-          }
-
-          if (typeof item === "string" || typeof item === "number") {
-            el.appendChild(document.createTextNode(item));
-            continue;
-          }
-
-          if (typeof item === "function") {
-            const t = document.createTextNode("");
-            el.appendChild(t);
-            CMSwift.reactive.effect(() => { t.textContent = item(); });
-            continue;
-          }
-
-          if (item.nodeType) {
-            el.appendChild(item);
-            continue;
-          }
-        }
+        appendChildValue(arg);
         continue;
       }
 
-      if (typeof arg === "string" || typeof arg === "number") {
-        el.appendChild(document.createTextNode(arg));
+      if (typeof arg === "string") {
+        const segments = takeInterpolatedSegments(arg, interpolationCursor);
+        if (segments) appendInterpolatedText(segments);
+        else el.appendChild(document.createTextNode(arg));
         continue;
       }
 
-      // reactive text binding
+      if (typeof arg === "number") {
+        el.appendChild(document.createTextNode(String(arg)));
+        continue;
+      }
+
       if (typeof arg === "function") {
         const t = document.createTextNode("");
         el.appendChild(t);
@@ -480,6 +581,11 @@
         CMSwift.reactive.effect(() => {
           t.textContent = arg();
         });
+        continue;
+      }
+
+      if (isRod(arg)) {
+        appendRodText(arg);
         continue;
       }
 
@@ -493,6 +599,13 @@
           if (key.startsWith("on") && typeof value === "function") {
             el.addEventListener(key.slice(2).toLowerCase(), value);
             continue;
+          }
+          if (typeof value === "string") {
+            const segments = takeInterpolatedSegments(value, interpolationCursor);
+            if (segments) {
+              bindProp(key, () => renderInterpolatedSegments(segments));
+              continue;
+            }
           }
           if (key === "class") {
             bindProp(key, value);
@@ -781,6 +894,11 @@
       return;
     }
 
+    if (isContentProp(key)) {
+      el[key] = value ?? "";
+      return;
+    }
+
     if (key === "class") {
       el.setAttribute("class", normalizeClass(value));
       return;
@@ -820,6 +938,11 @@
         if (!obj) return;
       }
       obj[parts[parts.length - 1]] = value;
+      return;
+    }
+
+    if (key in el) {
+      el[key] = value;
       return;
     }
 
@@ -965,8 +1088,11 @@
           const v = this.value;
           if (v == null) return v;
           const t = typeof v;
+          if (hint === "number") return Number(v);
+          if (t !== "symbol") trackRodInterpolation(this, v);
           if (t === "string" || t === "number" || t === "boolean" || t === "bigint" || t === "symbol") return v;
-          return hint === "number" ? Number(v) : String(v);
+          const out = String(v);
+          return out;
         },
         configurable: true
       });
