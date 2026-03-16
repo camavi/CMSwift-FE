@@ -3534,43 +3534,130 @@
   }
   // Esempio: CMSwift.ui.Separator()
 
-  UI.Checkbox = (...args) => {
+  const buildChoiceControl = (type, args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const id = props.id || ("cms-cb-" + Math.random().toString(36).slice(2));
-    const model = resolveModel(props.model, "UI.Checkbox:model");
+    const isRadio = type === "radio";
+    const id = props.id || (`cms-${type}-` + Math.random().toString(36).slice(2));
+    const model = resolveModel(props.model, isRadio ? "UI.Radio:model" : "UI.Checkbox:model");
 
-    const inputProps = CMSwift.omit(props, ["model", "label", "checked", "class", "style", "dense", "onChange", "onInput", "slots"]);
-    inputProps.type = "checkbox";
+    const inputProps = CMSwift.omit(props, [
+      "model", "label", "checked", "class", "style", "dense", "onChange", "onInput", "slots",
+      "icon", "checkedIcon", "uncheckedIcon", "inputClass", "iconSize", "color", "size", "outline",
+      "flat", "glossy", "glow", "glass", "gradient", "textGradient", "lightShadow", "shadow",
+      "rounded", "radius", "textColor", "clickable", "border"
+    ]);
+    inputProps.type = type;
     inputProps.id = id;
-    inputProps.class = uiClass(["cms-checkbox", props.inputClass]);
+    if (isRadio && props.name != null) inputProps.name = props.name;
+    inputProps.class = uiClass([`cms-${type}`, "cms-choice-input", props.inputClass]);
     const input = _h.input(inputProps);
-
-    if (model) {
-      input.checked = !!model.get();
-      model.watch((v) => { input.checked = !!v; }, "UI.Checkbox:watch");
-      input.addEventListener("change", (e) => {
-        model.set(!!input.checked);
-        props.onChange?.(!!input.checked, e);
-      });
-    } else {
-      input.checked = !!props.checked;
-      input.addEventListener("change", (e) => props.onChange?.(!!input.checked, e));
-    }
-    if (props.onInput) input.addEventListener("input", (e) => props.onInput?.(!!input.checked, e));
 
     const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
     const labelContent = labelNodes.length ? labelNodes : renderSlotToArray(slots, "default", {}, children);
-    const wrapProps = CMSwift.omit(props, ["model", "label", "checked", "onChange", "onInput", "value", "name", "id", "type", "dense", "inputClass", "slots"]);
-    wrapProps.class = uiClass(["cms-checkbox-wrap", uiWhen(props.dense, "dense"), props.class]);
-    wrapProps.style = { display: "inline-flex", alignItems: "center", gap: "8px", ...(props.style || {}) };
 
-    return _h.label(
+    const wrapProps = CMSwift.omit(props, [
+      "model", "label", "checked", "onChange", "onInput", "value", "name", "id", "type", "dense",
+      "inputClass", "slots", "icon", "checkedIcon", "uncheckedIcon", "iconSize", "color", "size",
+      "outline", "flat", "glossy", "glow", "glass", "gradient", "textGradient", "lightShadow",
+      "shadow", "rounded", "radius", "textColor", "clickable", "border"
+    ]);
+    wrapProps.class = uiClass([
+      "cms-clear-set",
+      "cms-singularity-check",
+      "cms-choice-wrap",
+      `cms-${type}-wrap`,
+      uiWhen(props.dense, "dense"),
+      props.class
+    ]);
+    wrapProps.style = { ...(props.style || {}) };
+
+    const sizeValue = uiUnwrap(props.size);
+    if (sizeValue != null && !(typeof sizeValue === "string" && CMSwift.uiSizes?.includes(sizeValue))) {
+      wrapProps.style["--cms-choice-size"] = toCssSize(sizeValue);
+    }
+
+    const marker = _h.span({
+      class: uiClass(["cms-choice-mark", isRadio ? "cms-choice-radio-mark" : "cms-choice-checkbox-mark"])
+    });
+    const labelNode = labelContent.length ? _h.span({ class: "cms-choice-label" }, ...labelContent) : null;
+
+    const wrap = _h.label(
       wrapProps,
       input,
-      labelContent.length ? _h.span(...labelContent) : null
+      marker,
+      labelNode
     );
+    setPropertyProps(wrap, props);
+
+    const iconSize = props.iconSize ? props.iconSize : props.size;
+    const defaultCheckedIcon = isRadio ? "radio_button_checked" : "check";
+    const defaultUncheckedIcon = isRadio ? "radio_button_unchecked" : null;
+    const resolveIconSource = (checked) => {
+      if (checked) {
+        if (props.checkedIcon != null) return props.checkedIcon;
+        if (props.icon != null) return props.icon;
+        return defaultCheckedIcon;
+      }
+      if (props.uncheckedIcon != null) return props.uncheckedIcon;
+      return defaultUncheckedIcon;
+    };
+
+    const syncIndicator = () => {
+      const checked = !!input.checked;
+      while (marker.firstChild) marker.removeChild(marker.firstChild);
+      wrap.classList.toggle("is-checked", checked);
+      wrap.classList.toggle("is-disabled", !!input.disabled);
+
+      const ctx = { checked, value: props.value, id, type };
+      let iconNode = CMSwift.ui.renderSlot(slots, checked ? "checkedIcon" : "uncheckedIcon", ctx, null);
+      if (iconNode == null) iconNode = CMSwift.ui.renderSlot(slots, "icon", ctx, null);
+      if (iconNode == null) {
+        const source = resolveIconSource(checked);
+        if (typeof source === "string") iconNode = UI.Icon({ name: source, size: iconSize });
+        else if (source != null) iconNode = CMSwift.ui.slot(source, { checked, as: checked ? "checkedIcon" : "uncheckedIcon" });
+      }
+      renderSlotToArray(null, "default", {}, iconNode).forEach((n) => marker.appendChild(n));
+    };
+
+    if (model) {
+      input.checked = isRadio ? (model.get() == props.value) : !!model.get();
+      model.watch((v) => {
+        input.checked = isRadio ? (v == props.value) : !!v;
+        syncIndicator();
+      }, isRadio ? "UI.Radio:watch" : "UI.Checkbox:watch");
+      input.addEventListener("change", (e) => {
+        if (isRadio) {
+          if (input.checked) {
+            model.set(props.value);
+            props.onChange?.(props.value, e);
+          }
+        } else {
+          model.set(!!input.checked);
+          props.onChange?.(!!input.checked, e);
+        }
+        syncIndicator();
+      });
+    } else {
+      input.checked = isRadio ? (props.checked === true) : !!props.checked;
+      input.addEventListener("change", (e) => {
+        if (isRadio) props.onChange?.(props.value, e);
+        else props.onChange?.(!!input.checked, e);
+        syncIndicator();
+      });
+    }
+    if (props.onInput) {
+      input.addEventListener("input", (e) => {
+        if (isRadio) props.onInput?.(props.value, e);
+        else props.onInput?.(!!input.checked, e);
+      });
+    }
+
+    syncIndicator();
+    return wrap;
   };
+
+  UI.Checkbox = (...args) => buildChoiceControl("checkbox", args);
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.Checkbox = {
@@ -3579,6 +3666,12 @@
         label: "String|Node|Function|Array",
         checked: "boolean",
         model: "[get,set] signal",
+        icon: "String|Node|Function|Array",
+        checkedIcon: "String|Node|Function|Array",
+        uncheckedIcon: "String|Node|Function|Array",
+        color: "string",
+        size: "string|number",
+        outline: "boolean",
         dense: "boolean",
         slots: "{ label?, default? }",
         class: "string",
@@ -3586,6 +3679,9 @@
       },
       slots: {
         label: "Checkbox label",
+        icon: "Base icon content",
+        checkedIcon: "Icon when checked",
+        uncheckedIcon: "Icon when unchecked",
         default: "Fallback label content"
       },
       events: {
@@ -3598,46 +3694,7 @@
   }
   // Esempio: CMSwift.ui.Checkbox({ label: "Accetto", model: [get,set] })
 
-  UI.Radio = (...args) => {
-    const { props, children } = CMSwift.uiNormalizeArgs(args);
-    const slots = props.slots || {};
-    const id = props.id || ("cms-radio-" + Math.random().toString(36).slice(2));
-    const model = resolveModel(props.model, "UI.Radio:model");
-
-    const inputProps = CMSwift.omit(props, ["model", "label", "checked", "class", "style", "dense", "onChange", "onInput", "slots"]);
-    inputProps.type = "radio";
-    inputProps.id = id;
-    inputProps.name = props.name;
-    inputProps.class = uiClass(["cms-radio", props.inputClass]);
-    const input = _h.input(inputProps);
-
-    if (model) {
-      input.checked = model.get() == props.value;
-      model.watch((v) => { input.checked = (v == props.value); }, "UI.Radio:watch");
-      input.addEventListener("change", (e) => {
-        if (input.checked) {
-          model.set(props.value);
-          props.onChange?.(props.value, e);
-        }
-      });
-    } else {
-      input.checked = props.checked === true;
-      input.addEventListener("change", (e) => props.onChange?.(props.value, e));
-    }
-    if (props.onInput) input.addEventListener("input", (e) => props.onInput?.(props.value, e));
-
-    const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
-    const labelContent = labelNodes.length ? labelNodes : renderSlotToArray(slots, "default", {}, children);
-    const wrapProps = CMSwift.omit(props, ["model", "label", "checked", "onChange", "onInput", "value", "name", "id", "type", "dense", "inputClass", "slots"]);
-    wrapProps.class = uiClass(["cms-radio-wrap", uiWhen(props.dense, "dense"), props.class]);
-    wrapProps.style = { display: "inline-flex", alignItems: "center", gap: "8px", ...(props.style || {}) };
-
-    return _h.label(
-      wrapProps,
-      input,
-      labelContent.length ? _h.span(...labelContent) : null
-    );
-  };
+  UI.Radio = (...args) => buildChoiceControl("radio", args);
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.Radio = {
@@ -3648,6 +3705,12 @@
         name: "string",
         checked: "boolean",
         model: "[get,set] signal",
+        icon: "String|Node|Function|Array",
+        checkedIcon: "String|Node|Function|Array",
+        uncheckedIcon: "String|Node|Function|Array",
+        color: "string",
+        size: "string|number",
+        outline: "boolean",
         dense: "boolean",
         slots: "{ label?, default? }",
         class: "string",
@@ -3655,6 +3718,9 @@
       },
       slots: {
         label: "Radio label",
+        icon: "Base icon content",
+        checkedIcon: "Icon when checked",
+        uncheckedIcon: "Icon when unchecked",
         default: "Fallback label content"
       },
       events: {

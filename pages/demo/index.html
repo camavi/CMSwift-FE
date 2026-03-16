@@ -103,6 +103,14 @@
     import { btn } from "../tutorial/btn.cms.js";
     import { input } from "../tutorial/input.cms.js";
     import { select } from "../tutorial/select.cms.js";
+    import { radio } from "../tutorial/radio.cms.js";
+    import { checkbox } from "../tutorial/checkbox.cms.js";
+    import { slider } from "../tutorial/slider.cms.js";
+    import { card } from "../tutorial/card.cms.js";
+    import { list } from "../tutorial/list.cms.js";
+    import { table } from "../tutorial/table.cms.js";
+    import { tabs } from "../tutorial/tabs.cms.js";
+    import { drawer } from "../tutorial/drawer.cms.js";
     function layoutPage(
       _content = null,
       _header = null,
@@ -286,7 +294,6 @@
       return currentLayout;
     }
     let contentPage = _h.div("Start");
-    console.log("contentPage", contentPage);
     const layoutApp = layoutPage(contentPage);
     CMSwift.mount("#app", layoutApp);
     const p = ColorTokensDemoPage();
@@ -301,6 +308,9 @@
     CMSwift.router.add("/demo/component/btn", () => btn);
     CMSwift.router.add("/demo/component/input", () => input);
     CMSwift.router.add("/demo/component/select", () => select);
+    CMSwift.router.add("/demo/component/checkbox", () => checkbox);
+    CMSwift.router.add("/demo/component/radio", () => radio);
+
     CMSwift.router.start();
     /* */
     hljs.highlightAll();

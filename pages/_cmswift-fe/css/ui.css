@@ -161,14 +161,14 @@
 .cms-drawer a,
 .cms-drawer .cms-drawer-group-toggle,
 .cms-drawer .cms-drawer-btn {
-  padding: 10px 12px;
+  padding: 5px 8px;
   border-radius: var(--cms-r-md);
   color: var(--cms-text);
   text-decoration: none;
   border: 1px solid transparent;
   box-sizing: border-box;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 .cms-drawer a,
@@ -1762,6 +1762,66 @@
   aspect-ratio: 1/1;
 }
 
+.cms-choice-wrap {
+  display: inline-flex;
+  gap: var(--set-gap, 8px);
+  padding: var(--set-padding, var(--cms-p-xs) var(--cms-p-sm));
+  margin: 2px;
+  cursor: pointer;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.cms-choice-wrap.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cms-choice-input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.cms-choice-mark {
+  flex-shrink: 0;
+  border: 1px solid var(--cms-border-color, #7a7a7a3d);
+  color: var(--set-color, var(--cms-text));
+  background: color-mix(in srgb, var(--set-background-color, var(--cms-surface-2)) 20%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 160ms ease;
+  position: relative;
+
+}
+
+.cms-choice-checkbox-mark {
+  border-radius: var(--set-border-radius, 4px);
+  width: calc(var(--cms-font-size, 16px) + 2px);
+  height: calc(var(--cms-font-size, 16px) + 2px);
+}
+
+.cms-choice-radio-mark {
+  border-radius: 999px;
+}
+
+.cms-choice-wrap .cms-choice-mark .cms-icon {
+  margin: 0;
+  font-size: var(--cms-choice-icon-size);
+  line-height: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cms-choice-label {
+  line-height: calc(var(--cms-font-size, 16px) + 6px);
+}
+
 /* SHADOW / STATE */
 .cms-singularity.cms-shadow-sm {
   box-shadow: var(--cms-shadow-sm);
@@ -1960,7 +2020,8 @@
 .cms-glass.cms-singularity-menu-select>.cms-select-options>.cms-select-option.selected::before,
 .cms-singularity-menu-select.cms-glass::before,
 .cms-singularity.cms-glass::before,
-.cms-singularity-field.cms-glass .cms-control::before {
+.cms-singularity-field.cms-glass .cms-control::before,
+.cms-singularity-check.cms-glass .cms-choice-mark::before {
   position: absolute;
   top: 0;
   left: 0;
@@ -2018,14 +2079,16 @@
   --set-gradient-active: linear-gradient(var(--set-gradient-deg), var(--set-color-2), var(--set-color-3));
 }
 
-.cms-text-gradient {
+.cms-singularity.cms-text-gradient,
+.cms-singularity-check.cms-text-gradient .cms-choice-mark,
+.cms-singularity-field.cms-text-gradient .cms-control {
   --set-gradient-active: linear-gradient(var(--set-gradient-deg), var(--set-color-2), var(--set-color-3));
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.cms-text-gradient .cms-btn {
+.cms-singularity.cms-text-gradient .cms-btn {
   background-image: linear-gradient(var(--set-gradient-deg), var(--set-color-2), var(--set-color-3));
   background-clip: text;
   -webkit-background-clip: text;
@@ -2094,6 +2157,17 @@
   color: var(--set-color);
   transition: all 0.2s ease-in-out;
 }
+
+.cms-singularity-check .cms-choice-mark {
+  background-color: var(--set-background-color);
+  background-image: var(--set-glossy-active, none), var(--set-gradient-active, none);
+  box-shadow: var(--set-shadow-active, 0 0 0 0), var(--set-glow-active, 0 0 0 0);
+  color: var(--set-color);
+  border-color: var(--set-border-color);
+  transition: all 0.2s ease-in-out;
+}
+
+.cms-singularity-check.cms-choice-wrap.is-checked .cms-choice-mark {}
 
 .cms-singularity-field.cms-field-fill>.cms-control {
   background-color: var(--set-background-color);
@@ -2173,6 +2247,12 @@
 .cms-glass.cms-singularity-menu-select {
   backdrop-filter: blur(1px);
   --set-background-color: color-mix(in srgb, var(--set-background-color) 40%, transparent);
+  --set-color: var(--set-border-color);
+}
+
+.cms-glass.cms-singularity-check .cms-choice-mark {
+  --set-background-color: color-mix(in srgb, var(--set-background-color) 40%, transparent);
+  border-color: color-mix(in srgb, var(--set-border-color) 80%, transparent);
   --set-color: var(--set-border-color);
 }
 
