@@ -1811,11 +1811,6 @@
 
 .cms-choice-wrap .cms-choice-mark .cms-icon {
   margin: 0;
-  font-size: var(--cms-choice-icon-size);
-  line-height: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .cms-choice-label {
