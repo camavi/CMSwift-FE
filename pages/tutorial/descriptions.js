@@ -65,7 +65,7 @@ const descriptions = {
   },
   "UI.Badge": {
     title: "Badge",
-    description: "Badge inline a pillola con colore e dimensione configurabili. Usa `label` o slot `default`."
+    description: "Badge inline a pillola con notification reattiva e 6 slot icona posizionabili. Usa `label`, `notification` e slot dedicati."
   },
   "UI.Avatar": {
     title: "Avatar",

@@ -3369,54 +3369,141 @@
   UI.Badge = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const cls = uiClass(["cms-badge", uiWhen(props.outline, "outline"), props.class]);
-    const p = CMSwift.omit(props, ["label", "color", "outline", "size", "slots"]);
+    const sizeClass = uiComputed(props.size, () => {
+      const v = uiUnwrap(props.size);
+      return (typeof v === "string" && sizeMap[v]) ? `cms-size-${v}` : "";
+    });
+    const cls = uiClass([
+      "cms-clear-set",
+      "cms-badge",
+      "cms-singularity",
+      sizeClass,
+      uiWhen(props.outline, "outline"),
+      props.class
+    ]);
+    const p = CMSwift.omit(props, [
+      "label",
+      "color",
+      "outline",
+      "size",
+      "slots",
+      "notification",
+      "iconSize",
+      "topLeft",
+      "topRight",
+      "bottomLeft",
+      "bottomRight",
+      "left",
+      "right"
+    ]);
     p.class = cls;
 
-    const color = props.color ?? "primary";
-    const sizeMap = {
-      xxs: { font: "9px", pad: "2px 5px" },
-      xs: { font: "10px", pad: "2px 6px" },
-      sm: { font: "11px", pad: "2px 7px" },
-      md: { font: "12px", pad: "2px 8px" },
-      lg: { font: "13px", pad: "3px 10px" },
-      xl: { font: "14px", pad: "4px 12px" },
-      xxl: { font: "15px", pad: "5px 14px" },
-      xxxl: { font: "16px", pad: "6px 16px" }
-    };
     const style = {
-      display: "inline-flex",
-      alignItems: "center",
-      padding: "2px 8px",
-      borderRadius: "999px",
-      fontSize: "12px",
-      border: "1px solid var(--cms-border-color)",
       ...(props.style || {})
     };
     if (props.size) {
-      if (typeof props.size === "string" && sizeMap[props.size]) {
-        style.fontSize = sizeMap[props.size].font;
-        style.padding = sizeMap[props.size].pad;
-      } else {
+      const size = uiUnwrap(props.size);
+      if (!(typeof size === "string" && sizeMap[size])) {
         style.fontSize = toCssSize(props.size);
-      }
-    }
-    if (color) {
-      const colorValue = color === "primary" ? "var(--cms-primary)" : color;
-      if (props.outline) {
-        style.background = "transparent";
-        style.borderColor = colorValue;
-        style.color = style.color || colorValue;
-      } else {
-        style.background = colorValue;
-        if (!style.color) style.color = "white";
       }
     }
     p.style = style;
 
-    const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
-    const content = labelNodes.length ? labelNodes : renderSlotToArray(slots, "default", {}, children);
-    return _h.span(p, ...(content.length ? content : [""]));
+    const renderNamedSlotToArray = (names, ctx, fallback) => {
+      const list = Array.isArray(names) ? names : [names];
+      for (const name of list) {
+        if (CMSwift.ui.getSlot(slots, name) != null) {
+          return renderSlotToArray(slots, name, ctx, fallback);
+        }
+      }
+      return fallback == null || fallback === false || fallback === ""
+        ? []
+        : renderSlotToArray(null, "default", ctx, fallback);
+    };
+
+    const resolveIconSize = () => {
+      const raw = uiUnwrap(props.iconSize ?? props.size);
+      if (typeof raw === "number") return Math.max(10, Math.round(raw * 0.85));
+      if (typeof raw === "string") {
+        const map = {
+          xxs: 10,
+          xs: 11,
+          sm: 12,
+          md: 13,
+          lg: 14,
+          xl: 16,
+          xxl: 18,
+          xxxl: 20
+        };
+        return map[raw] || 14;
+      }
+      return 14;
+    };
+
+    const resolveIconFallback = (source, as) => {
+      const raw = uiUnwrap(source);
+      if (raw == null || raw === false || raw === "") return null;
+      if (typeof raw === "string") return UI.Icon({ name: raw, size: resolveIconSize() });
+      return CMSwift.ui.slot(raw, { as });
+    };
+
+    const renderIconAnchor = (slotNames, propKey, position) => _h.dynamic(() => {
+      const iconFallback = resolveIconFallback(props[propKey], position);
+      const nodes = renderNamedSlotToArray(slotNames, { position }, iconFallback);
+      if (!nodes.length) return null;
+      return _h.span({
+        class: `cms-badge-anchor cms-badge-anchor-${position}`,
+        "data-badge-slot": position
+      }, ...nodes);
+    });
+
+    const content = _h.dynamic(() => {
+      const labelFallback = uiUnwrap(props.label);
+      let labelNodes = renderNamedSlotToArray(["label"], {}, labelFallback);
+      if (!labelNodes.length) labelNodes = renderNamedSlotToArray(["default"], {}, children);
+      return _h.span(
+        { class: "cms-badge-content" },
+        _h.span({ class: "cms-badge-label" }, ...(labelNodes.length ? labelNodes : [""]))
+      );
+    });
+
+    const notification = _h.dynamic(() => {
+      const rawNotification = uiUnwrap(props.notification);
+      const fallback = rawNotification == null || rawNotification === false || rawNotification === ""
+        ? null
+        : rawNotification;
+      const nodes = renderNamedSlotToArray(["notification"], { notification: rawNotification }, fallback);
+      if (!nodes.length) return null;
+      return _h.span({
+        class: "cms-badge-notification",
+        "data-badge-slot": "notification",
+        "aria-label": typeof rawNotification === "number" ? `${rawNotification} notifications` : null
+      }, ...nodes);
+    });
+
+    const wrap = _h.span(
+      renderIconAnchor(["left"], "left", "left"),
+      renderIconAnchor(["centerLeft", "center-left"], "centerLeft", "center-left"),
+      p,
+      content,
+      renderIconAnchor(["topLeft", "top-left"], "topLeft", "top-left"),
+      renderIconAnchor(["topRight", "top-right"], "topRight", "top-right"),
+      renderIconAnchor(["bottomLeft", "bottom-left"], "bottomLeft", "bottom-left"),
+      renderIconAnchor(["bottomRight", "bottom-right"], "bottomRight", "bottom-right"),
+      renderIconAnchor(["centerRight", "center-right"], "centerRight", "center-right"),
+      renderIconAnchor(["right"], "right", "right"),
+      notification
+    );
+    // se esiste un props con left o right
+    if (props.topLeft || props.centerLeft || props.bottomLeft) {
+      wrap.style.setProperty("padding-left", "15px");
+    }
+    if (props.topRight || props.centerRight || props.bottomRight) {
+      wrap.style.setProperty("padding-right", "15px");
+    }
+
+    setPropertyProps(wrap, props);
+    return wrap;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
@@ -3427,16 +3514,31 @@
         color: "string",
         size: "string|number",
         outline: "boolean",
-        slots: "{ label?, default? }",
+        notification: "string|number|Node|Function|[get,set] signal",
+        iconSize: "string|number",
+        topLeft: "String|Node|Function|Array",
+        topRight: "String|Node|Function|Array",
+        bottomLeft: "String|Node|Function|Array",
+        bottomRight: "String|Node|Function|Array",
+        left: "String|Node|Function|Array",
+        right: "String|Node|Function|Array",
+        slots: "{ label?, default?, notification?, topLeft?, topRight?, bottomLeft?, bottomRight?, left?, right? }",
         class: "string",
         style: "object"
       },
       slots: {
         label: "Badge label content",
-        default: "Fallback content"
+        default: "Fallback content",
+        notification: "Notification badge content",
+        topLeft: "Icon anchored top-left",
+        topRight: "Icon anchored top-right",
+        bottomLeft: "Icon anchored bottom-left",
+        bottomRight: "Icon anchored bottom-right",
+        left: "Icon anchored left",
+        right: "Icon anchored right"
       },
       returns: "HTMLSpanElement",
-      description: "Badge inline con colore configurabile."
+      description: "Badge inline con notification reattiva e 6 slot icona posizionabili."
     };
   }
   // Esempio: CMSwift.ui.Badge({ label: "New" })

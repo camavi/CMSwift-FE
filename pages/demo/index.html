@@ -111,6 +111,8 @@
     import { table } from "../tutorial/table.cms.js";
     import { tabs } from "../tutorial/tabs.cms.js";
     import { drawer } from "../tutorial/drawer.cms.js";
+    import { badge } from "../tutorial/badge.cms.js";
+    import { item } from "../tutorial/item.cms.js";
     function layoutPage(
       _content = null,
       _header = null,
@@ -310,6 +312,8 @@
     CMSwift.router.add("/demo/component/select", () => select);
     CMSwift.router.add("/demo/component/checkbox", () => checkbox);
     CMSwift.router.add("/demo/component/radio", () => radio);
+    CMSwift.router.add("/demo/component/badge", () => badge);
+    CMSwift.router.add("/demo/component/item", () => item);
 
     CMSwift.router.start();
     /* */
