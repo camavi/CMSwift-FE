@@ -29,6 +29,7 @@ const listSample = {
   },
   size: {
     code: [
+      _ui.Badge({ size: "xxs", color: "success" }, "XXS"),
       _ui.Badge({ size: "xs", color: "success" }, "XS"),
       _ui.Badge({ size: "sm", color: "info" }, "SM"),
       _ui.Badge({ size: "md", color: "primary" }, "MD"),
@@ -37,6 +38,7 @@ const listSample = {
       _ui.Badge({ size: 22, color: "secondary" }, "22px")
     ],
     sample: [
+      '_ui.Badge({ size: "xxs", color: "success" }, "XXS");',
       '_ui.Badge({ size: "xs", color: "success" }, "XS");',
       '_ui.Badge({ size: "sm", color: "info" }, "SM");',
       '_ui.Badge({ size: "md", color: "primary" }, "MD");',
