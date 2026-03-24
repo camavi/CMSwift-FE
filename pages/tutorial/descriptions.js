@@ -175,16 +175,16 @@ const descriptions = {
     title: "Form",
     description: "Form wrapper integrato con `useForm`: gestisce submit async e stato submitting. Children possono essere function(form)."
   },
-  "_.CardHeader": {
-    title: "CardHeader",
+  "_.cardHeader": {
+    title: "cardHeader",
     description: "Header per card con layout flex, gap, align e divider opzionale. Utile per titoli e azioni."
   },
-  "_.CardBody": {
-    title: "CardBody",
+  "_.cardBody": {
+    title: "cardBody",
     description: "Body per card con slot `default`. Usalo per contenuti principali della card."
   },
-  "_.CardFooter": {
-    title: "CardFooter",
+  "_.cardFooter": {
+    title: "cardFooter",
     description: "Footer per card con layout flex e divider opzionale. Ideale per azioni o info finali."
   },
   "_.Dialog": {

@@ -8,6 +8,7 @@
   const CMSwift = window.CMSwift;
   const publicRoot = window._ || {};
   const PUBLIC_UI_EXPORT_EXCLUDE = new Set(["meta", "slot", "slots", "inspect", "renderSlot", "renderSlotToArray", "can", "canAny"]);
+  const PUBLIC_UI_CAMEL_EXPORTS = new Set(["cardHeader", "cardBody", "cardFooter"]);
   let publicHyperscript = null;
   let publicRodFactory = null;
   const publicSignal = (...args) => CMSwift.reactive.signal(...args);
@@ -49,7 +50,7 @@
     if (ui && typeof ui === "object") {
       for (const key of Object.keys(ui)) {
         if (PUBLIC_UI_EXPORT_EXCLUDE.has(key)) continue;
-        if (!/^[A-Z]/.test(key)) continue;
+        if (!/^[A-Z]/.test(key) && !PUBLIC_UI_CAMEL_EXPORTS.has(key)) continue;
         publicRoot[key] = ui[key];
       }
     }

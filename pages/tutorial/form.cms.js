@@ -109,8 +109,8 @@ const registerSample = [
   "});",
   "_.Form({ form: registerForm, onSubmit: async (model) => console.log('REGISTER', model) }, () => [",
   "  _.Card(",
-  "    _.CardHeader(...),",
-  "    _.CardBody(",
+  "    _.cardHeader(...),",
+  "    _.cardBody(",
   "      _.Input({ label: 'Nome creator', model: fRegisterName.model }),",
   "      _.Input({ label: 'Email', model: fRegisterEmail.model }),",
   "      _.Input({ type: 'password', label: 'Password', model: fRegisterPassword.model }),",
@@ -118,7 +118,7 @@ const registerSample = [
   "      _.Checkbox({ model: fRegisterNewsletter.model }, 'Release notes CMSwift'),",
   "      _.Checkbox({ model: fRegisterTerms.model }, 'Accetto termini e privacy')",
   "    ),",
-  "    _.CardFooter(formActions('Crea account', resetRegisterForm, registerForm))",
+  "    _.cardFooter(formActions('Crea account', resetRegisterForm, registerForm))",
   "  )",
   "]);"
 ];
@@ -178,8 +178,8 @@ const onboardingSample = [
   "});",
   "_.Form({ form: onboardingForm, onSubmit: async (model) => console.log('ONBOARDING', model) }, () => [",
   "  _.Card(",
-  "    _.CardHeader(...Avatar, Badge, Chip...),",
-  "    _.CardBody(",
+  "    _.cardHeader(...Avatar, Badge, Chip...),",
+  "    _.cardBody(",
   "      _.Input({ label: 'Studio name', model: fStudio.model }),",
   "      _.Input({ label: 'Stack creativo', model: fStack.model }),",
   "      _.Radio({ value: 'solo', model: fTeam.model }, 'Solo maker'),",
@@ -190,7 +190,7 @@ const onboardingSample = [
   "      _.Checkbox({ model: fDesignReview.model }, 'Design review'),",
   "      _.Checkbox({ model: fAnalytics.model }, 'Product analytics')",
   "    ),",
-  "    _.CardFooter(formActions('Lancia workspace', resetOnboardingForm, onboardingForm))",
+  "    _.cardFooter(formActions('Lancia workspace', resetOnboardingForm, onboardingForm))",
   "  )",
   "]);"
 ];
@@ -244,8 +244,8 @@ const feedbackSample = [
   "});",
   "_.Form({ form: feedbackForm, onSubmit: async (model) => console.log('FEEDBACK', model) }, () => [",
   "  _.Card(",
-  "    _.CardHeader(...Badge e Chip...),",
-  "    _.CardBody(",
+  "    _.cardHeader(...Badge e Chip...),",
+  "    _.cardBody(",
   "      _.Select({ label: 'Use case', model: fUseCase.model, options: useCaseOptions }),",
   "      _.Select({ label: 'Componente preferito', model: fFavorite.model, options: favoriteOptions }),",
   "      _.Rating({ model: fScore.model, max: 5 }),",
@@ -253,7 +253,7 @@ const feedbackSample = [
   "      _.Checkbox({ model: fFollowup.model }, 'Voglio essere ricontattato'),",
   "      _.Input({ label: 'Nota finale', model: fNotes.model })",
   "    ),",
-  "    _.CardFooter(formActions('Invia feedback', resetFeedbackForm, feedbackForm))",
+  "    _.cardFooter(formActions('Invia feedback', resetFeedbackForm, feedbackForm))",
   "  )",
   "]);"
 ];
@@ -264,7 +264,7 @@ const listSample = {
       { form: registerForm, onSubmit: async (model) => console.log("REGISTER", model) },
       () => [
         _.Card(
-          _.CardHeader(
+          _.cardHeader(
             _.Toolbar(
               { justify: "space-between" },
               _.div(
@@ -274,7 +274,7 @@ const listSample = {
               ),
             )
           ),
-          _.CardBody(
+          _.cardBody(
             chipRow(
               _.Chip({ icon: "bolt" }, "Launch fast"),
               _.Chip({ icon: "palette" }, "Design system"),
@@ -301,7 +301,7 @@ const listSample = {
             fieldError(fRegisterTerms),
             formError(registerForm)
           ),
-          _.CardFooter(formActions("Crea account", resetRegisterForm, registerForm))
+          _.cardFooter(formActions("Crea account", resetRegisterForm, registerForm))
         )
       ]
     ),
@@ -312,7 +312,7 @@ const listSample = {
       { form: onboardingForm, onSubmit: async (model) => console.log("ONBOARDING", model) },
       () => [
         _.Card(
-          _.CardHeader(
+          _.cardHeader(
             _.Toolbar(
               { justify: "space-between" },
               _.div(
@@ -328,7 +328,7 @@ const listSample = {
               )
             )
           ),
-          _.CardBody(
+          _.cardBody(
             chipRow(
               _.Chip({ icon: "dataset_linked" }, "API-first"),
               _.Chip({ icon: "dashboard_customize" }, "Composable"),
@@ -358,7 +358,7 @@ const listSample = {
             _.Checkbox({ model: fAnalytics.model, icon: "analytics" }, "Abilita analytics di prodotto"),
             formError(onboardingForm)
           ),
-          _.CardFooter(formActions("Lancia workspace", resetOnboardingForm, onboardingForm))
+          _.cardFooter(formActions("Lancia workspace", resetOnboardingForm, onboardingForm))
         )
       ]
     ),
@@ -369,7 +369,7 @@ const listSample = {
       { form: feedbackForm, onSubmit: async (model) => console.log("FEEDBACK", model) },
       () => [
         _.Card(
-          _.CardHeader(
+          _.cardHeader(
             _.Toolbar(
               { justify: "space-between" },
               _.div(
@@ -379,7 +379,7 @@ const listSample = {
               )
             )
           ),
-          _.CardBody(
+          _.cardBody(
             chipRow(
               _.Chip({ icon: "forum" }, "Community"),
               _.Chip({ icon: "tips_and_updates" }, "Ideas"),
@@ -410,7 +410,7 @@ const listSample = {
             bindInput(fNotes, { label: "Nota finale", icon: "edit" }),
             formError(feedbackForm)
           ),
-          _.CardFooter(formActions("Invia feedback", resetFeedbackForm, feedbackForm))
+          _.cardFooter(formActions("Invia feedback", resetFeedbackForm, feedbackForm))
         )
       ]
     ),

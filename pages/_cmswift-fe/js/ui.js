@@ -5727,7 +5727,7 @@
     return modalRoot;
   }
 
-  UI.CardHeader = (...args) => {
+  UI.cardHeader = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
     const cls = uiClass(["cms-card-header", uiWhen(props.divider, "divider"), props.class]);
@@ -5747,7 +5747,7 @@
 
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
   };
-  UI.CardBody = (...args) => {
+  UI.cardBody = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
     const cls = uiClass(["cms-card-body", props.class]);
@@ -5755,7 +5755,7 @@
     p.class = cls;
     return _h.div(p, ...renderSlotToArray(slots, "default", {}, children));
   };
-  UI.CardFooter = (...args) => {
+  UI.cardFooter = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
     const cls = uiClass(["cms-card-footer", uiWhen(props.divider, "divider"), props.class]);
@@ -5777,8 +5777,8 @@
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
-    UI.meta.CardHeader = {
-      signature: "UI.CardHeader(...children) | UI.CardHeader(props, ...children)",
+    UI.meta.cardHeader = {
+      signature: "UI.cardHeader(...children) | UI.cardHeader(props, ...children)",
       props: {
         divider: "boolean",
         align: `stretch|flex-start|center|flex-end|baseline`,
@@ -5795,8 +5795,8 @@
       returns: "HTMLDivElement",
       description: "Header della card con supporto layout flex."
     };
-    UI.meta.CardBody = {
-      signature: "UI.CardBody(...children) | UI.CardBody(props, ...children)",
+    UI.meta.cardBody = {
+      signature: "UI.cardBody(...children) | UI.cardBody(props, ...children)",
       props: {
         slots: "{ default? }",
         class: "string",
@@ -5808,8 +5808,8 @@
       returns: "HTMLDivElement",
       description: "Body della card."
     };
-    UI.meta.CardFooter = {
-      signature: "UI.CardFooter(...children) | UI.CardFooter(props, ...children)",
+    UI.meta.cardFooter = {
+      signature: "UI.cardFooter(...children) | UI.cardFooter(props, ...children)",
       props: {
         divider: "boolean",
         align: `stretch|flex-start|center|flex-end|baseline`,

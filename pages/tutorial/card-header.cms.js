@@ -1,5 +1,5 @@
 const cardHeader = _.div({ class: "cms-panel cms-page" },
-  _.h1("CardHeader"),
+  _.h1("cardHeader"),
   _.p("Header per card con layout flex, gap, align e divider opzionale. Utile per titoli e azioni."),
   _.h2("Props principali"),
   _.List(
@@ -9,10 +9,10 @@ const cardHeader = _.div({ class: "cms-panel cms-page" },
   ),
   _.h2("Esempio completo"),
   _.Card({ header: "Demo" },
-    _.Card(_.CardHeader("Header"), _.CardBody("Body"), _.CardFooter(_.Btn("Action")))
+    _.Card(_.cardHeader("Header"), _.cardBody("Body"), _.cardFooter(_.Btn("Action")))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("CardHeader")
+  _.DocTable("cardHeader")
 );
 
 export { cardHeader };

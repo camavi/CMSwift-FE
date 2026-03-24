@@ -1,5 +1,5 @@
 const cardBody = _.div({ class: "cms-panel cms-page" },
-  _.h1("CardBody"),
+  _.h1("cardBody"),
   _.p("Body per card con slot `default`. Usalo per contenuti principali della card."),
   _.h2("Props principali"),
   _.List(
@@ -9,10 +9,10 @@ const cardBody = _.div({ class: "cms-panel cms-page" },
   ),
   _.h2("Esempio completo"),
   _.Card({ header: "Demo" },
-    _.Card(_.CardBody("Body"))
+    _.Card(_.cardBody("Body"))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("CardBody")
+  _.DocTable("cardBody")
 );
 
 export { cardBody };

@@ -64,9 +64,9 @@ function layoutPage(_content = null, _header = null, _drawer = null, _footer = n
           {
             label: "Card", onClick: () => currentLayout.mainUpdate(cardContent, "/demo/component/card")
           },
-          { label: "CardHeader", to: "/demo/component/cardheader" },
-          { label: "CardBody", to: "/demo/component/cardbody" },
-          { label: "CardFooter", to: "/demo/component/cardfooter" },
+          { label: "cardHeader", to: "/demo/component/cardheader" },
+          { label: "cardBody", to: "/demo/component/cardbody" },
+          { label: "cardFooter", to: "/demo/component/cardfooter" },
 
           { label: "Tooltip", to: "/demo/component/tooltip" },
           { label: "Banner", to: "/demo/component/banner" },
