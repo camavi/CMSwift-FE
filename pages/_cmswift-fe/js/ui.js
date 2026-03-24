@@ -3582,11 +3582,11 @@
       width: toCssSize(size),
       height: toCssSize(size),
       borderRadius: props.square ? "6px" : "999px",
-      overflow: "hidden",
+      aspectRatio: "1/1",
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "rgba(255,255,255,0.08)",
+      background: "rgba(183, 226, 249, 0.28)",
       ...(props.style || {})
     };
     p.style = style;

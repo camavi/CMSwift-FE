@@ -129,9 +129,9 @@ const listSample = {
         slots: {
           topLabel: _h.h3("Sample top label"),
           arrow: _ui.Icon("place_item"),
-          label: _h.div({ class: "label" }, "Sample label", _ui.Icon({ color: "blue", name: "token" })),
+          label: _h.div({ class: "label" }, "Sample label", _ui.Icon({ textColor: "blue", name: "token" })),
           clear: () => {
-            return _h.div({ class: "cms-clear" }, _ui.Icon({ color: "red", name: "close" }));
+            return _h.div({ class: "cms-clear" }, _ui.Icon({ textColor: "red", name: "close" }));
           },
         }
       }),
@@ -144,9 +144,9 @@ const listSample = {
       '   slots: {',
       '       topLabel: _h.h3("Sample top label"),',
       '       arrow: _ui.Icon("place_item"),',
-      '       label: _h.div({ class: "label" }, "Sample label", _ui.Icon({ color: "blue", name: "token" })),',
+      '       label: _h.div({ class: "label" }, "Sample label", _ui.Icon({ textColor: "blue", name: "token" })),',
       '       clear: () => {',
-      '           return _h.div({ class: "cms-clear" }, _ui.Icon({ color: "red", name: "close" }));',
+      '           return _h.div({ class: "cms-clear" }, _ui.Icon({ textColor: "red", name: "close" }));',
       '       },',
       '   }',
       '});'
