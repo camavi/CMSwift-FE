@@ -1,8 +1,8 @@
-const gridSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Grid sample"),
-  _h.p("Griglia CSS configurabile con `gap`, `cols`, `align` e `justify`. Utile per layout a colonne con classi `cms-grid`."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Grid({ gap: "var(--cms-s-md)" }, _ui.GridCol({ span: 12 }, _ui.Card("A")), _ui.GridCol({ span: 12 }, _ui.Card("B")))
+const gridSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Grid sample"),
+  _.p("Griglia CSS configurabile con `gap`, `cols`, `align` e `justify`. Utile per layout a colonne con classi `cms-grid`."),
+  _.Card({ header: "Esempio" },
+    _.Grid({ gap: "var(--cms-s-md)" }, _.GridCol({ span: 12 }, _.Card("A")), _.GridCol({ span: 12 }, _.Card("B")))
   )
 );
 

@@ -1,8 +1,8 @@
-const toolbarSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Toolbar sample"),
-  _h.p("Toolbar flessibile con gap, align, justify e wrap. Varianti dense/divider/elevated/sticky per barre di azioni."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Toolbar(_ui.Btn("Action"), _ui.Spacer(), _ui.Btn({ variant: "primary" }, "Save"))
+const toolbarSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Toolbar sample"),
+  _.p("Toolbar flessibile con gap, align, justify e wrap. Varianti dense/divider/elevated/sticky per barre di azioni."),
+  _.Card({ header: "Esempio" },
+    _.Toolbar(_.Btn("Action"), _.Spacer(), _.Btn({ variant: "primary" }, "Save"))
   )
 );
 

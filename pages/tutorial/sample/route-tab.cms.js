@@ -1,8 +1,8 @@
-const routeTabSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("RouteTab sample"),
-  _h.p("Tab link con `to` o `href`, supporto router e stato `active`. Usa slot `label` o children."),
-  _ui.Card({ header: "Esempio" },
-    _ui.RouteTab({ to: "#", active: true }, "Dashboard")
+const routeTabSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("RouteTab sample"),
+  _.p("Tab link con `to` o `href`, supporto router e stato `active`. Usa slot `label` o children."),
+  _.Card({ header: "Esempio" },
+    _.RouteTab({ to: "#", active: true }, "Dashboard")
   )
 );
 

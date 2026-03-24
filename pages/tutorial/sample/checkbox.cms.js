@@ -1,8 +1,8 @@
-const checkboxSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Checkbox sample"),
-  _h.p("Checkbox con label e supporto model reattivo. Espone onChange/onInput e variante dense."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Checkbox({ label: "Accetta termini" })
+const checkboxSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Checkbox sample"),
+  _.p("Checkbox con label e supporto model reattivo. Espone onChange/onInput e variante dense."),
+  _.Card({ header: "Esempio" },
+    _.Checkbox({ label: "Accetta termini" })
   )
 );
 

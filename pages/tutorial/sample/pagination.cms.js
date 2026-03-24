@@ -1,8 +1,8 @@
-const paginationSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Pagination sample"),
-  _h.p("Paginazione con prev/next, label e max pagine. Supporta model e slot per prev/next/label."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Pagination({ max: 8, value: 2 })
+const paginationSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Pagination sample"),
+  _.p("Paginazione con prev/next, label e max pagine. Supporta model e slot per prev/next/label."),
+  _.Card({ header: "Esempio" },
+    _.Pagination({ max: 8, value: 2 })
   )
 );
 

@@ -5,6 +5,7 @@
   app.ui = app.ui || {};
   app.services = app.services || {};
   app.services.notify = app.services.notify || {};
+  const uiSyncPublicRoot = () => CMSwift.syncPublicRoot?.();
 
   const uiRodPathRaw = Symbol("cms.ui.rodPathRaw");
   const uiRodPathEnhanced = Symbol("cms.ui.rodPathEnhanced");
@@ -184,6 +185,7 @@
     };
     Object.defineProperty(patchedRod, uiRodPathEnhanced, { value: true, configurable: false });
     window._rod = patchedRod;
+    uiSyncPublicRoot();
   };
   const uiPatchValueForH = (value, cursor, keyHint = "") => {
     if (Array.isArray(value)) {
@@ -269,9 +271,13 @@
       },
       set(target, prop, value, receiver) {
         const next = typeof value === "function" ? uiWrapUIFunction(value) : value;
-        return Reflect.set(target, prop, next, receiver);
+        const result = Reflect.set(target, prop, next, receiver);
+        uiSyncPublicRoot();
+        return result;
       }
     });
+    window._ui = app.ui;
+    uiSyncPublicRoot();
   };
   const uiPatchHyperscript = () => {
     if (!window._h || window._h[uiRodPathPatchedH]) return;
@@ -291,6 +297,7 @@
         return base.apply(this, changed ? patchedArgs : args);
       };
     }
+    uiSyncPublicRoot();
   };
 
   uiPatchRodFactory();
@@ -5348,7 +5355,7 @@
   }
 
   // Example:
-  // UI.Parallax({ src: "/assets/hero.jpg", height: "280px", speed: 0.2 }, _h.h2("Hello"));
+  // _.Parallax({ src: "/assets/hero.jpg", height: "280px", speed: 0.2 }, _.h2("Hello"));
 
   // -------------------------------
   // 4) NOTIFY SERVICE (toast)
@@ -7101,4 +7108,6 @@ transition: width 200ms ease;
       description: "Context menu a right-click con posizionamento su mouse."
     };
   }
+  window._ui = app.ui;
+  uiSyncPublicRoot();
 })(CMSwift);

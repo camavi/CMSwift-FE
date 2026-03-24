@@ -1,8 +1,8 @@
-const gridColSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("GridCol sample"),
-  _h.p("Colonna per UI.Grid con span e breakpoint `sm/md/lg`, oppure `auto`. Genera classi `cms-col-*` responsivi."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Grid(_ui.GridCol({ span: 8 }, _ui.Card("Col 8")), _ui.GridCol({ span: 16 }, _ui.Card("Col 16")))
+const gridColSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("GridCol sample"),
+  _.p("Colonna per _.Grid con span e breakpoint `sm/md/lg`, oppure `auto`. Genera classi `cms-col-*` responsivi."),
+  _.Card({ header: "Esempio" },
+    _.Grid(_.GridCol({ span: 8 }, _.Card("Col 8")), _.GridCol({ span: 16 }, _.Card("Col 16")))
   )
 );
 

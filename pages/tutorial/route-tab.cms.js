@@ -1,18 +1,18 @@
-const routeTab = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("RouteTab"),
-  _h.p("Tab link con `to` o `href`, supporto router e stato `active`. Usa slot `label` o children."),
-  _h.h2("Props principali"),
-  _ui.List(
-    _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
-    _ui.Item("state: success, warning, danger, info, primary, secondary"),
-    _ui.Item("outline, shadow, borderRadius, clickable per stile e interazione")
+const routeTab = _.div({ class: "cms-panel cms-page" },
+  _.h1("RouteTab"),
+  _.p("Tab link con `to` o `href`, supporto router e stato `active`. Usa slot `label` o children."),
+  _.h2("Props principali"),
+  _.List(
+    _.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
+    _.Item("state: success, warning, danger, info, primary, secondary"),
+    _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
-  _h.h2("Esempio completo"),
-  _ui.Card({ header: "Demo" },
-    _ui.RouteTab({ to: "#", active: true }, "Dashboard")
+  _.h2("Esempio completo"),
+  _.Card({ header: "Demo" },
+    _.RouteTab({ to: "#", active: true }, "Dashboard")
   ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("RouteTab")
+  _.h2("Documentazione API"),
+  _.DocTable("RouteTab")
 );
 
 export { routeTab };

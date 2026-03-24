@@ -1,18 +1,18 @@
-const spacer = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("Spacer"),
-  _h.p("Spaziatore flessibile (`cms-spacer`) per distribuire spazio tra elementi. Puoi inserirlo anche con contenuto opzionale."),
-  _h.h2("Props principali"),
-  _ui.List(
-    _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
-    _ui.Item("state: success, warning, danger, info, primary, secondary"),
-    _ui.Item("outline, shadow, borderRadius, clickable per stile e interazione")
+const spacer = _.div({ class: "cms-panel cms-page" },
+  _.h1("Spacer"),
+  _.p("Spaziatore flessibile (`cms-spacer`) per distribuire spazio tra elementi. Puoi inserirlo anche con contenuto opzionale."),
+  _.h2("Props principali"),
+  _.List(
+    _.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
+    _.Item("state: success, warning, danger, info, primary, secondary"),
+    _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
-  _h.h2("Esempio completo"),
-  _ui.Card({ header: "Demo" },
-    _ui.Row(_ui.Btn("Left"), _ui.Spacer(), _ui.Btn("Right"))
+  _.h2("Esempio completo"),
+  _.Card({ header: "Demo" },
+    _.Row(_.Btn("Left"), _.Spacer(), _.Btn("Right"))
   ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Spacer")
+  _.h2("Documentazione API"),
+  _.DocTable("Spacer")
 );
 
 export { spacer };

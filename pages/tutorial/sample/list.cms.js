@@ -1,8 +1,8 @@
-const listSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("List sample"),
-  _h.p("Lista base `<ul>` con variante dense. Usa slot `default` per inserire `UI.Item`."),
-  _ui.Card({ header: "Esempio" },
-    _ui.List(_ui.Item("Item 1"), _ui.Item("Item 2"))
+const listSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("List sample"),
+  _.p("Lista base `<ul>` con variante dense. Usa slot `default` per inserire `_.Item`."),
+  _.Card({ header: "Esempio" },
+    _.List(_.Item("Item 1"), _.Item("Item 2"))
   )
 );
 

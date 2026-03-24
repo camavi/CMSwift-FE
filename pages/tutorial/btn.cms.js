@@ -1,11 +1,11 @@
 const render = (options, label) => {
-  if (!Object.keys(options).length) return _ui.Btn(label);
-  return _ui.Btn(options, label);
+  if (!Object.keys(options).length) return _.Btn(label);
+  return _.Btn(options, label);
 };
 
 const renderSample = (options, label) => {
-  if (!Object.keys(options).length) return `_ui.Btn("${label}");`;
-  return `_ui.Btn(${serializeOptions(options)}, "${label}");`;
+  if (!Object.keys(options).length) return `_.Btn("${label}");`;
+  return `_.Btn(${serializeOptions(options)}, "${label}");`;
 };
 
 const createSection = (entries) => ({
@@ -53,18 +53,18 @@ const listSample = {
   outlineTextGradient: buildThemeSection({ removable: true, textGradient: true, outline: true })
 };
 
-const btn = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("Button"),
-  _h.p("Bottone con varianti colore, outline, icona/label e stato loading. Gestisce disabilitazione, aria e animazione burst su pointerdown."),
-  _h.h2("Props principali"),
-  _ui.List(
-    _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
-    _ui.Item("state: success, warning, danger, info, primary, secondary"),
-    _ui.Item("outline, shadow, borderRadius, clickable per stile e interazione")
+const btn = _.div({ class: "cms-panel cms-page" },
+  _.h1("Button"),
+  _.p("Bottone con varianti colore, outline, icona/label e stato loading. Gestisce disabilitazione, aria e animazione burst su pointerdown."),
+  _.h2("Props principali"),
+  _.List(
+    _.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
+    _.Item("state: success, warning, danger, info, primary, secondary"),
+    _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Btn"),
-  _h.h2("Esempio completo"),
+  _.h2("Documentazione API"),
+  _.DocTable("Btn"),
+  _.h2("Esempio completo"),
   boxCode("Basic color", listSample.basic),
   boxCode("Size", listSample.size),
   boxCode("Icon", listSample.icon),

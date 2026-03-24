@@ -1,8 +1,8 @@
-const itemSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Item sample"),
-  _h.p("Elemento lista `<li>` con divider opzionale. Pensato per `UI.List`."),
-  _ui.Card({ header: "Esempio" },
-    _ui.List(_ui.Item("Elemento"))
+const itemSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Item sample"),
+  _.p("Elemento lista `<li>` con divider opzionale. Pensato per `_.List`."),
+  _.Card({ header: "Esempio" },
+    _.List(_.Item("Elemento"))
   )
 );
 

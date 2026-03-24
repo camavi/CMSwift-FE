@@ -167,16 +167,16 @@ function Swatch({ label, token, height = 46, width = 200 } = {}) {
   if (token === '--cms-shadow-md') shadow = 'var(--cms-shadow-md)';
   if (token === '--cms-shadow-lg') shadow = 'var(--cms-shadow-lg)';
 
-  return UI.Card({
+  return _.Card({
     class: "cms-color-swatch",
     children: [
-      UI.Row({
+      _.Row({
         class: "cms-color-swatch__row",
         children: [
-          UI.Col({
+          _.Col({
             class: "cms-color-swatch__chipwrap",
             children: [
-              UI.Container({
+              _.Container({
                 class: "cms-color-swatch__chip",
                 style: {
                   minHeight: typeof height === "number" ? `${height}px` : String(height),
@@ -189,17 +189,17 @@ function Swatch({ label, token, height = 46, width = 200 } = {}) {
               }),
             ],
           }),
-          UI.Col({
+          _.Col({
             class: "cms-color-swatch__meta",
             children: [
-              UI.Container({ class: "cms-color-swatch__label", children: label }),
-              UI.Container({ class: "cms-color-swatch__token", children: token }),
+              _.Container({ class: "cms-color-swatch__label", children: label }),
+              _.Container({ class: "cms-color-swatch__token", children: token }),
             ],
           }),
-          UI.Col({
+          _.Col({
             class: "cms-color-swatch__actions",
             children: [
-              UI.Btn({
+              _.Btn({
                 class: "cms-color-swatch__btn",
                 children: "Copy",
                 onClick: () => copyText(valueText),
@@ -213,15 +213,15 @@ function Swatch({ label, token, height = 46, width = 200 } = {}) {
 }
 
 function ScaleCard({ title, prefix } = {}) {
-  return UI.Card({
+  return _.Card({
     class: "cms-scale-card",
     children: [
-      UI.Container({ class: "cms-scale-card__title", children: title }),
-      UI.Grid({
+      _.Container({ class: "cms-scale-card__title", children: title }),
+      _.Grid({
         class: "cms-scale-grid",
         children: SCALE_STOPS.map((stop) => {
           const token = `${prefix}-${stop}`;
-          return UI.GridCol({
+          return _.GridCol({
             class: "cms-scale-grid__col",
             children: Swatch({ label: String(stop), token, height: 42 }),
           });
@@ -235,28 +235,28 @@ function ControlsBar() {
   const theme = getTheme();
   const brand = getBrand();
 
-  return UI.Card({
+  return _.Card({
     class: "cms-controls",
     children: [
-      UI.Row({
+      _.Row({
         class: "cms-controls__row",
         children: [
-          UI.Col({
+          _.Col({
             children: [
-              UI.Container({ class: "cms-h1", children: "CMSwift UI — Colors & Tokens" }),
-              UI.Container({ class: "cms-p", children: "Palette professionale (scale + semantic tokens) con demo Light/Dark e Brand skins." }),
+              _.Container({ class: "cms-h1", children: "CMSwift UI — Colors & Tokens" }),
+              _.Container({ class: "cms-p", children: "Palette professionale (scale + semantic tokens) con demo Light/Dark e Brand skins." }),
             ],
           }),
-          UI.Col({
+          _.Col({
             class: "cms-controls__right",
             children: [
-              UI.Select({
+              _.Select({
                 value: theme,
                 options: THEME_OPTIONS,
                 onChange: (v) => setTheme(v),
               }),
-              UI.Spacer({ size: 12 }),
-              UI.Select({
+              _.Spacer({ size: 12 }),
+              _.Select({
                 value: brand,
                 options: BRAND_OPTIONS,
                 onChange: (v) => setBrand(v),
@@ -270,24 +270,24 @@ function ControlsBar() {
 }
 
 function TokensSection() {
-  return UI.Card({
+  return _.Card({
     class: "cms-section",
     children: [
-      UI.Container({ class: "cms-h2", children: "Semantic tokens (dev-first)" }),
-      UI.Container({
+      _.Container({ class: "cms-h2", children: "Semantic tokens (dev-first)" }),
+      _.Container({
         class: "cms-p",
         children: "Nei componenti CMSwift usa questi token (bg/text/border/primary/...) invece dei valori grezzi. Sono stabili e rendono i temi facilissimi.",
       }),
-      UI.Separator(),
-      UI.Grid({
+      _.Separator(),
+      _.Grid({
         class: "cms-semantic-grid",
         children: SEMANTIC.flatMap((group) => {
           return [
-            UI.GridCol({
+            _.GridCol({
               class: "cms-semantic-grid__title",
-              children: UI.Container({ class: "cms-h3", children: group.group }),
+              children: _.Container({ class: "cms-h3", children: group.group }),
             }),
-            ...group.items.map((it) => UI.GridCol({
+            ...group.items.map((it) => _.GridCol({
               class: "cms-semantic-grid__col",
               children: Swatch({ label: it.label, token: it.token, height: 40, width: 200 }),
             })),
@@ -299,18 +299,18 @@ function TokensSection() {
 }
 
 function ScalesSection() {
-  return UI.Card({
+  return _.Card({
     class: "cms-section",
     children: [
-      UI.Container({ class: "cms-h2", children: "Color scales (50 → 950)" }),
-      UI.Container({
+      _.Container({ class: "cms-h2", children: "Color scales (50 → 950)" }),
+      _.Container({
         class: "cms-p",
         children: "Queste scale servono per costruire UI coerenti (hover, soft backgrounds, borders) e per casi avanzati."
       }),
-      UI.Separator(),
-      UI.Grid({
+      _.Separator(),
+      _.Grid({
         class: "cms-scales-grid",
-        children: SCALES.map((s) => UI.GridCol({
+        children: SCALES.map((s) => _.GridCol({
           class: "cms-scales-grid__col",
           children: ScaleCard({ title: s.title, prefix: s.prefix }),
         })),
@@ -320,15 +320,15 @@ function ScalesSection() {
 }
 
 function SocialSection() {
-  return UI.Card({
+  return _.Card({
     class: "cms-section",
     children: [
-      UI.Container({ class: "cms-h2", children: "Social / Brand colors" }),
-      UI.Container({ class: "cms-p", children: "Token rapidi per pulsanti social e integrazioni." }),
-      UI.Separator(),
-      UI.Grid({
+      _.Container({ class: "cms-h2", children: "Social / Brand colors" }),
+      _.Container({ class: "cms-p", children: "Token rapidi per pulsanti social e integrazioni." }),
+      _.Separator(),
+      _.Grid({
         class: "cms-social-grid",
-        children: SOCIAL.map((s) => UI.GridCol({
+        children: SOCIAL.map((s) => _.GridCol({
           class: "cms-social-grid__col",
           children: Swatch({ label: s.title, token: s.token, height: 42 }),
         })),
@@ -338,62 +338,62 @@ function SocialSection() {
 }
 
 function ComponentsPreview() {
-  return UI.Card({
+  return _.Card({
     class: "cms-section",
     children: [
-      UI.Container({ class: "cms-h2", children: "Preview componenti (semantic tokens in azione)" }),
-      UI.Container({
+      _.Container({ class: "cms-h2", children: "Preview componenti (semantic tokens in azione)" }),
+      _.Container({
         class: "cms-p",
         children: "Questa mini UI usa solo token semantici: cambi Theme/Brand e tutto resta coerente.",
       }),
-      UI.Separator(),
-      UI.Row({
+      _.Separator(),
+      _.Row({
         class: "cms-preview",
         children: [
-          UI.Col({
+          _.Col({
             class: "cms-p-sm",
-            children: UI.Card({
+            children: _.Card({
               style: { height: "100%" },
               class: "cms-preview-card",
               children: [
-                UI.Container({ class: "cms-h3", children: "Card" }),
-                UI.Container({ class: "cms-p", children: "Superficie, testo e border vengono dai token." }),
-                UI.Row({
+                _.Container({ class: "cms-h3", children: "Card" }),
+                _.Container({ class: "cms-p", children: "Superficie, testo e border vengono dai token." }),
+                _.Row({
                   children: [
-                    UI.Badge({ children: "Primary", style: { background: "var(--cms-primary-soft)", color: "var(--cms-primary-text)" } }),
-                    UI.Spacer({ size: 10 }),
-                    UI.Badge({ children: "Success", style: { background: "var(--cms-success-soft)", color: "var(--cms-success)" } }),
-                    UI.Spacer({ size: 10 }),
-                    UI.Badge({ children: "Warning", style: { background: "var(--cms-warning-soft)", color: "var(--cms-warning)" } }),
-                    UI.Spacer({ size: 10 }),
-                    UI.Badge({ children: "Danger", style: { background: "var(--cms-danger-soft)", color: "var(--cms-danger)" } }),
+                    _.Badge({ children: "Primary", style: { background: "var(--cms-primary-soft)", color: "var(--cms-primary-text)" } }),
+                    _.Spacer({ size: 10 }),
+                    _.Badge({ children: "Success", style: { background: "var(--cms-success-soft)", color: "var(--cms-success)" } }),
+                    _.Spacer({ size: 10 }),
+                    _.Badge({ children: "Warning", style: { background: "var(--cms-warning-soft)", color: "var(--cms-warning)" } }),
+                    _.Spacer({ size: 10 }),
+                    _.Badge({ children: "Danger", style: { background: "var(--cms-danger-soft)", color: "var(--cms-danger)" } }),
                   ],
                 }),
               ],
             }),
           }),
-          UI.Col({
+          _.Col({
             class: "cms-p-sm",
-            children: UI.Card({
+            children: _.Card({
               style: { height: "100%" },
               class: "cms-preview-card",
               children: [
-                UI.Container({ class: "cms-h3", children: "Buttons & Input" }),
-                UI.Row({
+                _.Container({ class: "cms-h3", children: "Buttons & Input" }),
+                _.Row({
                   children: [
-                    UI.Btn({ class: "cms-demo-btn", children: "Primary" }),
-                    UI.Spacer({ size: 10 }),
-                    UI.Btn({
+                    _.Btn({ class: "cms-demo-btn", children: "Primary" }),
+                    _.Spacer({ size: 10 }),
+                    _.Btn({
                       class: "cms-demo-btn--soft",
                       children: "Soft",
                       onClick: () => { },
                     }),
                   ],
                 }),
-                UI.Spacer({ size: 12 }),
-                UI.Col(
+                _.Spacer({ size: 12 }),
+                _.Col(
                   { class: "cms-p-sm" },
-                  UI.Input({
+                  _.Input({
                     label: "name@domain.com",
                     class: "cms-demo-input",
                   })
@@ -410,7 +410,7 @@ function ComponentsPreview() {
 function PageStyles() {
   // Inline minimal demo styles (keeps tutorial page self-contained)
   // You can move these into your global css if you prefer.
-  return UI.Container({
+  return _.Container({
     tag: "style",
     children: `
       .cms-color-page {
@@ -553,7 +553,7 @@ function ColorTokensDemoPage() {
   const brand = getBrand();
   if (theme === "dark") setTheme("dark");
   if (brand) setBrand(brand);
-  return UI.Page({
+  return _.Page({
     class: "cms-color-page",
     children: [
       //PageStyles(),
@@ -562,8 +562,8 @@ function ColorTokensDemoPage() {
       TokensSection(),
       ScalesSection(),
       SocialSection(),
-      UI.Footer({
-        children: UI.Container({
+      _.Footer({
+        children: _.Container({
           class: "cms-p",
           children: "Tip: usa sempre i semantic tokens nei componenti. Le scale sono per costruire variazioni (hover/soft/border).",
         }),

@@ -1,8 +1,8 @@
-const parallaxSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Parallax sample"),
-  _h.p("Sezione parallax con background image, height e speed. Supporta overlay/color/position e slot content."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Parallax({ height: "220px" }, _h.h2("Parallax"))
+const parallaxSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Parallax sample"),
+  _.p("Sezione parallax con background image, height e speed. Supporta overlay/color/position e slot content."),
+  _.Card({ header: "Esempio" },
+    _.Parallax({ height: "220px" }, _.h2("Parallax"))
   )
 );
 

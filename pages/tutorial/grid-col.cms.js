@@ -1,18 +1,18 @@
-const gridCol = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("GridCol"),
-  _h.p("Colonna per UI.Grid con span e breakpoint `sm/md/lg`, oppure `auto`. Genera classi `cms-col-*` responsivi."),
-  _h.h2("Props principali"),
-  _ui.List(
-    _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
-    _ui.Item("state: success, warning, danger, info, primary, secondary"),
-    _ui.Item("outline, shadow, borderRadius, clickable per stile e interazione")
+const gridCol = _.div({ class: "cms-panel cms-page" },
+  _.h1("GridCol"),
+  _.p("Colonna per _.Grid con span e breakpoint `sm/md/lg`, oppure `auto`. Genera classi `cms-col-*` responsivi."),
+  _.h2("Props principali"),
+  _.List(
+    _.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
+    _.Item("state: success, warning, danger, info, primary, secondary"),
+    _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
-  _h.h2("Esempio completo"),
-  _ui.Card({ header: "Demo" },
-    _ui.Grid(_ui.GridCol({ span: 8 }, _ui.Card("Col 8")), _ui.GridCol({ span: 16 }, _ui.Card("Col 16")))
+  _.h2("Esempio completo"),
+  _.Card({ header: "Demo" },
+    _.Grid(_.GridCol({ span: 8 }, _.Card("Col 8")), _.GridCol({ span: 16 }, _.Card("Col 16")))
   ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("GridCol")
+  _.h2("Documentazione API"),
+  _.DocTable("GridCol")
 );
 
 export { gridCol };

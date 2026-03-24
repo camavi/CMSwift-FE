@@ -23,7 +23,7 @@ const favoriteOptions = [
   { label: "Badge", value: "badge" }
 ];
 
-const chipRow = (...children) => _h.div({
+const chipRow = (...children) => _.div({
   style: {
     display: "flex",
     flexWrap: "wrap",
@@ -32,13 +32,13 @@ const chipRow = (...children) => _h.div({
   }
 }, ...children);
 
-const formError = (form) => _h.div({ class: "cms-error" }, () => form.submitError.value || "");
-const fieldError = (field) => _h.div({ class: "cms-error" }, () => field.error() || "");
+const formError = (form) => _.div({ class: "cms-error" }, () => form.submitError.value || "");
+const fieldError = (field) => _.div({ class: "cms-error" }, () => field.error() || "");
 
-const formActions = (label, onReset, form) => _ui.Toolbar(
+const formActions = (label, onReset, form) => _.Toolbar(
   { justify: "space-between" },
-  _ui.Btn({ onClick: onReset, type: "button" }, "Reset"),
-  _ui.Btn(
+  _.Btn({ onClick: onReset, type: "button" }, "Reset"),
+  _.Btn(
     {
       color: "primary",
       type: "submit",
@@ -48,7 +48,7 @@ const formActions = (label, onReset, form) => _ui.Toolbar(
   )
 );
 
-const bindInput = (field, props = {}) => _ui.Input({
+const bindInput = (field, props = {}) => _.Input({
   model: field.model,
   error: () => field.error(),
   hint: field.hint,
@@ -59,7 +59,7 @@ const bindInput = (field, props = {}) => _ui.Input({
 });
 
 const registerForm = CMSwift.useForm({
-  model: _rod({
+  model: _.rod({
     name: "",
     email: "",
     password: "",
@@ -97,7 +97,7 @@ const resetRegisterForm = () => {
 
 const registerSample = [
   "const registerForm = CMSwift.useForm({",
-  "  model: _rod({ name: '', email: '', password: '', role: '', newsletter: true, terms: false }),",
+  "  model: _.rod({ name: '', email: '', password: '', role: '', newsletter: true, terms: false }),",
   "  validateOn: 'blur',",
   "  rules: {",
   "    name: [(v) => !!v || 'Inserisci il nome del creator'],",
@@ -107,24 +107,24 @@ const registerSample = [
   "    terms: [(v) => !!v || 'Devi accettare i termini']",
   "  }",
   "});",
-  "_ui.Form({ form: registerForm, onSubmit: async (model) => console.log('REGISTER', model) }, () => [",
-  "  _ui.Card(",
-  "    _ui.CardHeader(...),",
-  "    _ui.CardBody(",
-  "      _ui.Input({ label: 'Nome creator', model: fRegisterName.model }),",
-  "      _ui.Input({ label: 'Email', model: fRegisterEmail.model }),",
-  "      _ui.Input({ type: 'password', label: 'Password', model: fRegisterPassword.model }),",
-  "      _ui.Select({ label: 'Ruolo', model: fRegisterRole.model, options: roleOptions }),",
-  "      _ui.Checkbox({ model: fRegisterNewsletter.model }, 'Release notes CMSwift'),",
-  "      _ui.Checkbox({ model: fRegisterTerms.model }, 'Accetto termini e privacy')",
+  "_.Form({ form: registerForm, onSubmit: async (model) => console.log('REGISTER', model) }, () => [",
+  "  _.Card(",
+  "    _.CardHeader(...),",
+  "    _.CardBody(",
+  "      _.Input({ label: 'Nome creator', model: fRegisterName.model }),",
+  "      _.Input({ label: 'Email', model: fRegisterEmail.model }),",
+  "      _.Input({ type: 'password', label: 'Password', model: fRegisterPassword.model }),",
+  "      _.Select({ label: 'Ruolo', model: fRegisterRole.model, options: roleOptions }),",
+  "      _.Checkbox({ model: fRegisterNewsletter.model }, 'Release notes CMSwift'),",
+  "      _.Checkbox({ model: fRegisterTerms.model }, 'Accetto termini e privacy')",
   "    ),",
-  "    _ui.CardFooter(formActions('Crea account', resetRegisterForm, registerForm))",
+  "    _.CardFooter(formActions('Crea account', resetRegisterForm, registerForm))",
   "  )",
   "]);"
 ];
 
 const onboardingForm = CMSwift.useForm({
-  model: _rod({
+  model: _.rod({
     studio: "",
     stack: "",
     team: "solo",
@@ -167,7 +167,7 @@ const resetOnboardingForm = () => {
 
 const onboardingSample = [
   "const onboardingForm = CMSwift.useForm({",
-  "  model: _rod({ studio: '', stack: '', team: 'solo', plan: 'pro', automations: true, designReview: true, analytics: false }),",
+  "  model: _.rod({ studio: '', stack: '', team: 'solo', plan: 'pro', automations: true, designReview: true, analytics: false }),",
   "  validateOn: 'blur',",
   "  rules: {",
   "    studio: [(v) => !!v || 'Inserisci il nome dello studio'],",
@@ -176,27 +176,27 @@ const onboardingSample = [
   "    plan: [(v) => !!v || 'Seleziona un piano']",
   "  }",
   "});",
-  "_ui.Form({ form: onboardingForm, onSubmit: async (model) => console.log('ONBOARDING', model) }, () => [",
-  "  _ui.Card(",
-  "    _ui.CardHeader(...Avatar, Badge, Chip...),",
-  "    _ui.CardBody(",
-  "      _ui.Input({ label: 'Studio name', model: fStudio.model }),",
-  "      _ui.Input({ label: 'Stack creativo', model: fStack.model }),",
-  "      _ui.Radio({ value: 'solo', model: fTeam.model }, 'Solo maker'),",
-  "      _ui.Radio({ value: 'squad', model: fTeam.model }, 'Small squad'),",
-  "      _ui.Radio({ value: 'agency', model: fTeam.model }, 'Agency mode'),",
-  "      _ui.Select({ label: 'Piano', model: fPlan.model, options: planOptions }),",
-  "      _ui.Toggle({ model: fAutomations.model }, 'Attiva automazioni'),",
-  "      _ui.Checkbox({ model: fDesignReview.model }, 'Design review'),",
-  "      _ui.Checkbox({ model: fAnalytics.model }, 'Product analytics')",
+  "_.Form({ form: onboardingForm, onSubmit: async (model) => console.log('ONBOARDING', model) }, () => [",
+  "  _.Card(",
+  "    _.CardHeader(...Avatar, Badge, Chip...),",
+  "    _.CardBody(",
+  "      _.Input({ label: 'Studio name', model: fStudio.model }),",
+  "      _.Input({ label: 'Stack creativo', model: fStack.model }),",
+  "      _.Radio({ value: 'solo', model: fTeam.model }, 'Solo maker'),",
+  "      _.Radio({ value: 'squad', model: fTeam.model }, 'Small squad'),",
+  "      _.Radio({ value: 'agency', model: fTeam.model }, 'Agency mode'),",
+  "      _.Select({ label: 'Piano', model: fPlan.model, options: planOptions }),",
+  "      _.Toggle({ model: fAutomations.model }, 'Attiva automazioni'),",
+  "      _.Checkbox({ model: fDesignReview.model }, 'Design review'),",
+  "      _.Checkbox({ model: fAnalytics.model }, 'Product analytics')",
   "    ),",
-  "    _ui.CardFooter(formActions('Lancia workspace', resetOnboardingForm, onboardingForm))",
+  "    _.CardFooter(formActions('Lancia workspace', resetOnboardingForm, onboardingForm))",
   "  )",
   "]);"
 ];
 
 const feedbackForm = CMSwift.useForm({
-  model: _rod({
+  model: _.rod({
     useCase: "",
     favorite: "",
     score: 4,
@@ -234,7 +234,7 @@ const resetFeedbackForm = () => {
 
 const feedbackSample = [
   "const feedbackForm = CMSwift.useForm({",
-  "  model: _rod({ useCase: '', favorite: '', score: 4, recommend: true, followup: true, notes: '' }),",
+  "  model: _.rod({ useCase: '', favorite: '', score: 4, recommend: true, followup: true, notes: '' }),",
   "  validateOn: 'blur',",
   "  rules: {",
   "    useCase: [(v) => !!v || 'Seleziona un contesto'],",
@@ -242,175 +242,175 @@ const feedbackSample = [
   "    score: [(v) => Number(v || 0) > 0 || 'Aggiungi una valutazione']",
   "  }",
   "});",
-  "_ui.Form({ form: feedbackForm, onSubmit: async (model) => console.log('FEEDBACK', model) }, () => [",
-  "  _ui.Card(",
-  "    _ui.CardHeader(...Badge e Chip...),",
-  "    _ui.CardBody(",
-  "      _ui.Select({ label: 'Use case', model: fUseCase.model, options: useCaseOptions }),",
-  "      _ui.Select({ label: 'Componente preferito', model: fFavorite.model, options: favoriteOptions }),",
-  "      _ui.Rating({ model: fScore.model, max: 5 }),",
-  "      _ui.Toggle({ model: fRecommend.model }, 'Lo consiglierei ad altri team'),",
-  "      _ui.Checkbox({ model: fFollowup.model }, 'Voglio essere ricontattato'),",
-  "      _ui.Input({ label: 'Nota finale', model: fNotes.model })",
+  "_.Form({ form: feedbackForm, onSubmit: async (model) => console.log('FEEDBACK', model) }, () => [",
+  "  _.Card(",
+  "    _.CardHeader(...Badge e Chip...),",
+  "    _.CardBody(",
+  "      _.Select({ label: 'Use case', model: fUseCase.model, options: useCaseOptions }),",
+  "      _.Select({ label: 'Componente preferito', model: fFavorite.model, options: favoriteOptions }),",
+  "      _.Rating({ model: fScore.model, max: 5 }),",
+  "      _.Toggle({ model: fRecommend.model }, 'Lo consiglierei ad altri team'),",
+  "      _.Checkbox({ model: fFollowup.model }, 'Voglio essere ricontattato'),",
+  "      _.Input({ label: 'Nota finale', model: fNotes.model })",
   "    ),",
-  "    _ui.CardFooter(formActions('Invia feedback', resetFeedbackForm, feedbackForm))",
+  "    _.CardFooter(formActions('Invia feedback', resetFeedbackForm, feedbackForm))",
   "  )",
   "]);"
 ];
 
 const listSample = {
   registration: {
-    code: _ui.Form(
+    code: _.Form(
       { form: registerForm, onSubmit: async (model) => console.log("REGISTER", model) },
       () => [
-        _ui.Card(
-          _ui.CardHeader(
-            _ui.Toolbar(
+        _.Card(
+          _.CardHeader(
+            _.Toolbar(
               { justify: "space-between" },
-              _h.div(
-                _h.h3("Registrazione Creator"),
-                _h.p("Un form reale con validazione, stato submit e micro-componenti CMSwift."),
-                _ui.Badge({ label: "CMSwift", notification: 3, topRight: "rocket_launch" })
+              _.div(
+                _.h3("Registrazione Creator"),
+                _.p("Un form reale con validazione, stato submit e micro-componenti CMSwift."),
+                _.Badge({ label: "CMSwift", notification: 3, topRight: "rocket_launch" })
               ),
             )
           ),
-          _ui.CardBody(
+          _.CardBody(
             chipRow(
-              _ui.Chip({ icon: "bolt" }, "Launch fast"),
-              _ui.Chip({ icon: "palette" }, "Design system"),
-              _ui.Chip({ icon: "code" }, "Reactive UI")
+              _.Chip({ icon: "bolt" }, "Launch fast"),
+              _.Chip({ icon: "palette" }, "Design system"),
+              _.Chip({ icon: "code" }, "Reactive UI")
             ),
             bindInput(fRegisterName, { label: "Nome creator", icon: "person" }),
             bindInput(fRegisterEmail, { label: "Email", type: "email", icon: "mail" }),
             bindInput(fRegisterPassword, { label: "Password", type: "password", icon: "lock" }),
-            _ui.Select({
+            _.Select({
               label: "Ruolo iniziale",
               model: fRegisterRole.model,
               error: fRegisterRole.error,
               options: roleOptions,
               clearable: true
             }),
-            _ui.Checkbox(
+            _.Checkbox(
               { model: fRegisterNewsletter.model, icon: "campaign" },
               "Ricevi release notes, pattern e update di prodotto"
             ),
-            _ui.Checkbox(
+            _.Checkbox(
               { model: fRegisterTerms.model, icon: "verified_user", color: "primary" },
               "Accetto termini, privacy e workspace policy"
             ),
             fieldError(fRegisterTerms),
             formError(registerForm)
           ),
-          _ui.CardFooter(formActions("Crea account", resetRegisterForm, registerForm))
+          _.CardFooter(formActions("Crea account", resetRegisterForm, registerForm))
         )
       ]
     ),
     sample: registerSample
   },
   onboarding: {
-    code: _ui.Form(
+    code: _.Form(
       { form: onboardingForm, onSubmit: async (model) => console.log("ONBOARDING", model) },
       () => [
-        _ui.Card(
-          _ui.CardHeader(
-            _ui.Toolbar(
+        _.Card(
+          _.CardHeader(
+            _.Toolbar(
               { justify: "space-between" },
-              _h.div(
-                _ui.Toolbar(
+              _.div(
+                _.Toolbar(
                   { justify: "flex-start" },
-                  _ui.Avatar({ label: "CM", elevated: true }),
-                  _h.div(
-                    _h.h3("CMSwift Launch Pad"),
-                    _h.p("Un onboarding creativo per configurare una workspace pronta a scalare."),
-                    _ui.Badge({ label: "Beta", topLeft: "auto_awesome", notification: 1 })
+                  _.Avatar({ label: "CM", elevated: true }),
+                  _.div(
+                    _.h3("CMSwift Launch Pad"),
+                    _.p("Un onboarding creativo per configurare una workspace pronta a scalare."),
+                    _.Badge({ label: "Beta", topLeft: "auto_awesome", notification: 1 })
                   )
                 )
               )
             )
           ),
-          _ui.CardBody(
+          _.CardBody(
             chipRow(
-              _ui.Chip({ icon: "dataset_linked" }, "API-first"),
-              _ui.Chip({ icon: "dashboard_customize" }, "Composable"),
-              _ui.Chip({ icon: "rocket_launch" }, "Fast setup")
+              _.Chip({ icon: "dataset_linked" }, "API-first"),
+              _.Chip({ icon: "dashboard_customize" }, "Composable"),
+              _.Chip({ icon: "rocket_launch" }, "Fast setup")
             ),
             bindInput(fStudio, { label: "Studio name", icon: "apartment" }),
             bindInput(fStack, { label: "Stack creativo", icon: "memory" }),
-            _h.div(
+            _.div(
               { class: "cms-m-b-sm" },
-              _h.b("Setup team"),
-              _h.div(
+              _.b("Setup team"),
+              _.div(
                 { style: { display: "flex", flexDirection: "column", gap: "8px", marginTop: "8px" } },
-                _ui.Radio({ value: "solo", model: fTeam.model, color: "primary" }, "Solo maker"),
-                _ui.Radio({ value: "squad", model: fTeam.model, color: "info" }, "Small squad"),
-                _ui.Radio({ value: "agency", model: fTeam.model, color: "secondary" }, "Agency mode")
+                _.Radio({ value: "solo", model: fTeam.model, color: "primary" }, "Solo maker"),
+                _.Radio({ value: "squad", model: fTeam.model, color: "info" }, "Small squad"),
+                _.Radio({ value: "agency", model: fTeam.model, color: "secondary" }, "Agency mode")
               ),
               fieldError(fTeam)
             ),
-            _ui.Select({
+            _.Select({
               label: "Piano workspace",
               model: fPlan.model,
               error: fPlan.error,
               options: planOptions
             }),
-            _ui.Toggle({ model: fAutomations.model }, "Attiva automazioni di contenuto"),
-            _ui.Checkbox({ model: fDesignReview.model, icon: "draw" }, "Abilita design review interna"),
-            _ui.Checkbox({ model: fAnalytics.model, icon: "analytics" }, "Abilita analytics di prodotto"),
+            _.Toggle({ model: fAutomations.model }, "Attiva automazioni di contenuto"),
+            _.Checkbox({ model: fDesignReview.model, icon: "draw" }, "Abilita design review interna"),
+            _.Checkbox({ model: fAnalytics.model, icon: "analytics" }, "Abilita analytics di prodotto"),
             formError(onboardingForm)
           ),
-          _ui.CardFooter(formActions("Lancia workspace", resetOnboardingForm, onboardingForm))
+          _.CardFooter(formActions("Lancia workspace", resetOnboardingForm, onboardingForm))
         )
       ]
     ),
     sample: onboardingSample
   },
   feedback: {
-    code: _ui.Form(
+    code: _.Form(
       { form: feedbackForm, onSubmit: async (model) => console.log("FEEDBACK", model) },
       () => [
-        _ui.Card(
-          _ui.CardHeader(
-            _ui.Toolbar(
+        _.Card(
+          _.CardHeader(
+            _.Toolbar(
               { justify: "space-between" },
-              _h.div(
-                _h.h3("Pulse Check"),
-                _h.p("Feedback rapido ma ricco: rating, preferenze e follow-up in un unico form."),
-                _ui.Badge({ label: "Live", topRight: "favorite", notification: 5 })
+              _.div(
+                _.h3("Pulse Check"),
+                _.p("Feedback rapido ma ricco: rating, preferenze e follow-up in un unico form."),
+                _.Badge({ label: "Live", topRight: "favorite", notification: 5 })
               )
             )
           ),
-          _ui.CardBody(
+          _.CardBody(
             chipRow(
-              _ui.Chip({ icon: "forum" }, "Community"),
-              _ui.Chip({ icon: "tips_and_updates" }, "Ideas"),
-              _ui.Chip({ icon: "favorite" }, "UX signal")
+              _.Chip({ icon: "forum" }, "Community"),
+              _.Chip({ icon: "tips_and_updates" }, "Ideas"),
+              _.Chip({ icon: "favorite" }, "UX signal")
             ),
-            _ui.Select({
+            _.Select({
               label: "Use case principale",
               model: fUseCase.model,
               error: fUseCase.error,
               options: useCaseOptions,
               clearable: true
             }),
-            _ui.Select({
+            _.Select({
               label: "Componente preferito",
               model: fFavorite.model,
               error: fFavorite.error,
               options: favoriteOptions,
               clearable: true
             }),
-            _h.div(
+            _.div(
               { class: "cms-m-b-sm" },
-              _h.b("Valutazione esperienza"),
-              _h.div({ style: { marginTop: "8px" } }, _ui.Rating({ model: fScore.model, max: 5 })),
+              _.b("Valutazione esperienza"),
+              _.div({ style: { marginTop: "8px" } }, _.Rating({ model: fScore.model, max: 5 })),
               fieldError(fScore)
             ),
-            _ui.Toggle({ model: fRecommend.model }, "Lo consiglierei ad altri team"),
-            _ui.Checkbox({ model: fFollowup.model, icon: "mail" }, "Voglio essere ricontattato"),
+            _.Toggle({ model: fRecommend.model }, "Lo consiglierei ad altri team"),
+            _.Checkbox({ model: fFollowup.model, icon: "mail" }, "Voglio essere ricontattato"),
             bindInput(fNotes, { label: "Nota finale", icon: "edit" }),
             formError(feedbackForm)
           ),
-          _ui.CardFooter(formActions("Invia feedback", resetFeedbackForm, feedbackForm))
+          _.CardFooter(formActions("Invia feedback", resetFeedbackForm, feedbackForm))
         )
       ]
     ),
@@ -418,19 +418,19 @@ const listSample = {
   }
 };
 
-const form = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("Form"),
-  _h.p("Form wrapper integrato con `useForm`: gestisce submit async, validazione e stato `submitting`. I children possono essere funzioni che ricevono l'istanza del form."),
-  _h.h2("Props principali"),
-  _ui.List(
-    _ui.Item("form: istanza restituita da `CMSwift.useForm()`"),
-    _ui.Item("onSubmit: handler async con `(model, form)`"),
-    _ui.Item("class, style e children function per costruire layout avanzati")
+const form = _.div({ class: "cms-panel cms-page" },
+  _.h1("Form"),
+  _.p("Form wrapper integrato con `useForm`: gestisce submit async, validazione e stato `submitting`. I children possono essere funzioni che ricevono l'istanza del form."),
+  _.h2("Props principali"),
+  _.List(
+    _.Item("form: istanza restituita da `CMSwift.useForm()`"),
+    _.Item("onSubmit: handler async con `(model, form)`"),
+    _.Item("class, style e children function per costruire layout avanzati")
   ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Form"),
-  _h.h2("Esempi completi"),
-  _ui.Card({ header: "Demo" },
+  _.h2("Documentazione API"),
+  _.DocTable("Form"),
+  _.h2("Esempi completi"),
+  _.Card({ header: "Demo" },
     boxCode("Registrazione creator", listSample.registration),
     boxCode("Onboarding CMSwift", listSample.onboarding),
     boxCode("Feedback form", listSample.feedback)

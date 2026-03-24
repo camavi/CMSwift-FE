@@ -1,8 +1,8 @@
-const dateSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Date sample"),
-  _h.p("Input type `date` con styling `cms-input`. Semplifica la gestione di date native."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Date({ value: "2026-01-24" })
+const dateSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Date sample"),
+  _.p("Input type `date` con styling `cms-input`. Semplifica la gestione di date native."),
+  _.Card({ header: "Esempio" },
+    _.Date({ value: "2026-01-24" })
   )
 );
 

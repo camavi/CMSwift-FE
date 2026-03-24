@@ -1,8 +1,8 @@
-const toggleSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Toggle sample"),
-  _h.p("Switch toggle basato su checkbox con label. Supporta model, onChange/onInput e variante dense."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Toggle({ label: "Attivo" })
+const toggleSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Toggle sample"),
+  _.p("Switch toggle basato su checkbox con label. Supporta model, onChange/onInput e variante dense."),
+  _.Card({ header: "Esempio" },
+    _.Toggle({ label: "Attivo" })
   )
 );
 

@@ -1,8 +1,8 @@
 import { radio } from "./radio.cms";
 
-const render = (options) => _ui.Icon(options);
+const render = (options) => _.Icon(options);
 
-const renderSample = (options) => `_ui.Icon({${serializeOptions(options)}});`;
+const renderSample = (options) => `_.Icon({${serializeOptions(options)}});`;
 
 const createSection = (entries) => ({
   code: entries.map((options) => render(options)),
@@ -49,65 +49,65 @@ const buildThemeSection = (extraOptions = {}, names = null) => {
 const listSample = {
   source: {
     code: [
-      _ui.Icon("home"),
-      _ui.Icon("search"),
-      _ui.Icon("favorite"),
-      _ui.Icon("bolt"),
-      _ui.Icon("#home"),
-      _ui.Icon("#search"),
-      _ui.Icon("#bell"),
-      _ui.Icon("#heart"),
-      _ui.Icon("#brand-github"),
-      _ui.Icon("#code")
+      _.Icon("home"),
+      _.Icon("search"),
+      _.Icon("favorite"),
+      _.Icon("bolt"),
+      _.Icon("#home"),
+      _.Icon("#search"),
+      _.Icon("#bell"),
+      _.Icon("#heart"),
+      _.Icon("#brand-github"),
+      _.Icon("#code")
     ],
     sample: [
-      '_ui.Icon("home");',
-      '_ui.Icon("search");',
-      '_ui.Icon("favorite");',
-      '_ui.Icon("bolt");',
-      '_ui.Icon("#home");',
-      '_ui.Icon("#search");',
-      '_ui.Icon("#bell");',
-      '_ui.Icon("#heart");',
-      '_ui.Icon("#brand-github");',
-      '_ui.Icon("#code");',
+      '_.Icon("home");',
+      '_.Icon("search");',
+      '_.Icon("favorite");',
+      '_.Icon("bolt");',
+      '_.Icon("#home");',
+      '_.Icon("#search");',
+      '_.Icon("#bell");',
+      '_.Icon("#heart");',
+      '_.Icon("#brand-github");',
+      '_.Icon("#code");',
     ]
   },
   signature: {
     code: [
-      _ui.Icon("bolt", { textColor: "#f59e0b", size: "lg" }),
-      _ui.Icon("check_circle", { textColor: "#16a34a", size: 24 }),
-      _ui.Icon({ name: "#plus", textColor: "#2563eb", size: 22 }),
-      _ui.Icon({ name: "#heart", textColor: "#e11d48", size: 26 }),
-      _ui.Icon({ name: "settings", textColor: "#475569", size: "xl" })
+      _.Icon("bolt", { textColor: "#f59e0b", size: "lg" }),
+      _.Icon("check_circle", { textColor: "#16a34a", size: 24 }),
+      _.Icon({ name: "#plus", textColor: "#2563eb", size: 22 }),
+      _.Icon({ name: "#heart", textColor: "#e11d48", size: 26 }),
+      _.Icon({ name: "settings", textColor: "#475569", size: "xl" })
     ],
     sample: [
-      '_ui.Icon("bolt", { textColor: "#f59e0b", size: "lg" });',
-      '_ui.Icon("check_circle", { textColor: "#16a34a", size: 24 });',
-      '_ui.Icon({ name: "#plus", textColor: "#2563eb", size: 22 });',
-      '_ui.Icon({ name: "#heart", textColor: "#e11d48", size: 26 });',
-      '_ui.Icon({ name: "settings", textColor: "#475569", size: "xl" });',
+      '_.Icon("bolt", { textColor: "#f59e0b", size: "lg" });',
+      '_.Icon("check_circle", { textColor: "#16a34a", size: 24 });',
+      '_.Icon({ name: "#plus", textColor: "#2563eb", size: 22 });',
+      '_.Icon({ name: "#heart", textColor: "#e11d48", size: 26 });',
+      '_.Icon({ name: "settings", textColor: "#475569", size: "xl" });',
     ]
   },
   state: buildThemeSection(),
   size: {
     code: [
-      _ui.Icon({ name: "home", size: "xs" }),
-      _ui.Icon({ name: "home", size: "sm" }),
-      _ui.Icon({ name: "home", size: "md" }),
-      _ui.Icon({ name: "home", size: "lg" }),
-      _ui.Icon({ name: "home", size: "xl" }),
-      _ui.Icon({ name: "#plus", size: 20 }),
-      _ui.Icon({ name: "#brand-github", size: "clamp(26px, 4vw, 42px)" })
+      _.Icon({ name: "home", size: "xs" }),
+      _.Icon({ name: "home", size: "sm" }),
+      _.Icon({ name: "home", size: "md" }),
+      _.Icon({ name: "home", size: "lg" }),
+      _.Icon({ name: "home", size: "xl" }),
+      _.Icon({ name: "#plus", size: 20 }),
+      _.Icon({ name: "#brand-github", size: "clamp(26px, 4vw, 42px)" })
     ],
     sample: [
-      '_ui.Icon({ name: "home", size: "xs" });',
-      '_ui.Icon({ name: "home", size: "sm" });',
-      '_ui.Icon({ name: "home", size: "md" });',
-      '_ui.Icon({ name: "home", size: "lg" });',
-      '_ui.Icon({ name: "home", size: "xl" });',
-      '_ui.Icon({ name: "#plus", size: 20 });',
-      '_ui.Icon({ name: "#brand-github", size: "clamp(26px, 4vw, 42px)" });',
+      '_.Icon({ name: "home", size: "xs" });',
+      '_.Icon({ name: "home", size: "sm" });',
+      '_.Icon({ name: "home", size: "md" });',
+      '_.Icon({ name: "home", size: "lg" });',
+      '_.Icon({ name: "home", size: "xl" });',
+      '_.Icon({ name: "#plus", size: 20 });',
+      '_.Icon({ name: "#brand-github", size: "clamp(26px, 4vw, 42px)" });',
     ]
   },
   shadow: buildThemeSection({ shadow: true }),
@@ -128,28 +128,28 @@ const listSample = {
   outlineTextGradient: buildThemeSection({ textGradient: true, outline: true }, materialShowIcons),
   color: {
     code: [
-      _ui.Icon({ name: "home", textColor: "#b1faf3", color: "#2563eb", size: 24 }),
-      _ui.Icon({ name: "favorite", textColor: "#f7c272", color: "#db2777", size: 24 }),
-      _ui.Icon({ name: "bolt", textColor: "#e801f9", color: "#f59e0b", size: 24 }),
-      _ui.Icon({ name: "check_circle", textColor: "#f8f005", color: "#16a34a", size: 24 }),
-      _ui.Icon({ name: "#bell", textColor: "#00c7fe", color: "#7c3aed", size: 24 }),
-      _ui.Icon({ name: "#heart", textColor: "#d7e3fb", color: "#e11d48", size: 24 }),
-      _ui.Icon({ name: "#brand-codepen", textColor: "#ffffff", color: "#0f766e", size: 24 })
+      _.Icon({ name: "home", textColor: "#b1faf3", color: "#2563eb", size: 24 }),
+      _.Icon({ name: "favorite", textColor: "#f7c272", color: "#db2777", size: 24 }),
+      _.Icon({ name: "bolt", textColor: "#e801f9", color: "#f59e0b", size: 24 }),
+      _.Icon({ name: "check_circle", textColor: "#f8f005", color: "#16a34a", size: 24 }),
+      _.Icon({ name: "#bell", textColor: "#00c7fe", color: "#7c3aed", size: 24 }),
+      _.Icon({ name: "#heart", textColor: "#d7e3fb", color: "#e11d48", size: 24 }),
+      _.Icon({ name: "#brand-codepen", textColor: "#ffffff", color: "#0f766e", size: 24 })
     ],
     sample: [
-      '_ui.Icon({ name: "home", textColor: "#b1faf3", color: "#2563eb", size: 24 });',
-      '_ui.Icon({ name: "favorite", textColor: "#f7c272", color: "#db2777", size: 24 });',
-      '_ui.Icon({ name: "bolt", textColor: "#e801f9", color: "#f59e0b", size: 24 });',
-      '_ui.Icon({ name: "check_circle", textColor: "#f8f005", color: "#16a34a", size: 24 });',
-      '_ui.Icon({ name: "#bell", textColor: "#00c7fe", color: "#7c3aed", size: 24 });',
-      '_ui.Icon({ name: "#heart", textColor: "#d7e3fb", color: "#e11d48", size: 24 });',
-      '_ui.Icon({ name: "#brand-codepen", textColor: "#ffffff", color: "#0f766e", size: 24 });',
+      '_.Icon({ name: "home", textColor: "#b1faf3", color: "#2563eb", size: 24 });',
+      '_.Icon({ name: "favorite", textColor: "#f7c272", color: "#db2777", size: 24 });',
+      '_.Icon({ name: "bolt", textColor: "#e801f9", color: "#f59e0b", size: 24 });',
+      '_.Icon({ name: "check_circle", textColor: "#f8f005", color: "#16a34a", size: 24 });',
+      '_.Icon({ name: "#bell", textColor: "#00c7fe", color: "#7c3aed", size: 24 });',
+      '_.Icon({ name: "#heart", textColor: "#d7e3fb", color: "#e11d48", size: 24 });',
+      '_.Icon({ name: "#brand-codepen", textColor: "#ffffff", color: "#0f766e", size: 24 });',
     ]
   },
   custom: {
     code: [
-      _ui.Icon(
-        _h.span({
+      _.Icon(
+        _.span({
           style: {
             fontSize: "11px",
             fontWeight: "700",
@@ -157,8 +157,8 @@ const listSample = {
           }
         }, "AI")
       ),
-      _ui.Icon({
-        name: _h.span({
+      _.Icon({
+        name: _.span({
           style: {
             fontSize: "11px",
             fontWeight: "700",
@@ -177,8 +177,8 @@ const listSample = {
           color: "#ffffff"
         }
       }),
-      _ui.Icon({
-        name: _h.span({
+      _.Icon({
+        name: _.span({
           style: {
             fontSize: "10px",
             fontWeight: "700"
@@ -197,8 +197,8 @@ const listSample = {
           color: "#9a3412"
         }
       }),
-      _ui.Icon({
-        name: _h.span({
+      _.Icon({
+        name: _.span({
           style: {
             width: "18px",
             height: "18px",
@@ -218,14 +218,14 @@ const listSample = {
       })
     ],
     sample: [
-      '_ui.Icon(_h.span({ style: { fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em" } }, "AI"));',
-      '_ui.Icon({',
-      '  name: _h.span({ style: { fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em" } }, "LAB"),',
+      '_.Icon(_.span({ style: { fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em" } }, "AI"));',
+      '_.Icon({',
+      '  name: _.span({ style: { fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em" } }, "LAB"),',
       '  size: 30,',
       '  style: { display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: "30px", minHeight: "30px", borderRadius: "10px", background: "linear-gradient(135deg, #0ea5e9, #8b5cf6)", color: "#ffffff" }',
       '});',
-      '_ui.Icon({',
-      '  name: _h.span({ style: { fontSize: "10px", fontWeight: "700" } }, "24"),',
+      '_.Icon({',
+      '  name: _.span({ style: { fontSize: "10px", fontWeight: "700" } }, "24"),',
       '  size: 28,',
       '  style: { display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: "28px", minHeight: "28px", borderRadius: "999px", border: "1px solid #fed7aa", background: "#fff7ed", color: "#9a3412" }',
       '});',
@@ -233,33 +233,33 @@ const listSample = {
   },
   showcase: {
     code: [
-      _h.div({ style: { display: "grid", gap: "16px" } },
-        _ui.Card({ header: "Toolbar mista" },
-          _ui.Toolbar({ wrap: true, gap: "18px" },
-            _h.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } },
-              _ui.Icon({ name: "#brand-github", size: 26, textColor: "#ffffff", color: "#111827" }),
-              _h.span("Repository")
+      _.div({ style: { display: "grid", gap: "16px" } },
+        _.Card({ header: "Toolbar mista" },
+          _.Toolbar({ wrap: true, gap: "18px" },
+            _.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } },
+              _.Icon({ name: "#brand-github", size: 26, textColor: "#ffffff", color: "#111827" }),
+              _.span("Repository")
             ),
-            _h.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } },
-              _ui.Icon({ name: "notifications", size: 26, textColor: "#ffffff", color: "#ea580c" }),
-              _h.span("Alert")
+            _.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } },
+              _.Icon({ name: "notifications", size: 26, textColor: "#ffffff", color: "#ea580c" }),
+              _.span("Alert")
             ),
-            _h.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } },
-              _ui.Icon({ name: "#code", size: 26, textColor: "#ffffff", color: "#0f766e" }),
-              _h.span("Code")
+            _.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } },
+              _.Icon({ name: "#code", size: 26, textColor: "#ffffff", color: "#0f766e" }),
+              _.span("Code")
             ),
-            _h.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } },
-              _ui.Icon({ name: "favorite", size: 26, textColor: "#ffffff", color: "#db2777" }),
-              _h.span("Likes")
+            _.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } },
+              _.Icon({ name: "favorite", size: 26, textColor: "#ffffff", color: "#db2777" }),
+              _.span("Likes")
             )
           )
         ),
-        _ui.Card({ header: "Hero icon mix" },
-          _h.div({ style: { display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" } },
-            _ui.Icon({ name: "#brand-codepen", size: 42, textColor: "#ffffff", color: "#2563eb" }),
-            _ui.Icon({ name: "auto_awesome", size: 40, textColor: "#ffff85", color: "#7c3aed" }),
-            _ui.Icon({
-              name: _h.span({
+        _.Card({ header: "Hero icon mix" },
+          _.div({ style: { display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" } },
+            _.Icon({ name: "#brand-codepen", size: 42, textColor: "#ffffff", color: "#2563eb" }),
+            _.Icon({ name: "auto_awesome", size: 40, textColor: "#ffff85", color: "#7c3aed" }),
+            _.Icon({
+              name: _.span({
                 style: {
                   fontSize: "12px",
                   fontWeight: "700",
@@ -278,23 +278,23 @@ const listSample = {
                 color: "#ffffff"
               }
             }),
-            _h.div(
-              _h.div({ style: { fontWeight: "700" } }, "Material + Tabler + custom"),
-              _h.div({ style: { color: "#6b7280" } }, "Un'unica API per sprite SVG, Material Icons e contenuto personalizzato.")
+            _.div(
+              _.div({ style: { fontWeight: "700" } }, "Material + Tabler + custom"),
+              _.div({ style: { color: "#6b7280" } }, "Un'unica API per sprite SVG, Material Icons e contenuto personalizzato.")
             )
           )
         )
       )
     ],
     sample: [
-      '_ui.Toolbar({ wrap: true, gap: "18px" },',
-      '  _h.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } }, _ui.Icon({ name: "#brand-github", size: 26, color: "#111827" }), _h.span("Repository")),',
-      '  _h.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } }, _ui.Icon({ name: "notifications", size: 26, color: "#ea580c" }), _h.span("Alert")),',
-      '  _h.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } }, _ui.Icon({ name: "#app", size: 26, color: "#0f766e" }), _h.span("Apps"))',
+      '_.Toolbar({ wrap: true, gap: "18px" },',
+      '  _.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } }, _.Icon({ name: "#brand-github", size: 26, color: "#111827" }), _.span("Repository")),',
+      '  _.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } }, _.Icon({ name: "notifications", size: 26, color: "#ea580c" }), _.span("Alert")),',
+      '  _.div({ style: { display: "inline-flex", alignItems: "center", gap: "10px" } }, _.Icon({ name: "#app", size: 26, color: "#0f766e" }), _.span("Apps"))',
       ');',
       '',
-      '_ui.Icon({',
-      '  name: _h.span({ style: { fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em" } }, "AI"),',
+      '_.Icon({',
+      '  name: _.span({ style: { fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em" } }, "AI"),',
       '  size: 40,',
       '  style: { display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: "40px", minHeight: "40px", borderRadius: "12px", background: "linear-gradient(135deg, #14b8a6, #0f766e)", color: "#ffffff" }',
       '});',
@@ -302,22 +302,22 @@ const listSample = {
   }
 };
 
-const icon = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("Icon"),
-  _h.p("`_ui.Icon` e il componente base per tutte le micro-grafie dell'interfaccia: puoi renderizzare icone Google Material, sprite SVG Tabler oppure contenuto custom mantenendo la stessa API."),
-  _h.p("Per Tabler usa il prefisso `#` nel nome, per esempio `_ui.Icon(\"#home\")` oppure `_ui.Icon({ name: \"#home\" })`. Per Google Material usa il nome diretto, per esempio `_ui.Icon(\"home\")` oppure `_ui.Icon({ name: \"favorite\" })`."),
-  _h.h2("Props principali"),
-  _ui.List(
-    _ui.Item("name: string, Node o Function; se inizia con `#` usa lo sprite Tabler, altrimenti Material Icons"),
-    _ui.Item("size: token (`xs-sm-md-lg-xl`), numero in px o qualsiasi misura CSS"),
-    _ui.Item("color: supporta sia colori CSS sia stati standard come `success`, `warning`, `danger`, `info`, `primary`, `secondary`, `dark`, `light`"),
-    _ui.Item("shadow, lightShadow, clickable, border, glossy, glow, glass, gradient, outline e textGradient per tutte le varianti decorative standard"),
-    _ui.Item("style e class: rifinitura del wrapper quando l'icona diventa parte del layout"),
-    _ui.Item("contenuto custom: passa un Node o una Function per creare icone testuali, badge numerici o mini-shape")
+const icon = _.div({ class: "cms-panel cms-page" },
+  _.h1("Icon"),
+  _.p("`_.Icon` e il componente base per tutte le micro-grafie dell'interfaccia: puoi renderizzare icone Google Material, sprite SVG Tabler oppure contenuto custom mantenendo la stessa API."),
+  _.p("Per Tabler usa il prefisso `#` nel nome, per esempio `_.Icon(\"#home\")` oppure `_.Icon({ name: \"#home\" })`. Per Google Material usa il nome diretto, per esempio `_.Icon(\"home\")` oppure `_.Icon({ name: \"favorite\" })`."),
+  _.h2("Props principali"),
+  _.List(
+    _.Item("name: string, Node o Function; se inizia con `#` usa lo sprite Tabler, altrimenti Material Icons"),
+    _.Item("size: token (`xs-sm-md-lg-xl`), numero in px o qualsiasi misura CSS"),
+    _.Item("color: supporta sia colori CSS sia stati standard come `success`, `warning`, `danger`, `info`, `primary`, `secondary`, `dark`, `light`"),
+    _.Item("shadow, lightShadow, clickable, border, glossy, glow, glass, gradient, outline e textGradient per tutte le varianti decorative standard"),
+    _.Item("style e class: rifinitura del wrapper quando l'icona diventa parte del layout"),
+    _.Item("contenuto custom: passa un Node o una Function per creare icone testuali, badge numerici o mini-shape")
   ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Icon"),
-  _h.h2("Tutorial completo"),
+  _.h2("Documentazione API"),
+  _.DocTable("Icon"),
+  _.h2("Tutorial completo"),
   boxCode("Material + Tabler", listSample.source),
   boxCode("String signature + props", listSample.signature),
   boxCode("State color", listSample.state),

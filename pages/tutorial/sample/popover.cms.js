@@ -1,12 +1,12 @@
-const popBtn = _ui.Btn("Apri popover");
-const popoverApi = _ui.Popover({ title: "Popover", content: "Contenuto popover" });
+const popBtn = _.Btn("Apri popover");
+const popoverApi = _.Popover({ title: "Popover", content: "Contenuto popover" });
 popBtn.addEventListener("click", () => popoverApi.open(popBtn));
-const popoverExample = _ui.Row(popBtn);
+const popoverExample = _.Row(popBtn);
 
-const popoverSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Popover sample"),
-  _h.p("Popover overlay ancorato con title/content/actions. Supporta backdrop, trapFocus e closeOnOutside."),
-  _ui.Card({ header: "Esempio" },
+const popoverSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Popover sample"),
+  _.p("Popover overlay ancorato con title/content/actions. Supporta backdrop, trapFocus e closeOnOutside."),
+  _.Card({ header: "Esempio" },
     popoverExample
   )
 );

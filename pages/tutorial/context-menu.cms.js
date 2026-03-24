@@ -1,23 +1,23 @@
-const ctxArea = _h.div({ class: "cms-panel", style: { padding: "12px" } }, "Right click qui");
-const contextMenuApi = _ui.ContextMenu({ content: _ui.List(_ui.Item("Copia"), _ui.Item("Elimina")) });
+const ctxArea = _.div({ class: "cms-panel", style: { padding: "12px" } }, "Right click qui");
+const contextMenuApi = _.ContextMenu({ content: _.List(_.Item("Copia"), _.Item("Elimina")) });
 contextMenuApi.bind(ctxArea);
-const contextMenuExample = _ui.Row(ctxArea);
+const contextMenuExample = _.Row(ctxArea);
 
-const contextMenu = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("ContextMenu"),
-  _h.p("Menu contestuale su right-click con `bind` o `openAt(x,y)`. Supporta closeOnSelect e onOpen/onClose."),
-  _h.h2("Props principali"),
-  _ui.List(
-    _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
-    _ui.Item("state: success, warning, danger, info, primary, secondary"),
-    _ui.Item("outline, shadow, borderRadius, clickable per stile e interazione")
+const contextMenu = _.div({ class: "cms-panel cms-page" },
+  _.h1("ContextMenu"),
+  _.p("Menu contestuale su right-click con `bind` o `openAt(x,y)`. Supporta closeOnSelect e onOpen/onClose."),
+  _.h2("Props principali"),
+  _.List(
+    _.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
+    _.Item("state: success, warning, danger, info, primary, secondary"),
+    _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
-  _h.h2("Esempio completo"),
-  _ui.Card({ header: "Demo" },
+  _.h2("Esempio completo"),
+  _.Card({ header: "Demo" },
     contextMenuExample
   ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("ContextMenu")
+  _.h2("Documentazione API"),
+  _.DocTable("ContextMenu")
 );
 
 export { contextMenu };

@@ -1,18 +1,18 @@
-const formField = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("FormField"),
-  _h.p("Wrapper per controlli con label floating, hint/error/success/warning/note e addons (icon/prefix/suffix). Supporta clearable e slot avanzati per override."),
-  _h.h2("Props principali"),
-  _ui.List(
-    _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
-    _ui.Item("state: success, warning, danger, info, primary, secondary"),
-    _ui.Item("outline, shadow, borderRadius, clickable per stile e interazione")
+const formField = _.div({ class: "cms-panel cms-page" },
+  _.h1("FormField"),
+  _.p("Wrapper per controlli con label floating, hint/error/success/warning/note e addons (icon/prefix/suffix). Supporta clearable e slot avanzati per override."),
+  _.h2("Props principali"),
+  _.List(
+    _.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
+    _.Item("state: success, warning, danger, info, primary, secondary"),
+    _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
-  _h.h2("Esempio completo"),
-  _ui.Card({ header: "Demo" },
-    _ui.FormField({ label: "Email", hint: "Helper text", control: _h.input({ class: "cms-input", placeholder: "email@example.com" }) })
+  _.h2("Esempio completo"),
+  _.Card({ header: "Demo" },
+    _.FormField({ label: "Email", hint: "Helper text", control: _.input({ class: "cms-input", placeholder: "email@example.com" }) })
   ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("FormField")
+  _.h2("Documentazione API"),
+  _.DocTable("FormField")
 );
 
 export { formField };

@@ -1,8 +1,8 @@
-const containerSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Container sample"),
-  _h.p("Contenitore base (`cms-container`) per vincolare larghezze e padding. Usa slot `default` o children."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Container(_ui.Card("Contenuto"))
+const containerSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Container sample"),
+  _.p("Contenitore base (`cms-container`) per vincolare larghezze e padding. Usa slot `default` o children."),
+  _.Card({ header: "Esempio" },
+    _.Container(_.Card("Contenuto"))
   )
 );
 

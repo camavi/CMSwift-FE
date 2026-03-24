@@ -1,23 +1,23 @@
-const popBtn = _ui.Btn("Apri popover");
-const popoverApi = _ui.Popover({ title: "Popover", content: "Contenuto popover" });
+const popBtn = _.Btn("Apri popover");
+const popoverApi = _.Popover({ title: "Popover", content: "Contenuto popover" });
 popBtn.addEventListener("click", () => popoverApi.open(popBtn));
-const popoverExample = _ui.Row(popBtn);
+const popoverExample = _.Row(popBtn);
 
-const popover = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("Popover"),
-  _h.p("Popover overlay ancorato con title/content/actions. Supporta backdrop, trapFocus e closeOnOutside."),
-  _h.h2("Props principali"),
-  _ui.List(
-    _ui.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
-    _ui.Item("state: success, warning, danger, info, primary, secondary"),
-    _ui.Item("outline, shadow, borderRadius, clickable per stile e interazione")
+const popover = _.div({ class: "cms-panel cms-page" },
+  _.h1("Popover"),
+  _.p("Popover overlay ancorato con title/content/actions. Supporta backdrop, trapFocus e closeOnOutside."),
+  _.h2("Props principali"),
+  _.List(
+    _.Item("size: dimensione del componente (xs-sm-md-lg-xl)"),
+    _.Item("state: success, warning, danger, info, primary, secondary"),
+    _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
-  _h.h2("Esempio completo"),
-  _ui.Card({ header: "Demo" },
+  _.h2("Esempio completo"),
+  _.Card({ header: "Demo" },
     popoverExample
   ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("Popover")
+  _.h2("Documentazione API"),
+  _.DocTable("Popover")
 );
 
 export { popover };

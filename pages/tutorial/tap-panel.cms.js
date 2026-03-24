@@ -1,13 +1,13 @@
-const tabPanelModel = CMSwift.reactive.signal("overview");
-const tabPanelSwipeModel = CMSwift.reactive.signal("one");
-const tabPanelSlotsModel = CMSwift.reactive.signal("billing");
+const tabPanelModel = _.signal("overview");
+const tabPanelSwipeModel = _.signal("one");
+const tabPanelSlotsModel = _.signal("billing");
 
-const panelBlock = (title, text) => _h.div(
-  _h.h3(title),
-  _h.p(text),
-  _ui.Row({ style: { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" } },
-    _ui.Btn({ color: "primary" }, "Azione primaria"),
-    _ui.Btn({ outline: true }, "Secondaria")
+const panelBlock = (title, text) => _.div(
+  _.h3(title),
+  _.p(text),
+  _.Row({ style: { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" } },
+    _.Btn({ color: "primary" }, "Azione primaria"),
+    _.Btn({ outline: true }, "Secondaria")
   )
 );
 
@@ -37,42 +37,42 @@ const slotTabs = [
   { name: "notifications", label: "Notifications", icon: "🔔", content: "Preferenze e canali di notifica." }
 ];
 
-const tapPanel = _h.div({ class: "cms-panel cms-page" },
-  _h.h1("TabPanel"),
-  _h.p("TabPanel gestisce barra di navigazione e pannelli associati. Supporta model, swipe, wrap, animazioni e slot di personalizzazione."),
-  _h.h2("Props principali"),
-  _ui.List(
-    _ui.Item("tabs: array con name/label/content"),
-    _ui.Item("model: [get,set] signal per stato corrente"),
-    _ui.Item("orientation: vertical | horizontal (default vertical)"),
-    _ui.Item("navPosition: before | after"),
-    _ui.Item("wrap, swipeable, infinite, animated, transitionDuration, transitionEasing"),
-    _ui.Item("slots: nav, tab, label, panel, default")
+const tapPanel = _.div({ class: "cms-panel cms-page" },
+  _.h1("TabPanel"),
+  _.p("TabPanel gestisce barra di navigazione e pannelli associati. Supporta model, swipe, wrap, animazioni e slot di personalizzazione."),
+  _.h2("Props principali"),
+  _.List(
+    _.Item("tabs: array con name/label/content"),
+    _.Item("model: [get,set] signal per stato corrente"),
+    _.Item("orientation: vertical | horizontal (default vertical)"),
+    _.Item("navPosition: before | after"),
+    _.Item("wrap, swipeable, infinite, animated, transitionDuration, transitionEasing"),
+    _.Item("slots: nav, tab, label, panel, default")
   ),
-  _h.h2("Documentazione API"),
-  CMSwift.ui.DocTable("TabPanel"),
-  _h.h2("Esempi completi"),
-  _ui.Card({ header: "Base (verticale, nav before)", class: 'cms-m-b-md' },
-    _ui.TabPanel({ tabs: basicTabs, model: tabPanelModel, orientation: "horizontal", })
+  _.h2("Documentazione API"),
+  _.DocTable("TabPanel"),
+  _.h2("Esempi completi"),
+  _.Card({ header: "Base (verticale, nav before)", class: 'cms-m-b-md' },
+    _.TabPanel({ tabs: basicTabs, model: tabPanelModel, orientation: "horizontal", })
   ),
-  _ui.Card({ header: "Horizontal + wrap + nav after (label slot)", class: 'cms-m-b-md' },
-    _ui.TabPanel({
+  _.Card({ header: "Horizontal + wrap + nav after (label slot)", class: 'cms-m-b-md' },
+    _.TabPanel({
       tabs: wrapTabs,
       orientation: "horizontal",
       wrap: true,
       navPosition: "after",
       slots: {
-        label: ({ tab, active }) => _h.span(
+        label: ({ tab, active }) => _.span(
           { style: { display: "inline-flex", gap: "8px", alignItems: "center" } },
-          _h.span(tab.icon || "•"),
-          _h.span(tab.label),
-          tab.badge ? _ui.Badge({ color: active ? "primary" : "var(--cms-secondary)" }, tab.badge) : null
+          _.span(tab.icon || "•"),
+          _.span(tab.label),
+          tab.badge ? _.Badge({ color: active ? "primary" : "var(--cms-secondary)" }, tab.badge) : null
         )
       }
     })
   ),
-  _ui.Card({ header: "Swipe + infinite + animated", class: 'cms-m-b-md' },
-    _ui.TabPanel({
+  _.Card({ header: "Swipe + infinite + animated", class: 'cms-m-b-md' },
+    _.TabPanel({
       tabs: swipeTabs,
       model: tabPanelSwipeModel,
       swipeable: true,
@@ -82,24 +82,24 @@ const tapPanel = _h.div({ class: "cms-panel cms-page" },
       transitionEasing: "cubic-bezier(0.2, 0.7, 0.2, 1)"
     })
   ),
-  _ui.Card({ header: "Slots avanzati (nav + panel)", class: 'cms-m-b-md' },
-    _ui.TabPanel({
+  _.Card({ header: "Slots avanzati (nav + panel)", class: 'cms-m-b-md' },
+    _.TabPanel({
       tabs: slotTabs,
       model: tabPanelSlotsModel,
       animated: true,
       slots: {
-        nav: ({ tabs, select, active }) => _h.div(
+        nav: ({ tabs, select, active }) => _.div(
           { class: "cms-tabpanel-tabs" },
-          ...tabs.map((tab) => _h.button({
+          ...tabs.map((tab) => _.button({
             class: `cms-tabpanel-tab${active() === tab.name ? " active" : ""}`,
             type: "button",
             onClick: () => select(tab.name)
           }, tab.icon || "•", " ", tab.label))
         ),
-        panel: ({ tab }) => _h.div(
-          _h.h3(`${tab.label} Panel`),
-          _h.p(tab.content),
-          _ui.Btn({ color: "primary" }, "Configura")
+        panel: ({ tab }) => _.div(
+          _.h3(`${tab.label} Panel`),
+          _.p(tab.content),
+          _.Btn({ color: "primary" }, "Configura")
         )
       }
     })

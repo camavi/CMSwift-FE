@@ -1,8 +1,8 @@
-const btnSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Button sample"),
-  _h.p("Bottone con varianti colore, outline, icona/label e stato loading. Gestisce disabilitazione, aria e animazione burst su pointerdown."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Btn({ variant: "primary", icon: "#plus" }, "Primary")
+const btnSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Button sample"),
+  _.p("Bottone con varianti colore, outline, icona/label e stato loading. Gestisce disabilitazione, aria e animazione burst su pointerdown."),
+  _.Card({ header: "Esempio" },
+    _.Btn({ variant: "primary", icon: "#plus" }, "Primary")
   )
 );
 

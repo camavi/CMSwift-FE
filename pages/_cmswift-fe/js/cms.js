@@ -4,9 +4,61 @@
      CMSwift core mini (ready + dom + reactive)
      =============================== */
 
-  window.CMSwift = {};
-  window.cms = window.CMSwift; // alias
+  window.CMSwift = window.CMSwift || {};
   const CMSwift = window.CMSwift;
+  const publicRoot = window._ || {};
+  const PUBLIC_UI_EXPORT_EXCLUDE = new Set(["meta", "slot", "slots", "inspect", "renderSlot", "renderSlotToArray", "can", "canAny"]);
+  let publicHyperscript = null;
+  let publicRodFactory = null;
+  const publicSignal = (...args) => CMSwift.reactive.signal(...args);
+  const publicEffect = (...args) => CMSwift.reactive.effect(...args);
+  const publicRoute = (...args) => CMSwift.router.add(...args);
+  const publicNavigate = (...args) => CMSwift.router.navigate(...args);
+  const publicMount = (...args) => CMSwift.mount(...args);
+  const publicReady = (...args) => CMSwift.ready(...args);
+  const publicRodBind = (...args) => CMSwift.rodBind(...args);
+  const publicRodFromSignal = (...args) => CMSwift.rodFromSignal(...args);
+  const publicRodModel = (...args) => CMSwift.rodModel(...args);
+  const publicSignalModel = (...args) => CMSwift.signalModel(...args);
+  const syncPublicRoot = () => {
+    window._ = publicRoot;
+    if (publicHyperscript) Object.assign(publicRoot, publicHyperscript);
+    if (publicRodFactory) publicRoot.rod = publicRodFactory;
+
+    publicRoot.signal = publicSignal;
+    publicRoot.effect = publicEffect;
+    publicRoot.route = publicRoute;
+    publicRoot.navigate = publicNavigate;
+    publicRoot.mount = publicMount;
+    publicRoot.ready = publicReady;
+    publicRoot.dom = CMSwift.dom;
+    publicRoot.router = CMSwift.router;
+    publicRoot.store = CMSwift.store;
+    publicRoot.http = CMSwift.http;
+    publicRoot.overlay = CMSwift.overlay;
+    publicRoot.useRouter = CMSwift.useRouter;
+    publicRoot.useRoute = CMSwift.useRoute;
+    publicRoot.rodBind = publicRodBind;
+    publicRoot.rodFromSignal = publicRodFromSignal;
+    publicRoot.rodModel = publicRodModel;
+    publicRoot.signalModel = publicSignalModel;
+    publicRoot.config = CMSwift.config;
+    publicRoot.isDev = CMSwift.isDev;
+
+    const ui = CMSwift.ui;
+    if (ui && typeof ui === "object") {
+      for (const key of Object.keys(ui)) {
+        if (PUBLIC_UI_EXPORT_EXCLUDE.has(key)) continue;
+        if (!/^[A-Z]/.test(key)) continue;
+        publicRoot[key] = ui[key];
+      }
+    }
+
+    return publicRoot;
+  };
+  CMSwift.syncPublicRoot = syncPublicRoot;
+  window._ = publicRoot;
+  window.cms = publicRoot; // legacy alias, deprecated: use `_.`
 
 
   CMSwift.config = CMSwift.config || {};
@@ -832,7 +884,9 @@
   DOM_ELEMENTS.forEach(tag => {
     _h[tag] = (...args) => createElement(tag, ...args);
   });
-  window._h = _h;
+  window._h = _h; // legacy alias, deprecated: use `_.`
+  publicHyperscript = _h;
+  syncPublicRoot();
 
   _h.fragment = (...children) => children;
   _h.dynamic = function (renderFn) {
@@ -1136,7 +1190,9 @@
       comp.onDispose(() => CMSwift.rod._all.delete(comp));
     }
     return comp;
-  };
+  }; // legacy alias, deprecated: use `_.rod`
+  publicRodFactory = window._rod;
+  syncPublicRoot();
 
   CMSwift.rodBind = function (el, react, config = { key: "auto" }) {
     CMSwift.debug?.inc("rodBinds");
@@ -3041,7 +3097,8 @@
   CMSwift.ui = CMSwift.ui || {};
   CMSwift.ui.meta = CMSwift.ui.meta || {};
 
-  window._ui = CMSwift.ui;
+  window._ui = CMSwift.ui; // legacy alias, deprecated: use `_.`
+  syncPublicRoot();
 
   CMSwift.ui.slot = function slot(value, opts = {}) {
     const UI = CMSwift.ui;
@@ -3230,8 +3287,8 @@
       return a.name.localeCompare(b.name);
     })
     return CMSwift.ui.Card(
-      _h.h3(`_ui.${name}`),
-      meta.signature ? _h.p({ class: "cms-muted" }, meta.signature) : null,
+      _h.h3(`_.${name}`),
+      meta.signature ? _h.p({ class: "cms-muted" }, String(meta.signature).replaceAll("UI.", "_.")) : null,
       _h.h4("Props"),
       _ui.TabPanel({
         border: true,
@@ -3757,5 +3814,7 @@
   if (CMSwift.config?.debug) {
     window.$router = CMSwift.router;
   }
+
+  syncPublicRoot();
 
 })();

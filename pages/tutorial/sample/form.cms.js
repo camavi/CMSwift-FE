@@ -1,8 +1,8 @@
-const formSample = _h.div({ class: "cms-panel cms-page" },
-  _h.h2("Form sample"),
-  _h.p("Form wrapper integrato con `useForm`: gestisce submit async e stato submitting. Children possono essere function(form)."),
-  _ui.Card({ header: "Esempio" },
-    _ui.Form({ onSubmit: () => {} }, _ui.Input({ label: "Nome" }), _ui.Btn({ type: "submit", variant: "primary" }, "Invia"))
+const formSample = _.div({ class: "cms-panel cms-page" },
+  _.h2("Form sample"),
+  _.p("Form wrapper integrato con `useForm`: gestisce submit async e stato submitting. Children possono essere function(form)."),
+  _.Card({ header: "Esempio" },
+    _.Form({ onSubmit: () => {} }, _.Input({ label: "Nome" }), _.Btn({ type: "submit", variant: "primary" }, "Invia"))
   )
 );
 
