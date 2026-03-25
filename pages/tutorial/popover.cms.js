@@ -17,7 +17,7 @@ const popover = _.div({ class: "cms-panel cms-page" },
     popoverExample
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Popover")
+  _.docTable("Popover")
 );
 
 export { popover };

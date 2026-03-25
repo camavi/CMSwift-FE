@@ -12,7 +12,7 @@ const spinner = _.div({ class: "cms-panel cms-page" },
     _.Spinner({ size: 24 })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Spinner")
+  _.docTable("Spinner")
 );
 
 export { spinner };

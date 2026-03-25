@@ -164,7 +164,7 @@ const select = () => {
       _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
     ),
     _.h2("Documentazione API"),
-    _.DocTable("Select"),
+    _.docTable("Select"),
     _.h2("Esempio completo"),
     boxCode('Basic', listSample.basic),
     boxCode('Top label', listSample.topLabel),

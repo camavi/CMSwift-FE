@@ -12,7 +12,7 @@ const rating = _.div({ class: "cms-panel cms-page" },
     _.Rating({ value: 4 })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Rating")
+  _.docTable("Rating")
 );
 
 export { rating };

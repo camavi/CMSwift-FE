@@ -18,7 +18,7 @@ const loadingBar = _.div({ class: "cms-panel cms-page" },
     loadingBarControls
   ),
   _.h2("Documentazione API"),
-  _.DocTable("LoadingBar")
+  _.docTable("LoadingBar")
 );
 
 export { loadingBar };

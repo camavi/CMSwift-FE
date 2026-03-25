@@ -3163,8 +3163,8 @@
     return out;
   };
 
-  // DocTable genera una tabella di documentazione
-  CMSwift.ui.DocTable = (name) => {
+  // docTable genera una tabella di documentazione
+  CMSwift.ui.docTable = (name) => {
     if (!CMSwift.isDev()) return _h.div(); // non fa niente in prod
 
     const meta = CMSwift.ui.meta?.[name];

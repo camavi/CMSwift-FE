@@ -12,7 +12,7 @@ const container = _.div({ class: "cms-panel cms-page" },
     _.Container(_.Card("Contenuto"))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Container")
+  _.docTable("Container")
 );
 
 export { container };

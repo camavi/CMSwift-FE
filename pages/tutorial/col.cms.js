@@ -12,7 +12,7 @@ const col = _.div({ class: "cms-panel cms-page" },
     _.Col({ col: 12 }, "Col 12")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Col")
+  _.docTable("Col")
 );
 
 export { col };

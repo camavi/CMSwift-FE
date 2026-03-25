@@ -12,7 +12,7 @@ const item = _.div({ class: "cms-panel cms-page" },
     _.List(_.Item("Elemento"))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Item")
+  _.docTable("Item")
 );
 
 export { item };

@@ -12,7 +12,7 @@ const cardBody = _.div({ class: "cms-panel cms-page" },
     _.Card(_.cardBody("Body"))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("cardBody")
+  _.docTable("cardBody")
 );
 
 export { cardBody };

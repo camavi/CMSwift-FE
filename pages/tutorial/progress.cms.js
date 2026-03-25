@@ -12,7 +12,7 @@ const progress = _.div({ class: "cms-panel cms-page" },
     _.Progress({ value: 45 })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Progress")
+  _.docTable("Progress")
 );
 
 export { progress };

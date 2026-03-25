@@ -12,7 +12,7 @@ const cardHeader = _.div({ class: "cms-panel cms-page" },
     _.Card(_.cardHeader("Header"), _.cardBody("Body"), _.cardFooter(_.Btn("Action")))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("cardHeader")
+  _.docTable("cardHeader")
 );
 
 export { cardHeader };

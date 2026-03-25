@@ -12,7 +12,7 @@ const avatar = _.div({ class: "cms-panel cms-page" },
     _.Avatar({ label: "CM", size: 40 })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Avatar")
+  _.docTable("Avatar")
 );
 
 export { avatar };

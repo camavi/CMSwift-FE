@@ -12,7 +12,7 @@ const spacer = _.div({ class: "cms-panel cms-page" },
     _.Row(_.Btn("Left"), _.Spacer(), _.Btn("Right"))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Spacer")
+  _.docTable("Spacer")
 );
 
 export { spacer };

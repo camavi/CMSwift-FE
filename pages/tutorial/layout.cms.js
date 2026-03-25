@@ -12,7 +12,7 @@ const layout = _.div({ class: "cms-panel cms-page" },
     _.Layout({ header: _.Header({ title: "CMSwift" }), aside: _.Drawer({ items: [{ label: "Home", to: "#" }] }), page: _.Page(_.Card("Contenuto pagina")), footer: _.Footer("Footer") })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Layout")
+  _.docTable("Layout")
 );
 
 export { layout };

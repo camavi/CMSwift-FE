@@ -12,7 +12,7 @@ const table = _.div({ class: "cms-panel cms-page" },
     _.Table({ columns: [{ key: "name", label: "Name" }, { key: "role", label: "Role" }], rows: [{ name: "Alice", role: "Admin" }, { name: "Bob", role: "Editor" }] })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Table")
+  _.docTable("Table")
 );
 
 export { table };

@@ -316,7 +316,7 @@ const icon = _.div({ class: "cms-panel cms-page" },
     _.Item("contenuto custom: passa un Node o una Function per creare icone testuali, badge numerici o mini-shape")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Icon"),
+  _.docTable("Icon"),
   _.h2("Tutorial completo"),
   boxCode("Material + Tabler", listSample.source),
   boxCode("String signature + props", listSample.signature),

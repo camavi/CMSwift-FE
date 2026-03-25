@@ -12,7 +12,7 @@ const appShell = _.div({ class: "cms-panel cms-page" },
     _.AppShell({ header: _.Header({ title: "CMSwift" }), page: _.Page("Contenuto"), drawer: _.Drawer({ items: [{ label: "Home", to: "#" }] }) })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("AppShell")
+  _.docTable("AppShell")
 );
 
 export { appShell };

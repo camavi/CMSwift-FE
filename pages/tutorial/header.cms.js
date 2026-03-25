@@ -12,7 +12,7 @@ const header = _.div({ class: "cms-panel cms-page" },
     _.Header({ title: "CMSwift", subtitle: "UI Kit" })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Header")
+  _.docTable("Header")
 );
 
 export { header };

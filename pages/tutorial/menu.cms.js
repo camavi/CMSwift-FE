@@ -17,7 +17,7 @@ const menu = _.div({ class: "cms-panel cms-page" },
     menuExample
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Menu")
+  _.docTable("Menu")
 );
 
 export { menu };

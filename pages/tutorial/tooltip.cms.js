@@ -12,7 +12,7 @@ const tooltip = _.div({ class: "cms-panel cms-page" },
     _.Tooltip(_.Btn("Hover"), "Tooltip text")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Tooltip")
+  _.docTable("Tooltip")
 );
 
 export { tooltip };

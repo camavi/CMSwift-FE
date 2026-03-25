@@ -12,7 +12,7 @@ const gridCol = _.div({ class: "cms-panel cms-page" },
     _.Grid(_.GridCol({ span: 8 }, _.Card("Col 8")), _.GridCol({ span: 16 }, _.Card("Col 16")))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("GridCol")
+  _.docTable("GridCol")
 );
 
 export { gridCol };

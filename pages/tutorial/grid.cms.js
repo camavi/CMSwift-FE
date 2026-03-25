@@ -12,7 +12,7 @@ const grid = _.div({ class: "cms-panel cms-page" },
     _.Grid({ gap: "var(--cms-s-md)" }, _.GridCol({ span: 12 }, _.Card("A")), _.GridCol({ span: 12 }, _.Card("B")))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Grid")
+  _.docTable("Grid")
 );
 
 export { grid };

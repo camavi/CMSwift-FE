@@ -12,7 +12,7 @@ const drawer = _.div({ class: "cms-panel cms-page" },
     _.Drawer({ items: [{ label: "Dashboard", to: "#", icon: "🏠" }, { label: "Settings", to: "#" }] })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Drawer")
+  _.docTable("Drawer")
 );
 
 export { drawer };

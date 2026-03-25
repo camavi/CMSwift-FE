@@ -12,7 +12,7 @@ const breadcrumbs = _.div({ class: "cms-panel cms-page" },
     _.Breadcrumbs({ items: [{ label: "Home", to: "#" }, { label: "Docs" }] })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Breadcrumbs")
+  _.docTable("Breadcrumbs")
 );
 
 export { breadcrumbs };

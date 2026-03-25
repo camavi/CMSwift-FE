@@ -12,7 +12,7 @@ const formField = _.div({ class: "cms-panel cms-page" },
     _.FormField({ label: "Email", hint: "Helper text", control: _.input({ class: "cms-input", placeholder: "email@example.com" }) })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("FormField")
+  _.docTable("FormField")
 );
 
 export { formField };

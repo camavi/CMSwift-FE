@@ -64,7 +64,7 @@ const chip = _.div({ class: "cms-panel cms-page" },
     _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Chip"),
+  _.docTable("Chip"),
   _.h2("Esempio completo"),
   boxCode('Basic color', listSample.basic),
   boxCode('Size', listSample.size),

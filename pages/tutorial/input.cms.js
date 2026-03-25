@@ -10,7 +10,7 @@ const input = _.div({ class: "cms-panel cms-page" },
     _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Input"),
+  _.docTable("Input"),
   _.h2("Esempio completo"),
   _.Card({ header: "Demo" },
     _.Input({ label: "Nome", placeholder: "Inserisci nome", hint: "Helper text", icon: "#home", prefix: "home" }),

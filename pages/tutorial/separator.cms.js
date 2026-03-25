@@ -12,7 +12,7 @@ const separator = _.div({ class: "cms-panel cms-page" },
     _.Separator()
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Separator")
+  _.docTable("Separator")
 );
 
 export { separator };

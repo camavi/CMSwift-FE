@@ -428,7 +428,7 @@ const form = _.div({ class: "cms-panel cms-page" },
     _.Item("class, style e children function per costruire layout avanzati")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Form"),
+  _.docTable("Form"),
   _.h2("Esempi completi"),
   _.Card({ header: "Demo" },
     boxCode("Registrazione creator", listSample.registration),

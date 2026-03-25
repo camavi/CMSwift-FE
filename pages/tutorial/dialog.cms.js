@@ -1,7 +1,9 @@
-const dialogApi = _.Dialog({ title: "Conferma", content: "Sei sicuro?", actions: [
-  _.Btn({ onClick: () => dialogApi.close() }, "Annulla"),
-  _.Btn({ variant: "primary", onClick: () => dialogApi.close() }, "Ok")
-] });
+const dialogApi = _.Dialog({
+  title: "Conferma", content: "Sei sicuro?", actions: [
+    _.Btn({ onClick: () => dialogApi.close() }, "Annulla"),
+    _.Btn({ variant: "primary", onClick: () => dialogApi.close() }, "Ok")
+  ]
+});
 const dialogExample = _.Btn({ variant: "primary", onClick: () => dialogApi.open() }, "Apri dialog");
 
 const dialog = _.div({ class: "cms-panel cms-page" },
@@ -18,7 +20,7 @@ const dialog = _.div({ class: "cms-panel cms-page" },
     dialogExample
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Dialog")
+  _.docTable("Dialog")
 );
 
 export { dialog };

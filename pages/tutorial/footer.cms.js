@@ -12,7 +12,7 @@ const footer = _.div({ class: "cms-panel cms-page" },
     _.Footer("Footer")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Footer")
+  _.docTable("Footer")
 );
 
 export { footer };

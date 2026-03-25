@@ -12,7 +12,7 @@ const parallax = _.div({ class: "cms-panel cms-page" },
     _.Parallax({ height: "220px" }, _.h2("Parallax"))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Parallax")
+  _.docTable("Parallax")
 );
 
 export { parallax };

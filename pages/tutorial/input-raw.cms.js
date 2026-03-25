@@ -12,7 +12,7 @@ const inputRaw = _.div({ class: "cms-panel cms-page" },
     _.InputRaw({ placeholder: "Type..." })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("InputRaw")
+  _.docTable("InputRaw")
 );
 
 export { inputRaw };

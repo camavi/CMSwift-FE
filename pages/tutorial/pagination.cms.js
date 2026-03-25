@@ -12,7 +12,7 @@ const pagination = _.div({ class: "cms-panel cms-page" },
     _.Pagination({ max: 8, value: 2 })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Pagination")
+  _.docTable("Pagination")
 );
 
 export { pagination };

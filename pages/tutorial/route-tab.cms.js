@@ -12,7 +12,7 @@ const routeTab = _.div({ class: "cms-panel cms-page" },
     _.RouteTab({ to: "#", active: true }, "Dashboard")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("RouteTab")
+  _.docTable("RouteTab")
 );
 
 export { routeTab };

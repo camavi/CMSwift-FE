@@ -237,7 +237,7 @@ const badge = _.div({ class: "cms-panel cms-page" },
     _.Item("slots: label, notification e slot icona per render custom")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Badge"),
+  _.docTable("Badge"),
   _.h2("Tutorial completo"),
   boxCode("Basic color", listSample.basic),
   boxCode("Size", listSample.size),

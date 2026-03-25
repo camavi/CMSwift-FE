@@ -12,7 +12,7 @@ const date = _.div({ class: "cms-panel cms-page" },
     _.Date({ value: "2026-01-24" })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Date")
+  _.docTable("Date")
 );
 
 export { date };

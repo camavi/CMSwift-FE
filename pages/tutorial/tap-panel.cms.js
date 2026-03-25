@@ -50,7 +50,7 @@ const tapPanel = _.div({ class: "cms-panel cms-page" },
     _.Item("slots: nav, tab, label, panel, default")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("TabPanel"),
+  _.docTable("TabPanel"),
   _.h2("Esempi completi"),
   _.Card({ header: "Base (verticale, nav before)", class: 'cms-m-b-md' },
     _.TabPanel({ tabs: basicTabs, model: tabPanelModel, orientation: "horizontal", })

@@ -12,7 +12,7 @@ const banner = _.div({ class: "cms-panel cms-page" },
     _.Banner({ type: "success", message: "Operazione completata" })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Banner")
+  _.docTable("Banner")
 );
 
 export { banner };

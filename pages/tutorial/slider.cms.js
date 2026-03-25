@@ -12,7 +12,7 @@ const slider = _.div({ class: "cms-panel cms-page" },
     _.Slider({ min: 0, max: 100, value: 40 })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Slider")
+  _.docTable("Slider")
 );
 
 export { slider };

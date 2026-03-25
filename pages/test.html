@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -67,8 +67,8 @@
           }),
           _h.div(
             { class: "cms-muted", style: { marginTop: "8px" } },
-            () => `Selezionato: ${rValue}`
-          )
+            () => `Selezionato: ${rValue}`,
+          ),
         );
 
       // --- Controls (Playground) ---
@@ -93,8 +93,8 @@
           _ui.Btn({
             label: () => (rDisabled.value ? "Disabled: ON" : "Disabled: OFF"),
             onClick: () => (rDisabled.value = !rDisabled.value),
-          })
-        )
+          }),
+        ),
       );
 
       // --- Page Layout ---
@@ -107,19 +107,19 @@
             _h.h1("_ui.Select"),
             _h.p(
               { class: "cms-muted" },
-              "Select premium: clearable, filterable, keyboard nav, async options, groups."
+              "Select premium: clearable, filterable, keyboard nav, async options, groups.",
             ),
             _ui.Toolbar(
               { dense: true, gap: "10px" },
               _ui.Badge?.({ color: "success" }, "Stable") || _h.span("Stable"),
               _ui.Badge?.({ color: "info" }, "Reactive") || _h.span("Reactive"),
-              _ui.Badge?.({ color: "dark" }, "No build") || _h.span("No build")
+              _ui.Badge?.({ color: "dark" }, "No build") || _h.span("No build"),
             ),
             _h.pre(
               { class: "demo-code" },
               `const val = _rod("published");
-        UI.Select({ label:"Stato", model: val, clearable:true, filterable:true, options:[...] });`
-            )
+        UI.Select({ label:"Stato", model: val, clearable:true, filterable:true, options:[...] });`,
+            ),
           ),
 
           // PLAYGROUND
@@ -128,8 +128,8 @@
             _h.h2("Playground"),
             _ui.Row(
               _ui.Col({ style: { flex: "1" } }, DemoPreview()),
-              _ui.Col({ style: { width: "340px" } }, Controls)
-            )
+              _ui.Col({ style: { width: "340px" } }, Controls),
+            ),
           ),
 
           // FEATURES
@@ -140,17 +140,17 @@
               _h.li("Clearable + placeholder"),
               _h.li("Filterable (useInput)"),
               _h.li("Groups + Async options"),
-              _h.li("Keyboard navigation (↑ ↓ Enter Esc)")
-            )
+              _h.li("Keyboard navigation (↑ ↓ Enter Esc)"),
+            ),
           ),
 
           // API (auto)
           _ui.Card(
             { class: "demo-section" },
             _h.h2("API"),
-            _ui.DocTable
-              ? _ui.DocTable("Select")
-              : _h.div("_ui.DocTable non disponibile")
+            _ui.docTable
+              ? _ui.docTable("Select")
+              : _h.div("_ui.docTable non disponibile"),
           ),
 
           // EXAMPLES
@@ -208,7 +208,7 @@
                       disabled: disabled || readonly || !hasValue,
                       onClick: clear,
                     },
-                    "Reset"
+                    "Reset",
                   ),
               },
             }),
@@ -226,13 +226,13 @@
                     _h.strong(opt.label),
                     _h.span(
                       { class: "cms-muted", style: { marginLeft: "6px" } },
-                      `#${opt.value}`
-                    )
+                      `#${opt.value}`,
+                    ),
                   ),
               },
-            })
-          )
-        )
+            }),
+          ),
+        ),
       );
     });
     CMSwift.ready(() => {
@@ -282,14 +282,14 @@
                     type: "submit",
                     loading: form.submitting.value,
                   },
-                  "Invia"
-                )
+                  "Invia",
+                ),
               ),
               _h.div(
                 { class: "cms-error" },
-                () => form.submitError.value || ""
+                () => form.submitError.value || "",
               ),
-            ]
+            ],
           ),
           _ui.Card(
             _h.h4("Model"),
@@ -301,11 +301,11 @@
                     console.log(fEmail.error());
                   },
                 },
-                "Test"
-              )
-            )
-          )
-        )
+                "Test",
+              ),
+            ),
+          ),
+        ),
       );
       // Dialog confirm
       const dlg = _ui.Dialog({
@@ -320,7 +320,7 @@
                 /* confirm */ close();
               },
             },
-            "Delete"
+            "Delete",
           ),
         ],
       });

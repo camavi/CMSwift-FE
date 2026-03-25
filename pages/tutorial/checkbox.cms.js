@@ -490,7 +490,7 @@ const checkbox = _.div({ class: "cms-panel cms-page" },
     _.Item("outline, shadow, borderRadius, clickable per stile e interazione")
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Checkbox"),
+  _.docTable("Checkbox"),
   _.h2("Esempio completo"),
   boxCode('Basic color', listSample.basic),
   boxCode('Size', listSample.size),

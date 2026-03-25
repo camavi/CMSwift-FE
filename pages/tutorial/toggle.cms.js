@@ -12,7 +12,7 @@ const toggle = _.div({ class: "cms-panel cms-page" },
     _.Toggle({ label: "Attivo" })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Toggle")
+  _.docTable("Toggle")
 );
 
 export { toggle };

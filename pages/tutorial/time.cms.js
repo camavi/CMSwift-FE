@@ -12,7 +12,7 @@ const time = _.div({ class: "cms-panel cms-page" },
     _.Time({ value: "09:30" })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Time")
+  _.docTable("Time")
 );
 
 export { time };

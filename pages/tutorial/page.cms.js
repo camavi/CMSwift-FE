@@ -12,7 +12,7 @@ const page = _.div({ class: "cms-panel cms-page" },
     _.Page(_.Card("Contenuto pagina"))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Page")
+  _.docTable("Page")
 );
 
 export { page };

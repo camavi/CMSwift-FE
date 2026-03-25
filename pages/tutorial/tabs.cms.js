@@ -14,7 +14,7 @@ const tabs = _.div({ class: "cms-panel cms-page" },
     _.Tabs({ tabs: [{ label: "Overview", value: "overview" }, { label: "Settings", value: "settings" }], model: tabsModel })
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Tabs")
+  _.docTable("Tabs")
 );
 
 export { tabs };

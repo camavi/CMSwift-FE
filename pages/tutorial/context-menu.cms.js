@@ -17,7 +17,7 @@ const contextMenu = _.div({ class: "cms-panel cms-page" },
     contextMenuExample
   ),
   _.h2("Documentazione API"),
-  _.DocTable("ContextMenu")
+  _.docTable("ContextMenu")
 );
 
 export { contextMenu };

@@ -12,7 +12,7 @@ const toolbar = _.div({ class: "cms-panel cms-page" },
     _.Toolbar(_.Btn("Action"), _.Spacer(), _.Btn({ variant: "primary" }, "Save"))
   ),
   _.h2("Documentazione API"),
-  _.DocTable("Toolbar")
+  _.docTable("Toolbar")
 );
 
 export { toolbar };
