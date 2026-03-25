@@ -1960,6 +1960,56 @@
   margin: 0;
 }
 
+.cms-toggle-wrap {
+  align-items: center;
+  vertical-align: middle;
+}
+
+.cms-toggle-wrap .cms-choice-mark.cms-toggle-mark {
+  --cms-toggle-width: calc(var(--cms-choice-size, var(--cms-font-size, 16px)) * 2.15);
+  --cms-toggle-height: calc(var(--cms-choice-size, var(--cms-font-size, 16px)) * 1.2);
+  --cms-toggle-thumb-size: calc(var(--cms-toggle-height) - 6px);
+  width: var(--cms-toggle-width);
+  min-width: var(--cms-toggle-width);
+  height: var(--cms-toggle-height);
+  padding: 2px;
+  border-radius: 999px;
+  justify-content: flex-start;
+  background: color-mix(in srgb, var(--set-background-color, var(--cms-surface-2)) 28%, transparent);
+}
+
+.cms-toggle-wrap .cms-toggle-thumb {
+  width: var(--cms-toggle-thumb-size);
+  height: var(--cms-toggle-thumb-size);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cms-panel, #fff) 92%, white);
+  color: var(--set-color, var(--cms-text));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(0);
+  transition: transform 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.cms-toggle-wrap.is-checked .cms-choice-mark.cms-toggle-mark {
+  background: color-mix(in srgb, var(--set-background-color, var(--cms-primary, #2d6cdf)) 88%, white 12%);
+  border-color: color-mix(in srgb, var(--set-border-color, var(--cms-primary, #2d6cdf)) 90%, transparent);
+}
+
+.cms-toggle-wrap.is-checked .cms-toggle-thumb {
+  transform: translateX(calc(var(--cms-toggle-width) - var(--cms-toggle-thumb-size) - 4px));
+  background: color-mix(in srgb, white 94%, var(--set-background-color, var(--cms-primary, #2d6cdf)) 6%);
+}
+
+.cms-toggle-wrap.is-disabled .cms-toggle-thumb {
+  box-shadow: none;
+}
+
+.cms-toggle-wrap .cms-choice-input:focus-visible+.cms-choice-mark.cms-toggle-mark {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--set-background-color, var(--cms-primary, #2d6cdf)) 25%, transparent);
+}
+
 .cms-choice-label {
   line-height: calc(var(--cms-font-size, 16px) + 6px);
 }

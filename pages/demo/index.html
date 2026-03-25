@@ -228,6 +228,7 @@
     import { icon } from "../tutorial/icon.cms.js";
     import { form } from "../tutorial/form.cms.js";
     import { formField } from "../tutorial/form-field.cms.js";
+    import { toggle } from "../tutorial/toggle.cms.js";
 
     const createComponentItem = (label, path, onNavigate = null) => ({
       label,
@@ -411,28 +412,29 @@
     }
     let contentPage = _.div("Start");
     const layoutApp = layoutPage(contentPage);
-    CMSwift.mount("#app", layoutApp);
+    _.mount("#app", layoutApp);
     const p = ColorTokensDemoPage();
-    CMSwift.router.setOutlet(contentPage);
+    _.router.setOutlet(contentPage);
 
     //CMSwift.router.add("/demo", () => page.home());
-    CMSwift.router.add("/demo/component/card", () => page.card());
-    CMSwift.router.add("/demo/component/layout", () => layout);
-    CMSwift.router.add("/demo/component/chip", () => chip);
-    CMSwift.router.add("/demo/component/color", () => ColorTokensDemoPage);
-    CMSwift.router.add("/demo/component/tap-panel", () => tapPanel);
-    CMSwift.router.add("/demo/component/btn", () => btn);
-    CMSwift.router.add("/demo/component/input", () => input);
-    CMSwift.router.add("/demo/component/select", () => select);
-    CMSwift.router.add("/demo/component/checkbox", () => checkbox);
-    CMSwift.router.add("/demo/component/radio", () => radio);
-    CMSwift.router.add("/demo/component/badge", () => badge);
-    CMSwift.router.add("/demo/component/item", () => item);
-    CMSwift.router.add("/demo/component/icon", () => icon);
-    CMSwift.router.add("/demo/component/form", () => form);
-    CMSwift.router.add("/demo/component/formfield", () => formField);
+    _.router.add("/demo/component/card", () => page.card());
+    _.router.add("/demo/component/layout", () => layout);
+    _.router.add("/demo/component/chip", () => chip);
+    _.router.add("/demo/component/color", () => ColorTokensDemoPage);
+    _.router.add("/demo/component/tap-panel", () => tapPanel);
+    _.router.add("/demo/component/btn", () => btn);
+    _.router.add("/demo/component/input", () => input);
+    _.router.add("/demo/component/select", () => select);
+    _.router.add("/demo/component/checkbox", () => checkbox);
+    _.router.add("/demo/component/radio", () => radio);
+    _.router.add("/demo/component/badge", () => badge);
+    _.router.add("/demo/component/item", () => item);
+    _.router.add("/demo/component/icon", () => icon);
+    _.router.add("/demo/component/form", () => form);
+    _.router.add("/demo/component/formfield", () => formField);
+    _.router.add("/demo/component/toggle", () => toggle);
 
-    CMSwift.router.start();
+    _.router.start();
     /* */
     hljs.highlightAll();
   </script>

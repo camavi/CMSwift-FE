@@ -1,3 +1,5 @@
+import { icon } from "./icon.cms";
+
 const toggle = _.div({ class: "cms-panel cms-page" },
   _.h1("Toggle"),
   _.p("Switch toggle basato su checkbox con label. Supporta model, onChange/onInput e variante dense."),
@@ -9,7 +11,8 @@ const toggle = _.div({ class: "cms-panel cms-page" },
   ),
   _.h2("Esempio completo"),
   _.Card({ header: "Demo" },
-    _.Toggle({ label: "Attivo" })
+    _.Toggle({ label: "Casa", icon: "home", checked: false }),
+    _.Toggle({ label: "wow", })
   ),
   _.h2("Documentazione API"),
   _.docTable("Toggle")
