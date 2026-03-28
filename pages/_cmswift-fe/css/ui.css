@@ -859,6 +859,365 @@
   cursor: not-allowed;
 }
 
+.cms-date-display {
+  cursor: pointer;
+  min-height: var(--cms-date-input-height, 40px);
+  font-size: var(--cms-date-input-font-size, inherit);
+}
+
+.cms-date-display.is-manual {
+  cursor: text;
+}
+
+.cms-date-display.cms-size-xs {
+  --cms-date-input-height: 30px;
+  --cms-date-input-font-size: 12px;
+}
+
+.cms-date-display.cms-size-sm {
+  --cms-date-input-height: 34px;
+  --cms-date-input-font-size: 13px;
+}
+
+.cms-date-display.cms-size-md {
+  --cms-date-input-height: 40px;
+  --cms-date-input-font-size: 14px;
+}
+
+.cms-date-display.cms-size-lg {
+  --cms-date-input-height: 46px;
+  --cms-date-input-font-size: 15px;
+}
+
+.cms-date-display.cms-size-xl {
+  --cms-date-input-height: 52px;
+  --cms-date-input-font-size: 16px;
+}
+
+.cms-date-overlay {
+  padding: 0;
+}
+
+.cms-date-panel {
+  --cms-date-panel-min-width: min(720px, calc(100vw - 24px));
+  --cms-date-panel-max-width: min(860px, calc(100vw - 24px));
+  --cms-date-panel-padding: 12px;
+  --cms-date-panel-gap: 12px;
+  --cms-date-nav-size: 34px;
+  --cms-date-select-height: 34px;
+  --cms-date-action-height: 32px;
+  --cms-date-action-pad-x: 10px;
+  --cms-date-month-min: 280px;
+  --cms-date-month-padding: 10px;
+  --cms-date-month-title-font: 13px;
+  --cms-date-weekday-font: 11px;
+  --cms-date-day-height: 38px;
+  --cms-date-day-radius: 12px;
+  --cms-date-day-font: 14px;
+  --cms-date-day-point-right: 5px;
+  --cms-date-day-point-bottom: 4px;
+  min-width: var(--cms-date-panel-min-width);
+  max-width: var(--cms-date-panel-max-width);
+  padding: var(--cms-date-panel-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cms-date-panel-gap);
+  color: var(--cms-text);
+}
+
+.cms-date-panel-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cms-date-panel-gap);
+}
+
+.cms-date-panel.cms-size-xs {
+  --cms-date-panel-min-width: min(540px, calc(100vw - 24px));
+  --cms-date-panel-max-width: min(680px, calc(100vw - 24px));
+  --cms-date-panel-padding: 8px;
+  --cms-date-panel-gap: 8px;
+  --cms-date-nav-size: 28px;
+  --cms-date-select-height: 28px;
+  --cms-date-action-height: 28px;
+  --cms-date-action-pad-x: 8px;
+  --cms-date-month-min: 230px;
+  --cms-date-month-padding: 8px;
+  --cms-date-month-title-font: 11px;
+  --cms-date-weekday-font: 9px;
+  --cms-date-day-height: 28px;
+  --cms-date-day-radius: 8px;
+  --cms-date-day-font: 11px;
+  --cms-date-day-point-right: 3px;
+  --cms-date-day-point-bottom: 2px;
+}
+
+.cms-date-panel.cms-size-sm {
+  --cms-date-panel-min-width: min(620px, calc(100vw - 24px));
+  --cms-date-panel-max-width: min(760px, calc(100vw - 24px));
+  --cms-date-panel-padding: 10px;
+  --cms-date-panel-gap: 10px;
+  --cms-date-nav-size: 30px;
+  --cms-date-select-height: 30px;
+  --cms-date-action-height: 30px;
+  --cms-date-action-pad-x: 9px;
+  --cms-date-month-min: 248px;
+  --cms-date-month-padding: 9px;
+  --cms-date-month-title-font: 12px;
+  --cms-date-weekday-font: 10px;
+  --cms-date-day-height: 32px;
+  --cms-date-day-radius: 10px;
+  --cms-date-day-font: 12px;
+  --cms-date-day-point-right: 4px;
+  --cms-date-day-point-bottom: 3px;
+}
+
+.cms-date-panel.cms-size-lg {
+  --cms-date-panel-min-width: min(780px, calc(100vw - 24px));
+  --cms-date-panel-max-width: min(940px, calc(100vw - 24px));
+  --cms-date-panel-padding: 14px;
+  --cms-date-panel-gap: 14px;
+  --cms-date-nav-size: 38px;
+  --cms-date-select-height: 38px;
+  --cms-date-action-height: 36px;
+  --cms-date-action-pad-x: 12px;
+  --cms-date-month-min: 300px;
+  --cms-date-month-padding: 12px;
+  --cms-date-month-title-font: 14px;
+  --cms-date-weekday-font: 12px;
+  --cms-date-day-height: 42px;
+  --cms-date-day-radius: 14px;
+  --cms-date-day-font: 15px;
+}
+
+.cms-date-panel.cms-size-xl {
+  --cms-date-panel-min-width: min(860px, calc(100vw - 24px));
+  --cms-date-panel-max-width: min(1040px, calc(100vw - 24px));
+  --cms-date-panel-padding: 16px;
+  --cms-date-panel-gap: 16px;
+  --cms-date-nav-size: 42px;
+  --cms-date-select-height: 42px;
+  --cms-date-action-height: 40px;
+  --cms-date-action-pad-x: 14px;
+  --cms-date-month-min: 320px;
+  --cms-date-month-padding: 14px;
+  --cms-date-month-title-font: 15px;
+  --cms-date-weekday-font: 12px;
+  --cms-date-day-height: 46px;
+  --cms-date-day-radius: 16px;
+  --cms-date-day-font: 16px;
+}
+
+.cms-date-header {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--cms-date-panel-gap) * 0.66);
+}
+
+.cms-date-header-center {
+  flex: 1;
+  display: flex;
+  gap: calc(var(--cms-date-panel-gap) * 0.66);
+}
+
+.cms-date-nav,
+.cms-date-shortcut,
+.cms-date-action,
+.cms-date-select {
+  border: 1px solid var(--cms-border-color);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--cms-text);
+  border-radius: var(--cms-r-md);
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.cms-date-nav,
+.cms-date-shortcut,
+.cms-date-action {
+  cursor: pointer;
+}
+
+.cms-date-nav:hover,
+.cms-date-shortcut:hover,
+.cms-date-action:hover,
+.cms-date-select:hover {
+  border-color: rgba(79, 124, 255, 0.45);
+  background: rgba(79, 124, 255, 0.1);
+}
+
+.cms-date-nav {
+  width: var(--cms-date-nav-size);
+  height: var(--cms-date-nav-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cms-date-select {
+  min-height: var(--cms-date-select-height);
+  padding: 0 var(--cms-date-action-pad-x);
+  flex: 1;
+}
+
+.cms-date-select-year {
+  flex: 0 0 92px;
+}
+
+.cms-date-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--cms-date-panel-gap) * 0.66);
+}
+
+.cms-date-shortcut,
+.cms-date-action {
+  min-height: var(--cms-date-action-height);
+  padding: 0 var(--cms-date-action-pad-x);
+}
+
+.cms-date-action.is-primary {
+  background: rgba(79, 124, 255, 0.18);
+  border-color: rgba(79, 124, 255, 0.4);
+}
+
+.cms-date-months {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--cms-date-month-min), 1fr));
+  gap: var(--cms-date-panel-gap);
+}
+
+.cms-date-month {
+  border: 1px solid var(--cms-border-color);
+  border-radius: var(--cms-r-lg);
+  background: rgba(255, 255, 255, 0.025);
+  padding: var(--cms-date-month-padding);
+}
+
+.cms-date-month-title {
+  font-size: var(--cms-date-month-title-font);
+  font-weight: 700;
+  margin-bottom: calc(var(--cms-date-panel-gap) * 0.66);
+  text-transform: capitalize;
+}
+
+.cms-date-weekdays,
+.cms-date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.cms-date-weekday {
+  text-align: center;
+  font-size: var(--cms-date-weekday-font);
+  color: var(--cms-muted);
+  text-transform: uppercase;
+  padding: 4px 0;
+}
+
+.cms-date-day {
+  position: relative;
+  min-height: var(--cms-date-day-height);
+  border: 1px solid transparent;
+  border-radius: var(--cms-date-day-radius);
+  background: transparent;
+  color: var(--cms-text);
+  font-size: var(--cms-date-day-font);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease, opacity 140ms ease;
+}
+
+.cms-date-day:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cms-date-day.is-outside {
+  opacity: 0.55;
+}
+
+.cms-date-day.is-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.cms-date-day.is-today {
+  border-color: rgba(79, 124, 255, 0.4);
+}
+
+.cms-date-day.is-in-range {
+  background: rgba(79, 124, 255, 0.14);
+}
+
+.cms-date-day.is-selected,
+.cms-date-day.is-range-start,
+.cms-date-day.is-range-end {
+  background: rgba(79, 124, 255, 0.28);
+  border-color: rgba(79, 124, 255, 0.5);
+}
+
+.cms-date-day-label {
+  line-height: 1;
+}
+
+.cms-date-day.has-point .cms-date-day-label {
+  transform: translateY(-2px);
+}
+
+.cms-date-day-point {
+  position: absolute;
+  right: var(--cms-date-day-point-right);
+  bottom: var(--cms-date-day-point-bottom);
+  font-size: 10px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cms-date-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cms-date-panel-gap);
+  padding-top: var(--cms-date-panel-gap);
+  border-top: 1px solid var(--cms-border-color);
+  flex-wrap: wrap;
+}
+
+.cms-date-value {
+  font-size: 12px;
+  color: var(--cms-muted);
+  min-height: 18px;
+}
+
+.cms-date-actions {
+  display: flex;
+  gap: calc(var(--cms-date-panel-gap) * 0.66);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .cms-date-panel {
+    min-width: min(100vw - 16px, 100%);
+    padding: 10px;
+  }
+
+  .cms-date-header {
+    flex-wrap: wrap;
+  }
+
+  .cms-date-header-center {
+    order: 3;
+    width: 100%;
+  }
+
+  .cms-date-months {
+    grid-template-columns: 1fr;
+  }
+}
+
 .cms-select-empty {
   padding: 10px 12px;
   color: var(--cms-muted);

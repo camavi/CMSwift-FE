@@ -233,6 +233,8 @@
     import { toggle } from "../tutorial/toggle.cms.js";
     import { slider } from "../tutorial/slider.cms.js";
     import { rating } from "../tutorial/rating.cms.js";
+    import { date } from "../tutorial/date.cms.js";
+    import { time } from "../tutorial/time.cms.js";
 
     const createComponentItem = (label, path, onNavigate = null) => ({
       label,
@@ -456,6 +458,8 @@
     _.router.add("/demo/component/toggle", () => toggle);
     _.router.add("/demo/component/slider", () => slider);
     _.router.add("/demo/component/rating", () => rating);
+    _.router.add("/demo/component/date", () => date);
+    _.router.add("/demo/component/time", () => time);
 
     _.router.start();
     /* */
