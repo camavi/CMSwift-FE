@@ -1,4 +1,5 @@
 const infoLine = (label, getter) => _.div({ class: "cms-m-b-sm" }, _.b(`${label}: `), _.span(getter));
+window.CMSWIFT_DATE_DEBUG = true
 
 const parseIso = (value) => {
   if (typeof value !== "string") return null;

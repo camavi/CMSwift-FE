@@ -5106,7 +5106,9 @@
 
     if (model) {
       model.watch((next) => {
-        localValue = normalizeValue(next);
+        const normalized = normalizeValue(next);
+        if (serializeValue(normalized) === serializeValue(localValue)) return;
+        localValue = normalized;
         hoverValue = null;
         updateInputValue(localValue);
         syncVisualState();
@@ -5390,6 +5392,14 @@
       const raw = Number(uiUnwrap(props.monthsToShow) ?? fallback);
       return Math.max(1, Math.min(3, Number.isFinite(raw) ? raw : fallback));
     };
+    const getDefaultViewValue = () => {
+      const min = getMin();
+      const max = getMax();
+      let fallback = normalizeDateOnly(uiUnwrap(props.defaultMonth)) || todayIso();
+      if (min && fallback < min) fallback = min;
+      if (max && fallback > max) fallback = max;
+      return fallback || min || max || todayIso();
+    };
     const getCurrentValue = () => uiUnwrap(props.confirm) ? workingValue : localValue;
     const getDateContext = (iso) => {
       const date = fromIsoDate(iso);
@@ -5518,12 +5528,12 @@
     let mouseSelectedDate = null;
     let viewMonth = monthStart(
       mode === "range"
-        ? (localValue?.from || localValue?.to || uiUnwrap(props.defaultMonth) || todayIso())
+        ? (localValue?.from || localValue?.to || getDefaultViewValue())
         : (mode === "range-multiple"
-          ? (localValue?.[localValue.length - 1]?.from || localValue?.[localValue.length - 1]?.to || uiUnwrap(props.defaultMonth) || todayIso())
+          ? (localValue?.[localValue.length - 1]?.from || localValue?.[localValue.length - 1]?.to || getDefaultViewValue())
           : (mode === "multiple"
-            ? (localValue[0] || uiUnwrap(props.defaultMonth) || todayIso())
-            : (localValue || uiUnwrap(props.defaultMonth) || todayIso())))
+            ? (localValue[0] || getDefaultViewValue())
+            : (localValue || getDefaultViewValue())))
     );
     let entry = null;
     let panelRoot = null;
@@ -5574,12 +5584,12 @@
     const syncViewMonth = (value, options = {}) => {
       const current = options.focusIso || (
         mode === "range"
-          ? (value?.from || value?.to || uiUnwrap(props.defaultMonth) || todayIso())
+          ? (value?.from || value?.to || getDefaultViewValue())
           : (mode === "range-multiple"
-            ? (value?.[value.length - 1]?.from || value?.[value.length - 1]?.to || uiUnwrap(props.defaultMonth) || todayIso())
+            ? (value?.[value.length - 1]?.from || value?.[value.length - 1]?.to || getDefaultViewValue())
             : (mode === "multiple"
-              ? (value?.[0] || uiUnwrap(props.defaultMonth) || todayIso())
-              : (value || uiUnwrap(props.defaultMonth) || todayIso())))
+              ? (value?.[0] || getDefaultViewValue())
+              : (value || getDefaultViewValue())))
       );
       let nextViewMonth = monthStart(current);
       if (options.preserveMonthOffset) {
@@ -5769,6 +5779,7 @@
       if (shouldCloseOnSelect()) closePanel();
     };
     const clearValue = () => {
+      mouseSelectedDate = null;
       setDateValue(emptyValue(), null);
     };
     const jumpToToday = () => {
@@ -6006,7 +6017,7 @@
         _.div({ class: "cms-date-actions" },
           _.button({ type: "button", class: "cms-date-action", onClick: jumpToToday }, uiUnwrap(props.todayLabel) || "Oggi"),
           uiUnwrap(props.clearable) !== false
-            ? _.button({ type: "button", class: "cms-date-action", onClick: () => setWorkingOrCommit(emptyValue(), null) }, uiUnwrap(props.clearLabel) || "Reset")
+            ? _.button({ type: "button", class: "cms-date-action", onClick: clearValue }, uiUnwrap(props.clearLabel) || "Reset")
             : null,
           uiUnwrap(props.confirm)
             ? _.button({ type: "button", class: "cms-date-action is-primary", onClick: applyWorkingValue }, uiUnwrap(props.applyLabel) || "Applica")
@@ -6123,7 +6134,9 @@
 
     if (model) {
       model.watch((next) => {
-        localValue = normalizeValue(next);
+        const normalized = normalizeValue(next);
+        if (serializeValue(normalized) === serializeValue(localValue)) return;
+        localValue = normalized;
         workingValue = cloneValue(localValue);
         hoverDate = null;
         syncViewMonth(localValue);
@@ -7437,7 +7450,6 @@
       };
 
       const onInput = async () => {
-        console.log("onInput", name, validateOn);
         activeEl = document.activeElement;
         blurHandled = false;
         ensureOutsideWatch();
