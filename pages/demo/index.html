@@ -213,11 +213,6 @@
     import { tapPanel } from "../tutorial/tap-panel.cms.js";
     import { ColorTokensDemoPage } from "../tutorial/color.cms.js";
     import { btn } from "../tutorial/btn.cms.js";
-    import { input } from "../tutorial/input.cms.js";
-    import { select } from "../tutorial/select.cms.js";
-    import { radio } from "../tutorial/radio.cms.js";
-    import { checkbox } from "../tutorial/checkbox.cms.js";
-    import { slider } from "../tutorial/slider.cms.js";
     import { card } from "../tutorial/card.cms.js";
     import { list } from "../tutorial/list.cms.js";
     import { table } from "../tutorial/table.cms.js";
@@ -226,9 +221,16 @@
     import { badge } from "../tutorial/badge.cms.js";
     import { item } from "../tutorial/item.cms.js";
     import { icon } from "../tutorial/icon.cms.js";
+
+    // from e inputs
     import { form } from "../tutorial/form.cms.js";
     import { formField } from "../tutorial/form-field.cms.js";
+    import { input } from "../tutorial/input.cms.js";
+    import { select } from "../tutorial/select.cms.js";
+    import { checkbox } from "../tutorial/checkbox.cms.js";
+    import { radio } from "../tutorial/radio.cms.js";
     import { toggle } from "../tutorial/toggle.cms.js";
+    import { slider } from "../tutorial/slider.cms.js";
     import { rating } from "../tutorial/rating.cms.js";
 
     const createComponentItem = (label, path, onNavigate = null) => ({
@@ -424,18 +426,10 @@
     _.router.add("/demo/component/color", () => ColorTokensDemoPage);
     _.router.add("/demo/component/tap-panel", () => tapPanel);
     _.router.add("/demo/component/btn", () => btn);
-    _.router.add("/demo/component/input", () => input);
-    _.router.add("/demo/component/select", () => select);
-    _.router.add("/demo/component/checkbox", () => checkbox);
-    _.router.add("/demo/component/radio", () => radio);
-    _.router.add("/demo/component/badge", () => badge);
+
     _.router.add("/demo/component/item", () => item);
     _.router.add("/demo/component/icon", () => icon);
-    _.router.add("/demo/component/form", () => form);
-    _.router.add("/demo/component/formfield", () => formField);
-    _.router.add("/demo/component/toggle", () => toggle);
-    _.router.add("/demo/component/slider", () => slider);
-    _.router.add("/demo/component/rating", () => rating);
+
     _.router.add("/demo/component/date", () => date);
     _.router.add("/demo/component/time", () => time);
     _.router.add("/demo/component/list", () => list);
@@ -448,6 +442,18 @@
     _.router.add("/demo/component/spacer", () => spacer);
     _.router.add("/demo/component/parallax", () => parallax);
     _.router.add("/demo/component/row", () => row);
+    _.router.add("/demo/component/badge", () => badge);
+
+    // from e inputs
+    _.router.add("/demo/component/form", () => form);
+    _.router.add("/demo/component/formfield", () => formField);
+    _.router.add("/demo/component/input", () => input);
+    _.router.add("/demo/component/select", () => select);
+    _.router.add("/demo/component/checkbox", () => checkbox);
+    _.router.add("/demo/component/radio", () => radio);
+    _.router.add("/demo/component/toggle", () => toggle);
+    _.router.add("/demo/component/slider", () => slider);
+    _.router.add("/demo/component/rating", () => rating);
 
     _.router.start();
     /* */
