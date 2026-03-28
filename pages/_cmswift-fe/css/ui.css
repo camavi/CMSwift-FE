@@ -425,6 +425,7 @@
   background: rgba(255, 255, 255, 0.03);
   color: var(--cms-text);
   outline: none;
+  box-sizing: border-box;
 }
 
 .cms-input-raw:focus {
