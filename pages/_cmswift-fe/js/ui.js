@@ -4300,56 +4300,476 @@
   // Esempio: CMSwift.ui.Toggle({ label: "Attivo", model: [get,set] })
 
   UI.Slider = (...args) => {
-    const { props } = CMSwift.uiNormalizeArgs(args);
-    const model = resolveModel(props.model, "UI.Slider:model");
+    const { props, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = props.slots || {};
+    const boundValue = props.model || ((uiIsSignal(props.value) || uiIsRod(props.value)) ? props.value : null);
+    const model = resolveModel(boundValue, "UI.Slider:model");
 
-    const inputProps = CMSwift.omit(props, ["model", "value", "class", "style", "onChange", "onInput", "slots"]);
+    const inputProps = CMSwift.omit(props, [
+      "model", "value", "class", "style", "onChange", "onInput", "slots",
+      "label", "icon", "iconRight", "thumbIcon", "iconThumb", "pointIcon",
+      "markers", "markerLabels", "labelMarks", "leftLabel", "rightLabel",
+      "startLabel", "endLabel", "minLabel", "maxLabel", "withQItem", "qitem",
+      "item", "itemClass", "itemStyle", "showValue", "thumbLabel", "labelValue",
+      "selectionColor", "trackColor", "thumbColor", "inputClass", "readonly"
+    ]);
     inputProps.type = "range";
-    inputProps.min = props.min ?? 0;
-    inputProps.max = props.max ?? 100;
-    inputProps.step = props.step ?? 1;
-    inputProps.class = uiClass(["cms-slider", props.class]);
-    inputProps.style = props.style;
+    inputProps.class = uiClass(["cms-slider-input", props.inputClass]);
     const input = _.input(inputProps);
 
-    if (model) {
-      input.value = String(model.get() ?? 0);
-      model.watch((v) => { input.value = String(v ?? 0); }, "UI.Slider:watch");
-      input.addEventListener("input", (e) => {
-        model.set(Number(input.value));
-        props.onInput?.(Number(input.value), e);
+    const wrap = _.label({
+      class: uiClass([
+        "cms-clear-set",
+        "cms-singularity-check",
+        "cms-slider-wrap",
+        uiWhen(props.dense, "dense"),
+        props.class
+      ]),
+      style: props.style
+    });
+    setPropertyProps(wrap, props);
+
+    const header = _.div({
+      class: "cms-slider-header"
+    });
+    const labelHost = _.span({
+      class: "cms-slider-label"
+    });
+    const valueHost = _.span({
+      class: "cms-slider-value"
+    });
+    header.append(labelHost, valueHost);
+
+    const body = _.div({
+      class: "cms-slider-body"
+    });
+    const startIconHost = _.span({
+      class: "cms-slider-icon cms-slider-icon-left"
+    });
+    const startLabelHost = _.span({
+      class: "cms-slider-edge-label cms-slider-edge-label-left"
+    });
+    const main = _.div({
+      class: "cms-slider-main"
+    });
+    const sliderBox = _.div({
+      class: "cms-slider-box"
+    });
+    const rail = _.span({
+      class: "cms-slider-rail"
+    });
+    const selection = _.span({
+      class: "cms-slider-selection"
+    });
+    const thumb = _.span({
+      class: "cms-slider-thumb"
+    });
+    const thumbIconHost = _.span({
+      class: "cms-slider-thumb-icon"
+    });
+    const thumbLabelHost = _.span({
+      class: "cms-slider-thumb-label"
+    });
+    thumb.append(thumbLabelHost, thumbIconHost);
+
+    const markersHost = _.div({
+      class: "cms-slider-markers"
+    });
+    const endLabelHost = _.span({
+      class: "cms-slider-edge-label cms-slider-edge-label-right"
+    });
+    const endIconHost = _.span({
+      class: "cms-slider-icon cms-slider-icon-right"
+    });
+
+    sliderBox.append(rail, selection, thumb, input);
+    main.append(sliderBox, markersHost);
+    body.append(startIconHost, startLabelHost, main, endLabelHost, endIconHost);
+    wrap.append(header, body);
+
+    const clearHost = (host) => {
+      while (host.firstChild) host.removeChild(host.firstChild);
+    };
+    const renderInto = (host, nodes, display = "") => {
+      clearHost(host);
+      (nodes || []).forEach((n) => host.appendChild(n));
+      host.style.display = host.childNodes.length ? display : "none";
+    };
+    const unwrapSlotValue = (value) => (uiIsSignal(value) || uiIsRod(value) ? uiUnwrap(value) : value);
+    const asArray = (value, ctx = {}) => slotToArray(unwrapSlotValue(value), ctx);
+    const asIconArray = (value, as, ctx = {}) => {
+      const resolved = unwrapSlotValue(value);
+      if (resolved == null) return [];
+      if (typeof resolved === "string") return [UI.Icon({ name: resolved, size: props.iconSize ?? props.size ?? 16 })];
+      return asArray(resolved, { ...ctx, as });
+    };
+    const getNumber = (value, fallback) => {
+      const next = Number(value);
+      return Number.isFinite(next) ? next : fallback;
+    };
+    const getMin = () => getNumber(uiUnwrap(props.min), 0);
+    const getMax = () => {
+      const min = getMin();
+      const max = getNumber(uiUnwrap(props.max), 100);
+      return max < min ? min : max;
+    };
+    const getStep = () => {
+      const raw = uiUnwrap(props.step);
+      if (raw === "any") return "any";
+      const step = getNumber(raw, 1);
+      return step > 0 ? step : 1;
+    };
+    const getPrecision = (value) => {
+      if (value === "any") return 0;
+      const str = String(value);
+      if (str.includes("e-")) return Number(str.split("e-")[1] || 0);
+      const idx = str.indexOf(".");
+      return idx === -1 ? 0 : str.length - idx - 1;
+    };
+    const normalizeValue = (value) => {
+      const min = getMin();
+      const max = getMax();
+      const step = getStep();
+      let next = getNumber(value, min);
+      if (step !== "any") {
+        next = min + Math.round((next - min) / step) * step;
+        const precision = getPrecision(step);
+        if (precision > 0) next = Number(next.toFixed(precision));
+      }
+      return Math.min(max, Math.max(min, next));
+    };
+    const ratioFromValue = (value) => {
+      const min = getMin();
+      const max = getMax();
+      const span = max - min;
+      if (!span) return 0;
+      const raw = (normalizeValue(value) - min) / span;
+      const ratio = uiUnwrap(props.reverse) ? (1 - raw) : raw;
+      return Math.max(0, Math.min(1, ratio));
+    };
+    const [getValue, setValue] = CMSwift.reactive.signal(normalizeValue(
+      model ? model.get() : (uiUnwrap(props.value) ?? uiUnwrap(props.min) ?? 0)
+    ));
+
+    const setSliderValue = (raw, opts = {}) => {
+      const next = normalizeValue(raw);
+      if (getValue() !== next) setValue(next);
+      if (String(input.value) !== String(next)) input.value = String(next);
+      if (model && opts.fromModel !== true) model.set(next);
+      return next;
+    };
+
+    const getMarkerItems = () => {
+      const raw = uiUnwrap(props.markers);
+      const showLabels = !!uiUnwrap(props.markerLabels ?? props.labelMarks);
+      if (!raw) return [];
+      const min = getMin();
+      const max = getMax();
+      const normalizeMarker = (entry, index) => {
+        if (entry == null) return null;
+        if (typeof entry === "object" && !Array.isArray(entry)) {
+          const value = normalizeValue(entry.value ?? entry.position ?? entry.at ?? min);
+          return {
+            key: entry.key ?? `marker-${index}-${value}`,
+            value,
+            label: entry.label ?? (showLabels ? String(value) : null),
+            icon: entry.icon ?? null,
+            className: entry.class ?? entry.className ?? ""
+          };
+        }
+        const value = normalizeValue(entry);
+        return {
+          key: `marker-${index}-${value}`,
+          value,
+          label: showLabels ? String(entry) : null,
+          icon: null,
+          className: ""
+        };
+      };
+
+      if (Array.isArray(raw)) {
+        return raw.map((entry, index) => normalizeMarker(entry, index)).filter(Boolean);
+      }
+      if (typeof raw === "number" && raw > 1) {
+        const count = Math.floor(raw);
+        const stepValue = count > 1 ? (max - min) / (count - 1) : 0;
+        return Array.from({ length: count }, (_, index) => normalizeMarker(min + (stepValue * index), index)).filter(Boolean);
+      }
+      if (raw === true) {
+        const step = getStep();
+        if (step === "any") {
+          return [normalizeMarker(min, 0), normalizeMarker(max, 1)].filter(Boolean);
+        }
+        const count = Math.floor((max - min) / step) + 1;
+        if (count > 24) {
+          return [normalizeMarker(min, 0), normalizeMarker((min + max) / 2, 1), normalizeMarker(max, 2)].filter(Boolean);
+        }
+        return Array.from({ length: count }, (_, index) => normalizeMarker(min + (step * index), index)).filter(Boolean);
+      }
+      if (typeof raw === "object") {
+        return Object.keys(raw).map((key, index) => normalizeMarker({
+          value: Number(key),
+          label: raw[key]
+        }, index)).filter(Boolean);
+      }
+      return [];
+    };
+
+    const renderMarkers = () => {
+      clearHost(markersHost);
+      const markers = getMarkerItems();
+      markersHost.style.display = markers.length ? "block" : "none";
+      markersHost.style.minHeight = markers.some((marker) => marker.label != null && marker.label !== "") ? "30px" : "10px";
+      markers.forEach((marker) => {
+        const ratio = ratioFromValue(marker.value);
+        const active = uiUnwrap(props.reverse) ? getValue() <= marker.value : getValue() >= marker.value;
+        const item = _.button({
+          type: "button",
+          class: uiClass(["cms-slider-marker", marker.className, uiWhen(() => active, "active")]),
+          style: {
+            left: `${ratio * 100}%`,
+            color: active ? (uiUnwrap(props.color) || "var(--cms-primary)") : "var(--cms-muted)",
+            cursor: (uiUnwrap(props.disabled) || uiUnwrap(props.readonly)) ? "default" : "pointer"
+          },
+          disabled: !!uiUnwrap(props.disabled) || !!uiUnwrap(props.readonly),
+          onClick: () => {
+            if (uiUnwrap(props.disabled) || uiUnwrap(props.readonly)) return;
+            const next = setSliderValue(marker.value);
+            props.onInput?.(next);
+            props.onChange?.(next);
+          }
+        });
+        const markerCtx = {
+          marker,
+          active,
+          value: marker.value,
+          current: getValue(),
+          input
+        };
+        let markerNode = CMSwift.ui.renderSlot(slots, "marker", markerCtx, null);
+        if (markerNode == null && marker.icon != null) {
+          markerNode = typeof marker.icon === "string"
+            ? UI.Icon({ name: marker.icon, size: 12 })
+            : CMSwift.ui.slot(marker.icon, { ...markerCtx, as: "marker" });
+        }
+        const markerTick = _.span({
+          class: "cms-slider-marker-tick",
+          style: {
+            background: active ? (uiUnwrap(props.color) || "var(--cms-primary)") : "var(--cms-border-color)"
+          }
+        });
+        const markerNodes = markerNode == null
+          ? [markerTick]
+          : renderSlotToArray(null, "default", markerCtx, markerNode);
+        const labelNodes = marker.label == null
+          ? renderSlotToArray(slots, "markerLabel", markerCtx, null)
+          : renderSlotToArray(slots, "markerLabel", markerCtx, marker.label);
+        markerNodes.forEach((node) => item.appendChild(node));
+        if (labelNodes.length) {
+          item.appendChild(_.span({
+            class: "cms-slider-marker-label"
+          }, ...labelNodes));
+        }
+        markersHost.appendChild(item);
       });
-      input.addEventListener("change", (e) => props.onChange?.(Number(input.value), e));
+    };
+
+    const renderHeader = () => {
+      const ctx = { value: getValue(), input, props };
+      let labelNodes = renderSlotToArray(slots, "label", ctx, unwrapSlotValue(props.label));
+      if (!labelNodes.length) labelNodes = renderSlotToArray(slots, "default", ctx, children);
+      renderInto(labelHost, labelNodes, "inline-flex");
+
+      const showValue = uiUnwrap(props.showValue);
+      const rawValueLabel = showValue === false
+        ? null
+        : (unwrapSlotValue(props.labelValue) ?? getValue());
+      const valueNodes = showValue || unwrapSlotValue(props.labelValue) != null
+        ? renderSlotToArray(slots, "value", ctx, rawValueLabel)
+        : [];
+      renderInto(valueHost, valueNodes, "inline-flex");
+      header.style.display = (labelHost.childNodes.length || valueHost.childNodes.length) ? "flex" : "none";
+    };
+
+    const renderAddons = () => {
+      const ctx = { value: getValue(), input, props };
+      const leftIcon = renderSlotToArray(slots, "icon", ctx, null);
+      const leftIconNodes = leftIcon.length ? leftIcon : asIconArray(props.icon, "icon", ctx);
+      renderInto(startIconHost, leftIconNodes, "inline-flex");
+
+      const rightIcon = renderSlotToArray(slots, "iconRight", ctx, null);
+      const rightIconNodes = rightIcon.length ? rightIcon : asIconArray(props.iconRight, "iconRight", ctx);
+      renderInto(endIconHost, rightIconNodes, "inline-flex");
+
+      const leftLabelSource = unwrapSlotValue(props.startLabel ?? props.leftLabel ?? props.minLabel);
+      const rightLabelSource = unwrapSlotValue(props.endLabel ?? props.rightLabel ?? props.maxLabel);
+      renderInto(startLabelHost, renderSlotToArray(slots, "startLabel", ctx, leftLabelSource), "inline-flex");
+      renderInto(endLabelHost, renderSlotToArray(slots, "endLabel", ctx, rightLabelSource), "inline-flex");
+    };
+
+    const renderThumb = () => {
+      const ctx = { value: getValue(), input, props };
+      const thumbIconNodes = renderSlotToArray(slots, "thumbIcon", ctx, null);
+      const thumbIconFallback = props.thumbIcon ?? props.iconThumb ?? props.pointIcon;
+      renderInto(
+        thumbIconHost,
+        thumbIconNodes.length ? thumbIconNodes : asIconArray(thumbIconFallback, "thumbIcon", ctx),
+        "inline-flex"
+      );
+
+      const rawThumbLabel = unwrapSlotValue(props.thumbLabel)
+        ?? unwrapSlotValue(props.labelValue)
+        ?? (uiUnwrap(props.showValue) ? String(getValue()) : null);
+      const thumbLabelNodes = renderSlotToArray(slots, "thumbLabel", ctx, rawThumbLabel);
+      renderInto(thumbLabelHost, thumbLabelNodes, "inline-flex");
+    };
+
+    const syncVisualState = () => {
+      const value = normalizeValue(getValue());
+      const min = getMin();
+      const max = getMax();
+      const step = getStep();
+      const ratio = ratioFromValue(value);
+      const percent = `${ratio * 100}%`;
+      const color = uiUnwrap(props.color) || uiUnwrap(props.selectionColor) || "var(--cms-primary)";
+      const trackColor = uiUnwrap(props.trackColor) || "var(--cms-border-color)";
+      const thumbColor = uiUnwrap(props.thumbColor) || color;
+      const readonly = !!uiUnwrap(props.readonly);
+      const disabled = !!uiUnwrap(props.disabled);
+
+      input.min = String(min);
+      input.max = String(max);
+      input.step = step === "any" ? "any" : String(step);
+      input.disabled = disabled;
+      input.value = String(value);
+
+      rail.style.background = trackColor;
+      selection.style.background = color;
+      selection.style.width = percent;
+      thumb.style.left = percent;
+      thumb.style.borderColor = thumbColor;
+      thumb.style.color = thumbColor;
+      thumbLabelHost.style.background = color;
+      wrap.classList.toggle("is-disabled", disabled);
+      wrap.classList.toggle("is-readonly", readonly);
+      wrap.classList.toggle("has-markers", markersHost.childNodes.length > 0);
+    };
+
+    if (model) {
+      setSliderValue(model.get(), { fromModel: true });
+      model.watch((v) => { setSliderValue(v, { fromModel: true }); }, "UI.Slider:watch");
+    } else if (uiIsReactive(props.value)) {
+      CMSwift.reactive.effect(() => {
+        setSliderValue(uiUnwrap(props.value), { fromModel: true });
+      }, "UI.Slider:value");
     } else {
-      if (props.value != null) input.value = String(props.value);
-      input.addEventListener("input", (e) => props.onInput?.(Number(input.value), e));
-      input.addEventListener("change", (e) => props.onChange?.(Number(input.value), e));
+      setSliderValue(props.value ?? props.min ?? 0, { fromModel: true });
     }
-    return input;
+
+    input.addEventListener("input", (e) => {
+      if (uiUnwrap(props.disabled) || uiUnwrap(props.readonly)) {
+        input.value = String(getValue());
+        return;
+      }
+      const next = setSliderValue(input.value);
+      props.onInput?.(next, e);
+    });
+    input.addEventListener("change", (e) => {
+      if (uiUnwrap(props.disabled) || uiUnwrap(props.readonly)) {
+        input.value = String(getValue());
+        return;
+      }
+      const next = setSliderValue(input.value);
+      props.onChange?.(next, e);
+    });
+
+    CMSwift.reactive.effect(() => {
+      renderHeader();
+      renderAddons();
+      renderThumb();
+      renderMarkers();
+      syncVisualState();
+    }, "UI.Slider:render");
+
+    wrap._input = input;
+    wrap._getValue = getValue;
+    wrap._setValue = (value) => setSliderValue(value);
+
+    if (props.withQItem || props.qitem || props.item === true) {
+      const item = UI.Item({
+        class: uiClass(["cms-slider-item", props.itemClass]),
+        style: props.itemStyle
+      }, wrap);
+      item._input = input;
+      item._slider = wrap;
+      item._getValue = getValue;
+      item._setValue = wrap._setValue;
+      return item;
+    }
+
+    return wrap;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.Slider = {
-      signature: "UI.Slider(props)",
+      signature: "UI.Slider(...children) | UI.Slider(props, ...children)",
       props: {
         min: "number",
         max: "number",
-        step: "number",
-        value: "number",
-        model: "[get,set] signal",
-        slots: "{ default? }",
+        step: "number|\"any\"",
+        value: "number | rod | [get,set] signal",
+        model: "rod | [get,set] signal",
+        label: "String|Node|Function|Array",
+        icon: "String|Node|Function|Array",
+        iconRight: "String|Node|Function|Array",
+        thumbIcon: "String|Node|Function|Array",
+        iconThumb: "Alias di thumbIcon",
+        pointIcon: "Alias di thumbIcon",
+        thumbLabel: "String|Node|Function|Array",
+        showValue: "boolean",
+        labelValue: "String|Node|Function|Array",
+        markers: "boolean|number|Array|Object",
+        markerLabels: "boolean",
+        labelMarks: "Alias di markerLabels",
+        startLabel: "String|Node|Function|Array",
+        endLabel: "String|Node|Function|Array",
+        leftLabel: "Alias di startLabel",
+        rightLabel: "Alias di endLabel",
+        minLabel: "Alias di startLabel",
+        maxLabel: "Alias di endLabel",
+        withQItem: "boolean",
+        qitem: "Alias di withQItem",
+        item: "boolean",
+        itemClass: "string",
+        itemStyle: "object",
+        selectionColor: "string",
+        trackColor: "string",
+        thumbColor: "string",
+        readonly: "boolean",
+        inputClass: "string",
+        slots: "{ label?, default?, value?, icon?, iconRight?, thumbIcon?, thumbLabel?, marker?, markerLabel?, startLabel?, endLabel? }",
         class: "string",
         style: "object"
       },
       slots: {
-        default: "Unused (slider has no content)"
+        label: "Label content",
+        default: "Fallback label content",
+        value: "Header value content",
+        icon: "Left icon content",
+        iconRight: "Right icon content",
+        thumbIcon: "Thumb icon content",
+        thumbLabel: "Thumb label content",
+        marker: "Marker content",
+        markerLabel: "Marker label content",
+        startLabel: "Label a sinistra/inizio track",
+        endLabel: "Label a destra/fine track"
       },
       events: {
         onChange: "(value, event)",
         onInput: "(value, event)"
       },
-      returns: "HTMLInputElement",
-      description: "Slider range con supporto model."
+      returns: "HTMLLabelElement | HTMLLIElement (with ._input = HTMLInputElement)",
+      description: "Slider reattivo con label, icone, thumb custom, markers e supporto model/QItem."
     };
   }
   // Esempio: CMSwift.ui.Slider({ min: 0, max: 10, model: [get,set] })
