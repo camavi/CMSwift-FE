@@ -88,16 +88,75 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
+.cms-tooltip-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
 .cms-tooltip {
-  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
   font-size: 12px;
-  line-height: 1.3;
-  border-radius: var(--cms-r-sm);
+  line-height: 1.4;
+  border-radius: var(--cms-r-md);
   background: var(--cms-panel);
+  color: var(--cms-text);
   border: 1px solid var(--cms-border-color);
   box-shadow: var(--cms-shadow-sm);
   pointer-events: none;
-  max-width: 240px;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 16px));
+}
+
+.cms-tooltip.interactive {
+  pointer-events: auto;
+}
+
+.cms-tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cms-tooltip-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cms-tooltip-head-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cms-tooltip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.cms-tooltip-title {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.cms-tooltip-body {
+  opacity: 0.86;
+}
+
+.cms-tooltip-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(127, 127, 127, 0.18);
 }
 
 .cms-d-none {

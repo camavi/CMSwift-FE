@@ -6,7 +6,11 @@ const createSection = (node, sample) => ({
 const listSample = {
   summary: createSection(
     _.Card({
-      identifier: _.Chip({ color: "warning", dense: true }, "Featured"),
+      identifier: _.Tooltip({
+        title: "Featured case",
+        content: "Case study con priorita alta per il team growth e design system.",
+        placement: "top"
+      }, _.Chip({ color: "warning", dense: true }, "Featured")),
       eyebrow: "Case study",
       title: "Checkout mobile ridisegnato per wallet e guest flow",
       subtitle: "Riduzione del drop-off del 18% grazie a step compressi, address lookup e pagamento express.",
@@ -29,7 +33,11 @@ const listSample = {
       )
     ),
     `_.Card({
-  identifier: _.Chip({ color: "warning", dense: true }, "Featured"),
+  identifier: _.Tooltip({
+    title: "Featured case",
+    content: "Case study con priorita alta per il team growth e design system.",
+    placement: "top"
+  }, _.Chip({ color: "warning", dense: true }, "Featured")),
   eyebrow: "Case study",
   title: "Checkout mobile ridisegnato per wallet e guest flow",
   subtitle: "Riduzione del drop-off del 18% grazie a step compressi, address lookup e pagamento express.",

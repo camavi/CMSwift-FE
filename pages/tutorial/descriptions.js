@@ -77,7 +77,7 @@ const descriptions = {
   },
   "_.Tooltip": {
     title: "Tooltip",
-    description: "Tooltip overlay ancorato con hover/focus e delay. Puoi usarlo come wrapper o via API `bind/show/hide`."
+    description: "Tooltip ancorato con trigger hover/focus/click, contenuto ricco e API `bind/open/show/hide/close/toggle`."
   },
   "_.List": {
     title: "List",
