@@ -7758,50 +7758,444 @@
   // Esempio: CMSwift.ui.Spinner({ size: 24 })
 
   UI.Progress = (...args) => {
-    const { props } = CMSwift.uiNormalizeArgs(args);
-    const value = Math.max(0, Math.min(100, Number(uiUnwrap(props.value) ?? 0)));
-    const wrap = _.div({
-      class: uiClass(["cms-progress", props.class]),
-      style: {
-        width: uiUnwrap(props.width) || "100%",
-        height: uiUnwrap(props.size) || "6px",
-        background: "rgba(255,255,255,0.08)",
-        borderRadius: "999px",
-        overflow: "hidden",
-        ...(props.style || {})
-      }
+    const { props, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = props.slots || {};
+    const boundValue = props.model || ((uiIsSignal(props.value) || uiIsRod(props.value)) ? props.value : null);
+    const model = resolveModel(boundValue, "UI.Progress:model");
+    const stateClass = uiComputed([props.state, props.color], () => {
+      const state = normalizeState(uiUnwrap(props.state) || uiUnwrap(props.color));
+      return state ? `cms-state-${state}` : "";
     });
-    const bar = _.div({
-      class: uiClass(["cms-progress-bar", uiWhen(props.striped, "striped")]),
-      style: {
-        width: value + "%",
-        height: "100%",
-        background: uiUnwrap(props.color) || "var(--cms-primary)",
-        transition: "width 200ms ease"
+
+    const getNumber = (value, fallback) => {
+      const next = Number(value);
+      return Number.isFinite(next) ? next : fallback;
+    };
+    const getMin = () => getNumber(uiUnwrap(props.min), 0);
+    const getMax = () => {
+      const min = getMin();
+      const max = getNumber(uiUnwrap(props.max), 100);
+      return max < min ? min : max;
+    };
+    const getTrackHeight = () => {
+      const raw = uiUnwrap(props.height ?? props.thickness ?? props.size);
+      if (raw == null || raw === "") return "8px";
+      if (typeof raw === "number") return `${raw}px`;
+      if (typeof raw === "string") {
+        const sizePreset = {
+          xxs: "4px",
+          xs: "6px",
+          sm: "8px",
+          md: "10px",
+          lg: "12px",
+          xl: "14px",
+          xxl: "16px",
+          xxxl: "18px"
+        };
+        return sizePreset[raw] || raw;
       }
+      return "8px";
+    };
+    const resolveCssColor = (value, fallback = "") => {
+      const raw = uiUnwrap(value);
+      if (raw == null || raw === false || raw === "") return fallback;
+      const state = normalizeState(raw);
+      if (state) return `var(--cms-${state})`;
+      if (typeof raw === "string" && isTokenCSS(raw)) return `var(--cms-${raw})`;
+      return String(raw);
+    };
+    const normalizeValue = (value) => {
+      const min = getMin();
+      const max = getMax();
+      const next = getNumber(value, min);
+      return Math.min(max, Math.max(min, next));
+    };
+    const ratioFromValue = (value) => {
+      const min = getMin();
+      const max = getMax();
+      const span = max - min;
+      if (!span) return 0;
+      const raw = (normalizeValue(value) - min) / span;
+      const ratio = uiUnwrap(props.reverse) ? (1 - raw) : raw;
+      return Math.max(0, Math.min(1, ratio));
+    };
+    const clampBuffer = (value) => {
+      const normalized = normalizeValue(value);
+      return normalized < getValue() ? getValue() : normalized;
+    };
+    const resolveDisplayValue = (value, percent, ctx) => {
+      const formatter = props.formatValue;
+      if (typeof formatter === "function") {
+        const formatted = formatter(value, percent, ctx);
+        if (formatted != null) return formatted;
+      }
+      return `${Math.round(percent)}%`;
+    };
+    const clearHost = (host) => {
+      while (host.firstChild) host.removeChild(host.firstChild);
+    };
+    const renderInto = (host, nodes, display = "flex") => {
+      clearHost(host);
+      (nodes || []).forEach((node) => {
+        if (node == null || node === false) return;
+        if (node instanceof Node) {
+          host.appendChild(node);
+          return;
+        }
+        host.appendChild(document.createTextNode(String(node)));
+      });
+      host.style.display = host.childNodes.length ? display : "none";
+    };
+    const asArray = (value, ctx = {}) => slotToArray(uiUnwrap(value), ctx);
+    const asIconArray = (value, as, ctx = {}) => {
+      const raw = uiUnwrap(value);
+      if (raw == null || raw === false || raw === "") return [];
+      if (typeof raw === "string") return [UI.Icon({ name: raw, size: props.iconSize ?? 16 })];
+      return asArray(raw, { ...ctx, as });
+    };
+    const resolveContentProp = (value) => {
+      if (uiIsRod(value) || uiIsSignal(value)) return uiUnwrap(value);
+      if (typeof value === "function" && value.length === 0) return value();
+      return value;
+    };
+
+    const [getValue, setValue] = CMSwift.reactive.signal(normalizeValue(
+      model ? model.get() : (uiUnwrap(props.value) ?? uiUnwrap(props.min) ?? 0)
+    ));
+    const [getBuffer, setBuffer] = CMSwift.reactive.signal(clampBuffer(
+      uiUnwrap(props.buffer) ?? (model ? model.get() : (uiUnwrap(props.value) ?? uiUnwrap(props.min) ?? 0))
+    ));
+
+    const setProgressValue = (raw, opts = {}) => {
+      const next = normalizeValue(raw);
+      if (getValue() !== next) setValue(next);
+      if (getBuffer() < next) setBuffer(next);
+      if (model && opts.fromModel !== true) model.set(next);
+      return next;
+    };
+    const setProgressBuffer = (raw) => {
+      const next = clampBuffer(raw);
+      if (getBuffer() !== next) setBuffer(next);
+      return next;
+    };
+
+    const wrapProps = CMSwift.omit(props, [
+      "model", "value", "min", "max", "buffer", "class", "style", "slots",
+      "label", "note", "showValue", "valueLabel", "insideLabel", "formatValue",
+      "icon", "iconRight", "iconSize", "startLabel", "endLabel", "leftLabel", "rightLabel",
+      "trackColor", "bufferColor", "height", "thickness", "size", "state", "color",
+      "reverse", "striped", "animated", "indeterminate", "ariaLabel", "ariaValueText",
+      "width", "dense", "outline", "flat", "border", "glossy", "glow", "glass",
+      "shadow", "gradient", "textGradient", "lightShadow", "radius", "rounded", "textColor"
+    ]);
+    const rootStyle = {
+      width: uiUnwrap(props.width) || "100%",
+      ...(props.style || {})
+    };
+    const propColor = uiUnwrap(props.color);
+    if ((propColor != null || uiIsReactive(props.color)) && !normalizeState(propColor || "")) {
+      delete rootStyle.backgroundColor;
+    }
+    wrapProps.class = uiClass([
+      "cms-progress-wrap",
+      uiWhen(props.dense, "dense"),
+      uiWhen(props.reverse, "is-reverse"),
+      uiWhen(props.indeterminate, "is-indeterminate"),
+      stateClass,
+      props.class
+    ]);
+    wrapProps.style = rootStyle;
+
+    const header = _.div({ class: "cms-progress-header" });
+    const heading = _.div({ class: "cms-progress-heading" });
+    const labelHost = _.div({ class: "cms-progress-label" });
+    const noteHost = _.div({ class: "cms-progress-note" });
+    const valueHost = _.div({ class: "cms-progress-value" });
+    heading.append(labelHost, noteHost);
+    header.append(heading, valueHost);
+
+    const body = _.div({ class: "cms-progress-body" });
+    const startLabelHost = _.span({ class: "cms-progress-edge-label cms-progress-edge-label-left" });
+    const track = _.div({
+      class: "cms-progress",
+      role: "progressbar"
     });
-    wrap.appendChild(bar);
+    const buffer = _.span({ class: "cms-progress-buffer" });
+    const fill = _.span({
+      class: uiClass([
+        "cms-progress-bar",
+        "cms-singularity",
+        stateClass,
+        uiWhen(props.outline, "cms-outline"),
+        uiWhen(props.flat, "cms-flat"),
+        uiWhen(props.border, "cms-border"),
+        uiWhen(props.glossy, "cms-glossy"),
+        uiWhen(props.glow, "cms-glow"),
+        uiWhen(props.glass, "cms-glass"),
+        uiWhen(props.shadow, "cms-shadow"),
+        uiComputed(props.shadow, () => {
+          const shadow = normalizeShadow(uiUnwrap(props.shadow));
+          return shadow ? `cms-shadow-${shadow}` : "";
+        }),
+        uiWhen(props.gradient, "cms-gradient"),
+        uiWhen(props.textGradient, "cms-text-gradient"),
+        uiWhen(props.lightShadow, "cms-light-shadow"),
+        uiWhen(props.striped, "is-striped"),
+        uiWhen(props.animated || props.indeterminate, "is-animated")
+      ])
+    });
+    const insideHost = _.span({ class: "cms-progress-bar-label" });
+    fill.appendChild(insideHost);
+    track.append(buffer, fill);
+    const endLabelHost = _.span({ class: "cms-progress-edge-label cms-progress-edge-label-right" });
+    body.append(startLabelHost, track, endLabelHost);
+
+    const wrap = _.div(wrapProps, header, body);
+    setPropertyProps(fill, props);
+
+    const renderHeader = () => {
+      const value = getValue();
+      const percent = ratioFromValue(value) * 100;
+      const ctx = {
+        value,
+        percent,
+        min: getMin(),
+        max: getMax(),
+        buffer: getBuffer(),
+        progress: wrap,
+        track,
+        bar: fill,
+        props
+      };
+      const iconNodes = renderSlotToArray(slots, "icon", ctx, null);
+      const iconFallback = iconNodes.length ? [] : asIconArray(props.icon, "icon", ctx);
+      const labelNodes = renderSlotToArray(slots, "label", ctx, resolveContentProp(props.label));
+      const fallbackNodes = labelNodes.length ? labelNodes : renderSlotToArray(slots, "default", ctx, children);
+      const rightIconNodes = renderSlotToArray(slots, "iconRight", ctx, null);
+      const rightIconFallback = rightIconNodes.length ? [] : asIconArray(props.iconRight, "iconRight", ctx);
+      const noteNodes = renderSlotToArray(slots, "note", ctx, resolveContentProp(props.note));
+      const valueFallback = props.valueLabel != null
+        ? resolveContentProp(props.valueLabel)
+        : resolveDisplayValue(value, percent, ctx);
+      const showValue = uiUnwrap(props.showValue);
+      const outsideValueNodes = (showValue === true || props.valueLabel != null || CMSwift.ui.getSlot(slots, "value") != null)
+        ? renderSlotToArray(slots, "value", ctx, valueFallback)
+        : [];
+
+      renderInto(labelHost, [...iconFallback, ...iconNodes, ...fallbackNodes, ...rightIconFallback, ...rightIconNodes], "inline-flex");
+      renderInto(noteHost, noteNodes, "block");
+      renderInto(valueHost, showValue === "inside" ? [] : outsideValueNodes, "inline-flex");
+      header.style.display = (labelHost.childNodes.length || noteHost.childNodes.length || valueHost.childNodes.length) ? "flex" : "none";
+    };
+
+    const renderEdgeLabels = () => {
+      const value = getValue();
+      const percent = ratioFromValue(value) * 100;
+      const ctx = {
+        value,
+        percent,
+        min: getMin(),
+        max: getMax(),
+        buffer: getBuffer(),
+        progress: wrap,
+        track,
+        bar: fill,
+        props
+      };
+      const startSource = resolveContentProp(props.startLabel ?? props.leftLabel);
+      const endSource = resolveContentProp(props.endLabel ?? props.rightLabel);
+      renderInto(startLabelHost, renderSlotToArray(slots, "startLabel", ctx, startSource), "inline-flex");
+      renderInto(endLabelHost, renderSlotToArray(slots, "endLabel", ctx, endSource), "inline-flex");
+    };
+
+    const renderInsideValue = () => {
+      const value = getValue();
+      const percent = ratioFromValue(value) * 100;
+      const ctx = {
+        value,
+        percent,
+        min: getMin(),
+        max: getMax(),
+        buffer: getBuffer(),
+        progress: wrap,
+        track,
+        bar: fill,
+        props
+      };
+      const showValue = uiUnwrap(props.showValue);
+      const insideFallback = props.insideLabel != null
+        ? resolveContentProp(props.insideLabel)
+        : resolveDisplayValue(value, percent, ctx);
+      const insideNodes = (showValue === "inside" || props.insideLabel != null || CMSwift.ui.getSlot(slots, "inside") != null)
+        ? renderSlotToArray(slots, "inside", ctx, insideFallback)
+        : [];
+      renderInto(insideHost, insideNodes, "inline-flex");
+    };
+
+    const syncVisualState = () => {
+      const value = getValue();
+      const bufferValue = getBuffer();
+      const min = getMin();
+      const max = getMax();
+      const percent = ratioFromValue(value) * 100;
+      const bufferPercent = ratioFromValue(bufferValue) * 100;
+      const tone = resolveCssColor(props.color, "");
+      const trackTone = resolveCssColor(
+        props.trackColor,
+        tone ? `color-mix(in srgb, ${tone} 14%, transparent)` : "rgba(255,255,255,0.08)"
+      );
+      const bufferTone = resolveCssColor(
+        props.bufferColor,
+        tone ? `color-mix(in srgb, ${tone} 30%, transparent)` : "rgba(255,255,255,0.16)"
+      );
+      const ariaLabel = uiUnwrap(props.ariaLabel);
+      const ariaValueText = uiUnwrap(props.ariaValueText);
+      const isIndeterminate = !!uiUnwrap(props.indeterminate);
+      const customRadius = uiUnwrap(props.radius);
+
+      wrap.style.width = uiUnwrap(props.width) || "100%";
+      wrap.style.setProperty("--cms-progress-height", getTrackHeight());
+      if (customRadius != null) {
+        if (typeof customRadius === "number") wrap.style.setProperty("--cms-progress-radius", `${customRadius}px`);
+        else if (typeof customRadius === "string" && CMSwift.uiSizes.includes(customRadius)) wrap.style.setProperty("--cms-progress-radius", `var(--cms-r-${customRadius})`);
+        else wrap.style.setProperty("--cms-progress-radius", String(customRadius));
+      } else {
+        wrap.style.removeProperty("--cms-progress-radius");
+      }
+
+      track.style.background = trackTone;
+      buffer.style.background = bufferTone;
+      buffer.style.width = `${bufferPercent}%`;
+
+      if (tone && !normalizeState(uiUnwrap(props.state) || uiUnwrap(props.color))) {
+        fill.style.setProperty("--set-background-color", tone);
+        fill.style.setProperty("--set-border-color", tone);
+        fill.style.setProperty("--set-color", uiUnwrap(props.textColor) || "var(--cms-on-primary, #fff)");
+      } else if (!normalizeState(uiUnwrap(props.state) || uiUnwrap(props.color))) {
+        fill.style.setProperty("--set-background-color", "var(--cms-primary)");
+        fill.style.setProperty("--set-border-color", "var(--cms-primary)");
+        fill.style.setProperty("--set-color", uiUnwrap(props.textColor) || "var(--cms-on-primary, #fff)");
+      } else {
+        fill.style.removeProperty("--set-background-color");
+        fill.style.removeProperty("--set-border-color");
+        fill.style.removeProperty("--set-color");
+      }
+
+      if (isIndeterminate) {
+        fill.style.width = "";
+        track.removeAttribute("aria-valuenow");
+        track.removeAttribute("aria-valuemin");
+        track.removeAttribute("aria-valuemax");
+      } else {
+        fill.style.width = `${percent}%`;
+        track.setAttribute("aria-valuemin", String(min));
+        track.setAttribute("aria-valuemax", String(max));
+        track.setAttribute("aria-valuenow", String(value));
+      }
+
+      if (ariaLabel != null) track.setAttribute("aria-label", String(ariaLabel));
+      else if (typeof uiUnwrap(props.label) === "string") track.setAttribute("aria-label", String(uiUnwrap(props.label)));
+      else track.removeAttribute("aria-label");
+
+      if (ariaValueText != null) {
+        track.setAttribute("aria-valuetext", String(ariaValueText));
+      } else if (!isIndeterminate) {
+        track.setAttribute("aria-valuetext", resolveDisplayValue(value, percent, { value, percent, min, max, buffer: bufferValue, progress: wrap, track, bar: fill, props }));
+      } else {
+        track.removeAttribute("aria-valuetext");
+      }
+
+      wrap.classList.toggle("has-start-label", startLabelHost.childNodes.length > 0);
+      wrap.classList.toggle("has-end-label", endLabelHost.childNodes.length > 0);
+      wrap.classList.toggle("has-inside-label", insideHost.childNodes.length > 0);
+    };
+
+    if (model) {
+      setProgressValue(model.get(), { fromModel: true });
+      model.watch((value) => { setProgressValue(value, { fromModel: true }); }, "UI.Progress:watch");
+    } else if (uiIsReactive(props.value)) {
+      CMSwift.reactive.effect(() => {
+        setProgressValue(uiUnwrap(props.value), { fromModel: true });
+      }, "UI.Progress:value");
+    } else {
+      setProgressValue(props.value ?? props.min ?? 0, { fromModel: true });
+    }
+
+    if (uiIsReactive(props.buffer)) {
+      CMSwift.reactive.effect(() => {
+        setProgressBuffer(uiUnwrap(props.buffer));
+      }, "UI.Progress:buffer");
+    } else {
+      setProgressBuffer(props.buffer ?? props.value ?? props.min ?? 0);
+    }
+
+    CMSwift.reactive.effect(() => {
+      renderHeader();
+      renderEdgeLabels();
+      renderInsideValue();
+      syncVisualState();
+    }, "UI.Progress:render");
+
+    wrap._track = track;
+    wrap._bar = fill;
+    wrap._buffer = buffer;
+    wrap._getValue = getValue;
+    wrap._getBuffer = getBuffer;
+    wrap._setValue = (value) => setProgressValue(value);
+    wrap._setBuffer = (value) => setProgressBuffer(value);
+
     return wrap;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.Progress = {
-      signature: "UI.Progress(props)",
+      signature: "UI.Progress(...children) | UI.Progress(props, ...children)",
       props: {
-        value: "number",
+        value: "number|rod|[get,set] signal",
+        model: "rod|[get,set] signal",
+        min: "number",
+        max: "number",
+        buffer: "number|rod|[get,set] signal",
+        label: "String|Node|Function|Array",
+        note: "String|Node|Function|Array",
+        showValue: "boolean|\"inside\"",
+        valueLabel: "String|Node|Function|Array",
+        insideLabel: "String|Node|Function|Array",
+        formatValue: "function(value, percent, ctx)",
+        icon: "String|Node|Function|Array",
+        iconRight: "String|Node|Function|Array",
+        startLabel: "String|Node|Function|Array",
+        endLabel: "String|Node|Function|Array",
+        leftLabel: "Alias di startLabel",
+        rightLabel: "Alias di endLabel",
         width: "string|number",
         size: "string|number",
+        height: "string|number",
+        thickness: "Alias di height",
         color: "string",
+        state: "primary|secondary|success|warning|danger|info|light|dark",
+        trackColor: "string",
+        bufferColor: "string",
         striped: "boolean",
-        slots: "{ default? }",
+        animated: "boolean",
+        indeterminate: "boolean",
+        reverse: "boolean",
+        slots: "{ icon?, label?, note?, value?, inside?, startLabel?, endLabel?, default? }",
         class: "string",
         style: "object"
       },
       slots: {
-        default: "Unused (progress has no content)"
+        icon: "Icona prima della label",
+        label: "Contenuto principale del progress",
+        note: "Contenuto secondario sotto la label",
+        value: "Valore esterno a destra",
+        inside: "Contenuto dentro la barra",
+        startLabel: "Label a sinistra della barra",
+        endLabel: "Label a destra della barra",
+        default: "Fallback label content"
       },
       returns: "HTMLDivElement",
-      description: "Progress bar orizzontale."
+      description: "Progress bar standardizzata con header opzionale, buffer, stato semantico e supporto reattivo."
     };
   }
   // Esempio: CMSwift.ui.Progress({ value: 45 })
