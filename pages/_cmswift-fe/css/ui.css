@@ -3625,6 +3625,51 @@
   animation: cms-progress-indeterminate 1.35s ease-in-out infinite;
 }
 
+.cms-loading-bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.cms-loading-bar.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cms-loading-bar.is-inline {
+  transform: none;
+}
+
+.cms-loading-bar .cms-progress-wrap {
+  gap: 0;
+}
+
+.cms-loading-bar .cms-progress-body {
+  gap: 0;
+}
+
+.cms-loading-bar .cms-progress {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.cms-loading-bar.has-track .cms-progress {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cms-loading-bar .cms-progress-buffer,
+.cms-loading-bar .cms-progress-bar {
+  transition: width 220ms ease, transform 220ms ease, opacity 180ms ease;
+}
+
 @keyframes cms-progress-stripes {
   from {
     background-position: 0 0;
