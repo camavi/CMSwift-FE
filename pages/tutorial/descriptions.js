@@ -149,7 +149,7 @@ const descriptions = {
   },
   "_.Banner": {
     title: "Banner",
-    description: "Banner informativo con messaggio e azioni opzionali. Supporta type, densita e slot message/actions."
+    description: "Banner strutturato con titolo, messaggio, descrizione, CTA, dismiss e slots per avvisi operativi o contestuali."
   },
   "_.Header": {
     title: "Header",

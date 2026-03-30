@@ -2159,6 +2159,176 @@
   font-size: var(--cms-font-size-xxxl);
 }
 
+.cms-banner {
+  --cms-banner-bg: color-mix(in srgb, var(--cms-panel) 88%, white 4%);
+  --cms-banner-border: var(--cms-border-color);
+  --cms-banner-color: inherit;
+  --cms-banner-accent: color-mix(in srgb, var(--cms-border-color) 65%, white);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cms-s-md);
+  width: 100%;
+  min-width: 0;
+  padding: 10px 14px;
+  font-size: var(--cms-font-size, 14px);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--cms-banner-border);
+  border-radius: var(--set-border-radius, var(--cms-r-md));
+  background: var(--cms-banner-bg);
+  color: var(--cms-banner-color);
+}
+
+.cms-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--cms-banner-accent);
+  opacity: 0.95;
+}
+
+.cms-banner-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cms-banner-accent) 16%, transparent);
+  color: var(--cms-banner-accent);
+  flex-shrink: 0;
+}
+
+.cms-banner-body {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cms-s-sm);
+}
+
+.cms-banner-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cms-banner-title {
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.cms-banner-message {
+  line-height: 1.45;
+}
+
+.cms-banner-description,
+.cms-banner-meta {
+  line-height: 1.45;
+  color: color-mix(in srgb, currentColor 72%, transparent);
+}
+
+.cms-banner-extra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cms-s-sm);
+}
+
+.cms-banner-actions,
+.cms-banner-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cms-banner-side {
+  margin-left: auto;
+  justify-content: flex-end;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.cms-banner-actions .cms-btn,
+.cms-banner-side .cms-btn {
+  margin: 0;
+}
+
+.cms-banner-close {
+  min-width: 34px;
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+.cms-banner.cms-banner-actions-bottom .cms-banner-side {
+  align-self: stretch;
+}
+
+.cms-banner.cms-banner-actions-bottom .cms-banner-side .cms-banner-actions {
+  width: 100%;
+}
+
+.cms-banner.cms-banner-stack {
+  flex-direction: column;
+}
+
+.cms-banner.cms-banner-stack::before {
+  inset: 0 0 auto 0;
+  width: auto;
+  height: 4px;
+}
+
+.cms-banner.cms-banner-stack .cms-banner-side {
+  margin-left: 0;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.cms-banner.cms-banner-outline {
+  --cms-banner-bg: transparent;
+  --cms-banner-border: color-mix(in srgb, var(--cms-banner-accent) 42%, var(--cms-border-color));
+}
+
+.cms-banner.cms-dense {
+  gap: var(--cms-s-sm);
+  padding: 8px 10px;
+}
+
+.cms-banner.cms-dense .cms-banner-icon {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+}
+
+.cms-banner.cms-banner-ghost {
+  --cms-banner-bg: color-mix(in srgb, var(--cms-banner-accent) 10%, transparent);
+  --cms-banner-border: transparent;
+}
+
+.cms-banner.cms-banner-solid {
+  --cms-banner-bg: var(--cms-banner-accent);
+  --cms-banner-border: color-mix(in srgb, var(--cms-banner-accent) 84%, black);
+  --cms-banner-color: var(--cms-banner-solid-text, #fff);
+}
+
+.cms-banner.cms-banner-solid .cms-banner-icon {
+  background: color-mix(in srgb, var(--cms-banner-color) 14%, transparent);
+  color: var(--cms-banner-color);
+}
+
+.cms-banner.cms-size-xxs {
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+.cms-banner.cms-size-xs {
+  padding: 7px 11px;
+  font-size: 12px;
+}
+
 .cms-banner.cms-size-sm {
   padding: 8px 12px;
   font-size: 13px;
@@ -2172,6 +2342,16 @@
 .cms-banner.cms-size-lg {
   padding: 12px 16px;
   font-size: 15px;
+}
+
+.cms-banner.cms-size-xl {
+  padding: 14px 18px;
+  font-size: 16px;
+}
+
+.cms-banner.cms-size-xxl {
+  padding: 16px 20px;
+  font-size: 17px;
 }
 
 .cms-toolbar.cms-size-sm {
@@ -2216,41 +2396,77 @@
   font-size: 16px;
 }
 
-.cms-banner.success {
-  border-color: var(--cms-success);
-  background: var(--cms-success-soft);
-  color: var(--cms-success-text);
+.cms-banner.success,
+.cms-banner.cms-state-success {
+  --cms-banner-accent: var(--cms-success);
+  --cms-banner-border: color-mix(in srgb, var(--cms-success) 32%, var(--cms-border-color));
+  --cms-banner-bg: var(--cms-success-soft);
+  --cms-banner-color: var(--cms-success-text);
+  --cms-banner-solid-text: var(--cms-success-text);
 }
 
-.cms-banner.warning {
-  border-color: var(--cms-warning);
-  background: var(--cms-warning-soft);
-  color: var(--cms-warning-text);
+.cms-banner.warning,
+.cms-banner.cms-state-warning {
+  --cms-banner-accent: var(--cms-warning);
+  --cms-banner-border: color-mix(in srgb, var(--cms-warning) 32%, var(--cms-border-color));
+  --cms-banner-bg: var(--cms-warning-soft);
+  --cms-banner-color: var(--cms-warning-text);
+  --cms-banner-solid-text: var(--cms-warning-text);
 }
 
 .cms-banner.error,
-.cms-banner.danger {
-  border-color: var(--cms-danger);
-  background: var(--cms-danger-soft);
-  color: var(--cms-danger-text);
+.cms-banner.danger,
+.cms-banner.cms-state-danger {
+  --cms-banner-accent: var(--cms-danger);
+  --cms-banner-border: color-mix(in srgb, var(--cms-danger) 32%, var(--cms-border-color));
+  --cms-banner-bg: var(--cms-danger-soft);
+  --cms-banner-color: var(--cms-danger-text);
+  --cms-banner-solid-text: var(--cms-danger-text);
 }
 
-.cms-banner.info {
-  border-color: var(--cms-info);
-  background: var(--cms-info-soft);
-  color: var(--cms-info-text);
+.cms-banner.info,
+.cms-banner.cms-state-info {
+  --cms-banner-accent: var(--cms-info);
+  --cms-banner-border: color-mix(in srgb, var(--cms-info) 32%, var(--cms-border-color));
+  --cms-banner-bg: var(--cms-info-soft);
+  --cms-banner-color: var(--cms-info-text);
+  --cms-banner-solid-text: var(--cms-info-text);
 }
 
-.cms-banner.primary {
-  border-color: var(--cms-primary);
-  background: var(--cms-primary-soft);
-  color: var(--cms-primary-text);
+.cms-banner.primary,
+.cms-banner.cms-state-primary {
+  --cms-banner-accent: var(--cms-primary);
+  --cms-banner-border: color-mix(in srgb, var(--cms-primary) 32%, var(--cms-border-color));
+  --cms-banner-bg: var(--cms-primary-soft);
+  --cms-banner-color: var(--cms-primary-text);
+  --cms-banner-solid-text: var(--cms-primary-text);
 }
 
-.cms-banner.secondary {
-  border-color: var(--cms-secondary);
-  background: var(--cms-secondary-soft);
-  color: var(--cms-secondary-text);
+.cms-banner.secondary,
+.cms-banner.cms-state-secondary {
+  --cms-banner-accent: var(--cms-secondary);
+  --cms-banner-border: color-mix(in srgb, var(--cms-secondary) 32%, var(--cms-border-color));
+  --cms-banner-bg: var(--cms-secondary-soft);
+  --cms-banner-color: var(--cms-secondary-text);
+  --cms-banner-solid-text: var(--cms-secondary-text);
+}
+
+.cms-banner.light,
+.cms-banner.cms-state-light {
+  --cms-banner-accent: var(--cms-light);
+  --cms-banner-border: color-mix(in srgb, var(--cms-light) 70%, var(--cms-border-color));
+  --cms-banner-bg: color-mix(in srgb, var(--cms-light) 18%, var(--cms-panel));
+  --cms-banner-color: var(--cms-light-text);
+  --cms-banner-solid-text: var(--cms-light-text);
+}
+
+.cms-banner.dark,
+.cms-banner.cms-state-dark {
+  --cms-banner-accent: var(--cms-dark);
+  --cms-banner-border: color-mix(in srgb, var(--cms-dark) 52%, var(--cms-border-color));
+  --cms-banner-bg: color-mix(in srgb, var(--cms-dark) 18%, var(--cms-panel));
+  --cms-banner-color: var(--cms-dark-text);
+  --cms-banner-solid-text: var(--cms-dark-text);
 }
 
 .cms-t-nowrap {
