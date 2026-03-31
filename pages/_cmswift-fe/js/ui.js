@@ -10724,11 +10724,17 @@ transition: width 200ms ease;
   };
 
   // ===============================
-  // UI.Table MVP
+  // UI.Table
   // ===============================
   function toValue(rows) {
     if (typeof rows === "function") return rows();
     return rows || [];
+  }
+
+  function tableGetByPath(obj, path) {
+    if (obj == null || path == null) return undefined;
+    if (typeof path !== "string" || path.indexOf(".") < 0) return obj?.[path];
+    return path.split(".").reduce((acc, key) => acc == null ? acc : acc[key], obj);
   }
 
   function defaultCompare(a, b) {
@@ -10736,211 +10742,517 @@ transition: width 200ms ease;
     if (a == null) return -1;
     if (b == null) return 1;
     if (typeof a === "number" && typeof b === "number") return a - b;
-    return String(a).localeCompare(String(b));
+    return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" });
+  }
+
+  function tableToArray(value) {
+    const rows = toValue(value);
+    return Array.isArray(rows) ? rows : [];
+  }
+
+  function tableColumnLabel(col) {
+    return col?.label ?? col?.title ?? col?.header ?? col?.key ?? "";
+  }
+
+  function tableColumnSortKey(col, index) {
+    return col?.sortKey ?? col?.key ?? `__col_${index}`;
+  }
+
+  function tableFindColumn(columns, key) {
+    return columns.find((col, index) => tableColumnSortKey(col, index) === key || col?.key === key) || null;
+  }
+
+  function tableResolveValue(col, row, rowIndex) {
+    if (!col) return row;
+    if (typeof col.get === "function") return col.get(row, { row, rowIndex, col });
+    if (typeof col.value === "function") return col.value(row, { row, rowIndex, col });
+    if (typeof col.key === "string") return tableGetByPath(row, col.key);
+    return col.key != null ? row?.[col.key] : row;
+  }
+
+  function tableResolveStyle(style, ctx) {
+    if (typeof style === "function") return style(ctx) || {};
+    return style || {};
+  }
+
+  function tableTextValue(value) {
+    if (value == null) return "";
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
+    if (Array.isArray(value)) return value.map(tableTextValue).filter(Boolean).join(" ");
+    if (typeof Node !== "undefined" && value instanceof Node) return value.textContent || "";
+    if (typeof value === "object") {
+      if (typeof value.textContent === "string") return value.textContent;
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return "";
+      }
+    }
+    return String(value);
+  }
+
+  function tableNormalizePageSizes(options, fallback) {
+    const list = Array.isArray(options) ? options : fallback;
+    const normalized = list
+      .map((item) => Number(item))
+      .filter((item) => Number.isFinite(item) && item > 0);
+    return normalized.length ? Array.from(new Set(normalized)) : fallback;
+  }
+
+  function tableMatchesQuery(row, columns, query, props) {
+    const predicate = props.searchBy || props.searchPredicate;
+    if (typeof predicate === "function") return !!predicate(row, { query, columns });
+
+    const terms = String(query || "")
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (!terms.length) return true;
+
+    const searchKeys = Array.isArray(props.searchKeys) && props.searchKeys.length
+      ? props.searchKeys
+      : columns.filter((col) => col?.searchable !== false).map((col) => col?.searchKey ?? col?.key).filter(Boolean);
+
+    const tokens = [];
+    if (searchKeys.length) {
+      for (const key of searchKeys) {
+        if (typeof key === "function") tokens.push(tableTextValue(key(row)));
+        else {
+          const col = columns.find((item) => item?.key === key || item?.searchKey === key);
+          tokens.push(tableTextValue(col ? tableResolveValue(col, row, -1) : tableGetByPath(row, key)));
+        }
+      }
+    } else {
+      tokens.push(tableTextValue(row));
+    }
+
+    const haystack = tokens.join(" ").toLowerCase();
+    return terms.every((term) => haystack.includes(term));
   }
 
   UI.Table = (...args) => {
-    const { props } = CMSwift.uiNormalizeArgs(args);
-    // props:
-    // columns: [{ key, label, sortable, get(row), render(row), width, align }]
-    // rows: array | () => array (reactive)
-    // rowKey: "id" | (row)=>string
-    // loading: boolean | () => boolean
-    // pageSize: number
-    // initialSort: { key, dir: "asc|desc" }
-    // actions: (row) => Node|Node[]   (per row)
-    // emptyText, loadingText
-    // onRowClick(row)
-    const columns = props.columns || [];
-    const pageSize0 = props.pageSize || 10;
+    const { props, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = props.slots || {};
+    const columns = Array.isArray(props.columns) ? props.columns : [];
+    const basePageSizes = tableNormalizePageSizes(props.pageSizeOptions, [5, 10, 20, 50]);
+    const initialPageSize = Number(props.pageSize ?? basePageSizes[0] ?? 10) || 10;
+    const pageSizes = Array.from(new Set([...basePageSizes, initialPageSize])).sort((a, b) => a - b);
+    const initialSort = props.initialSort || (props.sortBy ? { key: props.sortBy, dir: props.sortDir === "desc" ? "desc" : "asc" } : null);
+    const searchable = props.searchable === true
+      || typeof props.searchable === "string"
+      || props.searchPlaceholder != null
+      || props.search != null
+      || props.query != null
+      || !!props.searchModel
+      || !!props.queryModel
+      || Array.isArray(props.searchKeys)
+      || typeof props.searchBy === "function"
+      || typeof props.searchPredicate === "function";
+    const searchModel = resolveModel(props.searchModel || props.queryModel, "UI.Table:query");
 
-    const [getPage, setPage] = app.reactive.signal(1);
-    const [getPageSize, setPageSize] = app.reactive.signal(pageSize0);
-    const [getSort, setSort] = app.reactive.signal(props.initialSort || null); // {key,dir}
+    const [getPage, setPage] = app.reactive.signal(Math.max(1, Number(props.page || 1) || 1));
+    const [getPageSize, setPageSizeState] = app.reactive.signal(initialPageSize);
+    const [getSort, setSort] = app.reactive.signal(initialSort);
+    const [getQuery, setQueryState] = app.reactive.signal(String((searchModel ? searchModel.get() : (props.search ?? props.query)) ?? ""));
+
+    const setQuery = (value) => {
+      const next = String(value ?? "");
+      setQueryState(next);
+      if (searchModel) searchModel.set(next);
+      setPage(1);
+    };
+    const setPageSize = (value) => {
+      const next = Number(value) || initialPageSize;
+      setPageSizeState(next);
+      setPage(1);
+    };
+    const toggleSort = (col, index) => {
+      const nextKey = tableColumnSortKey(col, index);
+      const current = getSort();
+      if (!current || (current.key !== nextKey && current.key !== col?.key)) setSort({ key: nextKey, dir: "asc" });
+      else if (current.dir === "asc") setSort({ key: nextKey, dir: "desc" });
+      else setSort(null);
+      setPage(1);
+    };
+
+    let searchInput = null;
+    if (searchModel) {
+      searchModel.watch((value) => {
+        const next = String(value ?? "");
+        setQueryState(next);
+        if (searchInput && searchInput.value !== next) searchInput.value = next;
+        setPage(1);
+      }, "UI.Table:queryWatch");
+    }
 
     const wrapProps = CMSwift.omit(props, [
-      "columns", "rows", "rowKey", "loading", "pageSize", "initialSort",
-      "actions", "emptyText", "loadingText", "onRowClick", "onRowDblClick",
-      "tableClass", "cardClass", "dense", "striped", "hover", "slots"
+      "columns", "rows", "rowKey", "loading", "page", "pageSize", "pageSizeOptions", "pagination",
+      "initialSort", "sortBy", "sortDir", "search", "query", "searchable", "searchPlaceholder",
+      "searchKeys", "searchBy", "searchPredicate", "searchModel", "queryModel", "filter",
+      "actions", "actionsLabel", "emptyText", "loadingText", "onRowClick", "onRowDblClick",
+      "tableClass", "tableStyle", "cardClass", "dense", "striped", "hover", "stickyHeader",
+      "toolbar", "toolbarStart", "toolbarEnd", "caption", "footer", "status", "rowClass", "rowAttrs",
+      "minTableWidth", "hideHeader", "hideFooter", "slots", "body"
     ]);
     wrapProps.class = uiClass(["cms-table-card", props.class, props.cardClass]);
     if (props.dense != null) wrapProps.dense = props.dense;
-    const wrap = UI.Card(wrapProps);
 
-    // header row
-    const thead = _.thead(
-      _.tr(
-        ...columns.map(col => {
-          const isSortable = col.sortable !== false;
-          const thStyle = {};
-          if (col.width) thStyle.width = col.width;
-          if (col.align) thStyle.textAlign = col.align;
+    const shell = _.div({ class: "cms-table-shell" });
+    const leadNodes = renderSlotToArray(slots, "default", {}, children);
+    if (leadNodes.length) shell.appendChild(_.div({ class: "cms-table-lead" }, ...leadNodes));
 
-          if (!isSortable) {
-            const labelNodes = renderSlotToArray(null, "default", {}, col.label || col.key);
-            return _.th({ style: thStyle, class: col.headerClass }, ...labelNodes);
-          }
+    const toolbarStartNodes = renderSlotToArray(slots, "toolbarStart", {}, props.toolbarStart);
+    const toolbarNodes = renderSlotToArray(slots, "toolbar", {}, props.toolbar);
+    const toolbarEndNodes = renderSlotToArray(slots, "toolbarEnd", {}, props.toolbarEnd);
 
-          const labelText = (typeof col.label === "string" || typeof col.label === "number")
-            ? col.label
-            : (col.key || "");
-          return _.th({
-            class: uiClass(["cms-table-sort", col.headerClass]),
-            style: thStyle,
-            onClick: () => {
-              const s = getSort();
-              if (!s || s.key !== col.key) setSort({ key: col.key, dir: "asc" });
-              else if (s.dir === "asc") setSort({ key: col.key, dir: "desc" });
-              else setSort(null);
-              setPage(1);
-            }
-          }, () => {
-            const s = getSort();
-            const active = s && s.key === col.key;
-            const arrow = active ? (s.dir === "asc" ? "▲" : "▼") : "↕";
-            return `${labelText} ` + arrow;
-          });
-        }),
-        props.actions ? _.th({ style: { textAlign: "right" } }, "Azioni") : null
-      )
+    const toolbar = _.div({ class: "cms-table-toolbar" });
+    const toolbarMain = _.div({ class: "cms-table-toolbar-main" });
+    const toolbarSide = _.div({ class: "cms-table-toolbar-side" });
+    toolbarStartNodes.forEach((node) => toolbarMain.appendChild(node));
+    toolbarNodes.forEach((node) => toolbarMain.appendChild(node));
+
+    const searchSlotNodes = renderSlotToArray(slots, "search", { query: getQuery(), getQuery, setQuery }, null);
+    if (searchSlotNodes.length) {
+      searchSlotNodes.forEach((node) => toolbarSide.appendChild(node));
+    } else if (searchable) {
+      searchInput = _.input({
+        type: "search",
+        class: "cms-input",
+        placeholder: typeof props.searchable === "string" ? props.searchable : (props.searchPlaceholder || "Cerca nella tabella"),
+        value: String(getQuery() || "")
+      });
+      searchInput.addEventListener("input", () => setQuery(searchInput.value));
+      const clearSearch = UI.Btn({
+        class: "cms-table-search-clear",
+        outline: true,
+        onClick: () => {
+          if (searchInput) searchInput.value = "";
+          setQuery("");
+        }
+      }, "Reset");
+      toolbarSide.appendChild(
+        _.div({ class: "cms-singularity cms-table-search" },
+          _.span({ class: "cms-table-search-icon", "aria-hidden": "true" }, "⌕"),
+          searchInput,
+          clearSearch
+        )
+      );
+    }
+    toolbarEndNodes.forEach((node) => toolbarSide.appendChild(node));
+    if (toolbarMain.childNodes.length || toolbarSide.childNodes.length) {
+      toolbar.appendChild(toolbarMain);
+      toolbar.appendChild(toolbarSide);
+      shell.appendChild(toolbar);
+    }
+
+    const statusSummary = _.div({ class: "cms-singularity cms-table-chip" }, "");
+    const statusFilter = _.div({ class: "cms-singularity cms-table-chip" }, "");
+    const statusSort = _.div({ class: "cms-singularity cms-table-chip" }, "");
+    const statusExtraNodes = renderSlotToArray(slots, "status", {}, props.status);
+    const status = _.div({ class: "cms-table-status" },
+      statusSummary,
+      statusFilter,
+      statusSort,
+      ...statusExtraNodes
     );
+    shell.appendChild(status);
 
+    const captionNodes = renderSlotToArray(slots, "caption", {}, props.caption);
+    if (captionNodes.length) shell.appendChild(_.div({ class: "cms-table-caption" }, ...captionNodes));
+
+    const thead = _.thead();
     const tbody = _.tbody();
+    const hasActions = !!props.actions || !!slots.actions;
 
-    const tableClass = uiClass(["cms-table", uiWhen(props.dense, "dense"), props.tableClass]);
-    const table = _.table({ class: tableClass }, thead, tbody);
+    const tableClass = uiClass([
+      "cms-table",
+      uiWhen(props.dense, "dense"),
+      uiWhen(props.striped, "striped"),
+      uiWhen(props.hover !== false, "hover"),
+      uiWhen(props.stickyHeader !== false, "sticky-head"),
+      props.tableClass
+    ]);
+    const tableStyle = {
+      ...(props.tableStyle || {})
+    };
+    if (props.minTableWidth != null) tableStyle["--cms-table-min-width"] = toCssSize(props.minTableWidth);
+    const table = _.table({ class: tableClass, style: tableStyle }, thead, tbody);
+    const wrapTable = _.div({ class: "cms-singularity cms-table-wrap" }, table);
+    shell.appendChild(wrapTable);
 
-    const wrapTable = _.div({ class: "cms-table-wrap" }, table);
-
-    // footer/pager
-    const pagerInfo = _.div({ class: "cms-table-chip" }, "");
-    const btnPrev = UI.Btn({ onClick: () => setPage(Math.max(1, getPage() - 1)) }, "‹");
-    const btnNext = UI.Btn({ onClick: () => setPage(getPage() + 1) }, "›");
-
-    const sizeSelect = _.select({ class: "cms-input", style: { width: "110px" } },
-      ...[5, 10, 20, 50].map(n => uiOptionNode({ value: String(n) }, String(n)))
+    const pagerInfo = _.div({ class: "cms-singularity cms-table-chip" }, "");
+    const pagerMeta = _.div({ class: "cms-singularity cms-table-chip" }, "");
+    const btnPrev = UI.Btn({ outline: true, onClick: () => setPage(Math.max(1, getPage() - 1)) }, "‹");
+    const btnNext = UI.Btn({ outline: true, onClick: () => setPage(getPage() + 1) }, "›");
+    const pageChip = _.div({ class: "cms-singularity cms-table-chip" }, "");
+    const sizeSelect = _.select({ class: "cms-input cms-table-size-select" },
+      ...pageSizes.map((size) => uiOptionNode({ value: String(size) }, String(size)))
     );
     sizeSelect.value = String(getPageSize());
-    sizeSelect.addEventListener("change", () => {
-      setPageSize(Number(sizeSelect.value) || pageSize0);
-      setPage(1);
-    });
+    sizeSelect.addEventListener("change", () => setPageSize(sizeSelect.value));
+    const footerExtraNodes = renderSlotToArray(slots, "footer", {}, props.footer);
 
     const footer = _.div({ class: "cms-table-foot" },
-      _.div({ class: "cms-row" },
+      _.div({ class: "cms-table-foot-main" },
         pagerInfo,
-        _.div({ class: "cms-table-chip" }, "Rows"),
-        sizeSelect
+        pagerMeta,
+        _.label({ class: "cms-table-size" },
+          _.span("Righe"),
+          sizeSelect
+        )
       ),
-      _.div({ class: "cms-table-pager" },
-        btnPrev,
-        _.div({ class: "cms-table-chip" }, () => `Page ${getPage()}`),
-        btnNext
+      _.div({ class: "cms-table-foot-extra" },
+        ...footerExtraNodes,
+        _.div({ class: "cms-table-pager" },
+          btnPrev,
+          pageChip,
+          btnNext
+        )
       )
     );
+    if (props.hideFooter !== true) shell.appendChild(footer);
 
-    // render rows reattivo
-    app.reactive.effect(() => {
-      const rows = toValue(props.rows);
-      const loading = typeof props.loading === "function" ? !!props.loading() : !!props.loading;
+    const renderHeader = () => {
+      thead.innerHTML = "";
+      if (props.hideHeader) return;
 
-      tbody.innerHTML = "";
+      const row = _.tr();
+      columns.forEach((col, colIndex) => {
+        const ctx = { col, colIndex, sort: getSort() };
+        const thStyle = {
+          ...tableResolveStyle(col?.style, { ...ctx, header: true }),
+          ...tableResolveStyle(col?.headerStyle ?? col?.thStyle, { ...ctx, header: true })
+        };
+        if (col?.width != null) thStyle.width = toCssSize(col.width);
+        if (col?.minWidth != null) thStyle.minWidth = toCssSize(col.minWidth);
+        if (col?.maxWidth != null) thStyle.maxWidth = toCssSize(col.maxWidth);
+        if (col?.align) thStyle.textAlign = col.align;
+        let headerNodes = renderSlotToArray(col?.slots, "header", ctx, null);
+        if (!headerNodes.length) {
+          const fallback = typeof col?.header === "function" ? col.header(ctx) : (col?.header ?? tableColumnLabel(col));
+          headerNodes = renderSlotToArray(slots, "header", ctx, fallback);
+        }
 
-      // loading state
-      if (loading) {
-        const loadingNodes = renderSlotToArray(null, "default", {}, props.loadingText || "Loading...");
-        const tr = _.tr(
-          _.td({ colSpan: String(columns.length + (props.actions ? 1 : 0)), class: "cms-muted" },
-            ...loadingNodes
-          )
+        const currentSort = getSort();
+        const sortKey = tableColumnSortKey(col, colIndex);
+        const isSortable = col?.sortable !== false && (col?.key != null || typeof col?.get === "function" || typeof col?.compare === "function");
+        const isActive = !!currentSort && (currentSort.key === sortKey || currentSort.key === col?.key);
+        const th = _.th({
+          class: uiClass([
+            "cms-table-head-cell",
+            uiWhen(col?.nowrap, "is-nowrap"),
+            uiWhen(isSortable, "cms-table-sortable"),
+            uiWhen(isActive, "is-sorted"),
+            col?.headerClass
+          ]),
+          style: thStyle
+        });
+
+        if (isSortable) {
+          th.appendChild(
+            _.button({
+              type: "button",
+              class: "cms-table-head-button",
+              onClick: () => toggleSort(col, colIndex)
+            },
+              _.span({ class: "cms-table-head-label" }, ...headerNodes),
+              _.span({ class: "cms-table-head-arrow", "aria-hidden": "true" },
+                isActive ? (currentSort.dir === "asc" ? "↑" : "↓") : "↕"
+              )
+            )
+          );
+        } else {
+          headerNodes.forEach((node) => th.appendChild(node));
+        }
+        row.appendChild(th);
+      });
+
+      if (hasActions) {
+        const actionsHeaderNodes = renderSlotToArray(slots, "actionsHeader", {}, props.actionsLabel || "Azioni");
+        row.appendChild(
+          _.th({ class: "cms-table-head-cell cms-table-head-actions", style: { textAlign: "right" } }, ...actionsHeaderNodes)
         );
-        tbody.appendChild(tr);
+      }
+      thead.appendChild(row);
+    };
+
+    const renderStateRow = (slotName, fallback) => {
+      const ctx = { columns, count: columns.length };
+      const nodes = renderSlotToArray(slots, slotName, ctx, fallback);
+      const colSpan = String(columns.length + (hasActions ? 1 : 0));
+      tbody.appendChild(
+        _.tr(
+          _.td({ colSpan, class: "cms-table-state" }, ...nodes)
+        )
+      );
+    };
+
+    app.reactive.effect(() => {
+      const rows = tableToArray(props.rows);
+      const query = String(getQuery() || "").trim();
+      const currentSort = getSort();
+      const loading = typeof props.loading === "function" ? !!props.loading() : !!props.loading;
+      const paginationEnabled = props.pagination !== false;
+
+      renderHeader();
+      tbody.innerHTML = "";
+      if (searchInput && searchInput.value !== getQuery()) searchInput.value = getQuery();
+      if (sizeSelect.value !== String(getPageSize())) sizeSelect.value = String(getPageSize());
+
+      if (loading) {
+        statusSummary.textContent = "Caricamento in corso";
+        statusFilter.style.display = "none";
+        statusSort.style.display = "none";
         pagerInfo.textContent = "Loading…";
+        pagerMeta.textContent = "";
+        pageChip.textContent = "Pagina 1";
+        btnPrev.disabled = true;
+        btnNext.disabled = true;
+        renderStateRow("loading", props.loadingText || "Loading...");
         return;
       }
 
-      // apply sort
       let list = rows.slice();
-      const s = getSort();
-      if (s) {
-        const col = columns.find(c => c.key === s.key);
-        if (col) {
-          const getter = col.get || ((r) => r?.[col.key]);
-          const cmp = col.compare || defaultCompare;
+      const datasetTotal = list.length;
+      if (typeof props.filter === "function") {
+        list = list.filter((row, index) => props.filter(row, { row, index, query, rows, columns }));
+      }
+      if (query) {
+        list = list.filter((row) => tableMatchesQuery(row, columns, query, props));
+      }
+
+      if (currentSort) {
+        const sortCol = tableFindColumn(columns, currentSort.key);
+        if (sortCol) {
           list.sort((a, b) => {
-            const av = getter(a);
-            const bv = getter(b);
-            const out = cmp(av, bv, a, b);
-            return s.dir === "asc" ? out : -out;
+            const av = tableResolveValue(sortCol, a, -1);
+            const bv = tableResolveValue(sortCol, b, -1);
+            const out = typeof sortCol.compare === "function"
+              ? sortCol.compare(av, bv, a, b)
+              : defaultCompare(av, bv);
+            return currentSort.dir === "asc" ? out : -out;
           });
         }
       }
 
-      // pagination
-      const pageSize = getPageSize();
-      const total = list.length;
-      const pages = Math.max(1, Math.ceil(total / pageSize));
-      const page = Math.min(getPage(), pages);
+      const filteredTotal = list.length;
+      const currentPageSize = Math.max(1, Number(getPageSize()) || initialPageSize);
+      const pages = paginationEnabled ? Math.max(1, Math.ceil(filteredTotal / currentPageSize)) : 1;
+      const page = paginationEnabled ? Math.min(getPage(), pages) : 1;
       if (page !== getPage()) setPage(page);
 
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
+      const start = paginationEnabled ? (page - 1) * currentPageSize : 0;
+      const end = paginationEnabled ? start + currentPageSize : filteredTotal;
       const pageRows = list.slice(start, end);
 
-      pagerInfo.textContent = total
-        ? `${start + 1}-${Math.min(end, total)} of ${total}`
-        : "0";
+      statusSummary.textContent = filteredTotal === datasetTotal
+        ? `${filteredTotal} righe`
+        : `${filteredTotal} di ${datasetTotal} righe`;
+      statusFilter.textContent = query ? `Ricerca: ${query}` : "";
+      statusFilter.style.display = query ? "" : "none";
+      if (currentSort) {
+        const sortCol = tableFindColumn(columns, currentSort.key);
+        statusSort.textContent = sortCol
+          ? `Ordine: ${tableColumnLabel(sortCol)} ${currentSort.dir === "asc" ? "↑" : "↓"}`
+          : "";
+        statusSort.style.display = sortCol ? "" : "none";
+      } else {
+        statusSort.style.display = "none";
+      }
 
-      btnPrev.disabled = page <= 1;
-      btnNext.disabled = page >= pages;
+      pagerInfo.textContent = filteredTotal
+        ? `${start + 1}-${Math.min(end, filteredTotal)} di ${filteredTotal}`
+        : "0 risultati";
+      pagerMeta.textContent = filteredTotal !== datasetTotal ? `Dataset totale ${datasetTotal}` : `Page size ${currentPageSize}`;
+      pageChip.textContent = paginationEnabled ? `Pagina ${page} / ${pages}` : "Tutte le righe";
+      btnPrev.disabled = !paginationEnabled || page <= 1;
+      btnNext.disabled = !paginationEnabled || page >= pages;
+      sizeSelect.disabled = !paginationEnabled;
+      sizeSelect.parentNode.style.display = paginationEnabled ? "" : "none";
 
-      // empty state
       if (pageRows.length === 0) {
-        const emptyNodes = renderSlotToArray(null, "default", {}, props.emptyText || "Nessun dato");
-        const tr = _.tr(
-          _.td({ colSpan: String(columns.length + (props.actions ? 1 : 0)), class: "cms-muted" },
-            ...emptyNodes
-          )
-        );
-        tbody.appendChild(tr);
+        renderStateRow("empty", props.emptyText || "Nessun dato");
         return;
       }
 
-      // rows render
-      for (const row of pageRows) {
+      for (let pageIndex = 0; pageIndex < pageRows.length; pageIndex++) {
+        const row = pageRows[pageIndex];
+        const rowIndex = start + pageIndex;
+        const rowCtx = { row, rowIndex, pageIndex };
+        const rowAttrs = typeof props.rowAttrs === "function" ? (props.rowAttrs(row, rowCtx) || {}) : (props.rowAttrs || {});
+        const rowClass = typeof props.rowClass === "function" ? props.rowClass(row, rowCtx) : props.rowClass;
+        const isInteractiveRow = !!(props.onRowClick || props.onRowDblClick);
         const tr = _.tr({
-          onClick: props.onRowClick ? () => props.onRowClick(row) : null,
-          onDblclick: props.onRowDblClick ? () => props.onRowDblClick(row) : null,
-          style: (props.onRowClick || props.onRowDblClick) ? { cursor: "pointer" } : null
+          ...rowAttrs,
+          class: uiClass([
+            "cms-table-row",
+            rowClass,
+            rowAttrs.class,
+            uiWhen(isInteractiveRow, "is-clickable")
+          ])
         });
+
         if (props.rowKey) {
-          const key = typeof props.rowKey === "function" ? props.rowKey(row) : row?.[props.rowKey];
+          const key = typeof props.rowKey === "function" ? props.rowKey(row, rowCtx) : tableGetByPath(row, props.rowKey);
           if (key != null) tr.dataset.key = String(key);
         }
 
-        for (const col of columns) {
-          const tdStyle = {};
-          if (col.align) tdStyle.textAlign = col.align;
-
-          let cell;
-          if (col.render) cell = col.render(row);
-          else {
-            const v = (col.get ? col.get(row) : row?.[col.key]);
-            cell = (v == null ? "" : String(v));
-          }
-          const cellNodes = renderSlotToArray(null, "default", { row, col }, cell);
-          tr.appendChild(_.td({ style: tdStyle }, ...cellNodes));
+        const shouldIgnoreRowEvent = (event) => {
+          const target = event?.target;
+          return !!(target && target.closest && target.closest("button, a, input, select, textarea, label, [data-table-action]"));
+        };
+        if (props.onRowClick) {
+          tr.addEventListener("click", (event) => {
+            if (shouldIgnoreRowEvent(event)) return;
+            props.onRowClick(row, rowCtx, event);
+          });
+        }
+        if (props.onRowDblClick) {
+          tr.addEventListener("dblclick", (event) => {
+            if (shouldIgnoreRowEvent(event)) return;
+            props.onRowDblClick(row, rowCtx, event);
+          });
         }
 
-        // actions column
-        if (props.actions) {
-          const actionsNode = props.actions(row);
-          const actionsNodes = renderSlotToArray(null, "default", { row }, actionsNode);
+        columns.forEach((col, colIndex) => {
+          const value = tableResolveValue(col, row, rowIndex);
+          const cellCtx = { ...rowCtx, col, colIndex, value };
+          const tdStyle = {
+            ...tableResolveStyle(col?.style, cellCtx),
+            ...tableResolveStyle(col?.cellStyle ?? col?.tdStyle, cellCtx)
+          };
+          if (col?.align) tdStyle.textAlign = col.align;
+          if (col?.width != null) tdStyle.width = toCssSize(col.width);
+          if (col?.minWidth != null) tdStyle.minWidth = toCssSize(col.minWidth);
+          if (col?.maxWidth != null) tdStyle.maxWidth = toCssSize(col.maxWidth);
+          const cellClass = typeof col?.cellClass === "function" ? col.cellClass(row, cellCtx) : (col?.cellClass || col?.class);
+          const td = _.td({
+            class: uiClass(["cms-table-cell", cellClass, uiWhen(col?.nowrap, "is-nowrap")]),
+            style: tdStyle
+          });
+
+          let cellNodes = renderSlotToArray(col?.slots, "cell", cellCtx, null);
+          if (!cellNodes.length) {
+            const raw = typeof col?.render === "function"
+              ? col.render(row, cellCtx)
+              : (typeof col?.format === "function" ? col.format(value, row, cellCtx) : value);
+            const fallback = raw == null ? (col?.emptyText ?? "") : raw;
+            cellNodes = renderSlotToArray(slots, "cell", cellCtx, fallback);
+          }
+          if (!cellNodes.length) cellNodes = [""];
+          cellNodes.forEach((node) => td.appendChild(node));
+          tr.appendChild(td);
+        });
+
+        if (hasActions) {
+          const actionCtx = { ...rowCtx };
+          const actionRaw = typeof props.actions === "function" ? props.actions(row, rowCtx) : props.actions;
+          let actionNodes = renderSlotToArray(slots, "actions", actionCtx, actionRaw);
+          if (!actionNodes.length) actionNodes = renderSlotToArray(null, "default", actionCtx, actionRaw);
           tr.appendChild(
-            _.td({ style: { textAlign: "right" } },
-              _.div({ class: "cms-table-actions" },
-                ...actionsNodes
-              )
+            _.td({ class: "cms-table-cell cms-table-cell-actions", style: { textAlign: "right" } },
+              _.div({ class: "cms-table-actions" }, ...actionNodes)
             )
           );
         }
@@ -10949,36 +11261,76 @@ transition: width 200ms ease;
       }
     }, "UI.Table:render");
 
-    wrap.appendChild(wrapTable);
-    wrap.appendChild(footer);
-    return wrap;
+    wrapProps.body = shell;
+    return UI.Card(wrapProps);
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.Table = {
       signature: "UI.Table(props)",
       props: {
-        columns: "Array<{ key, label?, sortable?, get?, render?, width?, align?, compare? }>",
+        columns: "Array<{ key, label?, sortable?, get?, value?, render?, format?, width?, minWidth?, maxWidth?, align?, compare?, style?, headerStyle?, thStyle?, cellStyle?, tdStyle?, cellClass?, headerClass?, nowrap?, searchable? }>",
         rows: "Array|() => Array",
         rowKey: "string|((row)=>string)",
         loading: "boolean|() => boolean",
+        page: "number",
         pageSize: "number",
+        pageSizeOptions: "number[]",
+        pagination: "boolean",
         initialSort: "{ key, dir: 'asc'|'desc' }",
-        actions: "(row)=>Node|Array",
+        search: "string",
+        query: "string",
+        searchable: "boolean|string",
+        searchPlaceholder: "string",
+        searchKeys: "Array<string|function>",
+        searchModel: "[get,set] signal",
+        filter: "(row, ctx)=>boolean",
+        actions: "(row, ctx)=>Node|Array",
+        actionsLabel: "string|Node|Function|Array",
         emptyText: "string|Node|Function|Array",
         loadingText: "string|Node|Function|Array",
+        toolbar: "Node|Function|Array",
+        toolbarStart: "Node|Function|Array",
+        toolbarEnd: "Node|Function|Array",
+        caption: "string|Node|Function|Array",
+        footer: "Node|Function|Array",
+        status: "string|Node|Function|Array",
+        rowClass: "string|((row,ctx)=>string)",
+        rowAttrs: "object|((row,ctx)=>object)",
+        minTableWidth: "string|number",
+        stickyHeader: "boolean",
+        hideHeader: "boolean",
+        hideFooter: "boolean",
         dense: "boolean",
+        striped: "boolean",
+        hover: "boolean",
         tableClass: "string",
         cardClass: "string",
         class: "string",
         style: "object"
       },
+      slots: {
+        default: "Contenuto introduttivo sopra la tabella",
+        toolbarStart: "Area sinistra toolbar",
+        toolbar: "Toolbar centrale/custom",
+        toolbarEnd: "Area destra toolbar",
+        search: "Sostituisce la search box built-in",
+        header: "Header custom per colonna",
+        cell: "Render globale celle",
+        actions: "Render globale azioni riga",
+        actionsHeader: "Header colonna azioni",
+        caption: "Caption sopra la tabella",
+        status: "Contenuto extra nella status row",
+        loading: "Stato loading",
+        empty: "Stato empty",
+        footer: "Contenuto extra nel footer"
+      },
       events: {
-        onRowClick: "(row) => void",
-        onRowDblClick: "(row) => void"
+        onRowClick: "(row, ctx, event) => void",
+        onRowDblClick: "(row, ctx, event) => void"
       },
       returns: "HTMLDivElement",
-      description: "Tabella con ordinamento, paginazione e azioni per riga."
+      description: "Tabella standardizzata con toolbar, ricerca, sorting, paginazione, stati e rendering flessibile."
     };
   }
 
