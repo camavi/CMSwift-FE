@@ -352,6 +352,7 @@
   --cms-font-size-xxxl: 48px;
 
   --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-gray-600) 40%, transparent);
+  --set-color-0: var(--cms-gray-100);
   --set-color-1: var(--cms-gray-300);
   --set-color-2: var(--cms-gray-300);
   --set-color-3: var(--cms-gray-500);

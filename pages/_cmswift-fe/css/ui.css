@@ -2612,42 +2612,66 @@
 .cms-dialog.success,
 .cms-dialog.cms-state-success {
   --cms-dialog-accent: var(--cms-success);
+  --set-background-color: var(--set-color-0);
+  --set-text-color: var(--set-color-4);
+  --set-color: var(--set-text-color);
 }
 
 .cms-dialog.warning,
 .cms-dialog.cms-state-warning {
   --cms-dialog-accent: var(--cms-warning);
+  --set-background-color: var(--set-color-0);
+  --set-text-color: var(--set-color-4);
+  --set-color: var(--set-text-color);
 }
 
 .cms-dialog.error,
 .cms-dialog.danger,
 .cms-dialog.cms-state-danger {
   --cms-dialog-accent: var(--cms-danger);
+  --set-background-color: var(--set-color-0);
+  --set-text-color: var(--set-color-4);
+  --set-color: var(--set-text-color);
 }
 
 .cms-dialog.info,
 .cms-dialog.cms-state-info {
   --cms-dialog-accent: var(--cms-info);
+  --set-background-color: var(--set-color-0);
+  --set-text-color: var(--set-color-4);
+  --set-color: var(--set-text-color);
 }
 
 .cms-dialog.primary,
 .cms-dialog.cms-state-primary {
   --cms-dialog-accent: var(--cms-primary);
+  --set-background-color: var(--set-color-0);
+  --set-text-color: var(--set-color-4);
+  --set-color: var(--set-text-color);
 }
 
 .cms-dialog.secondary,
 .cms-dialog.cms-state-secondary {
   --cms-dialog-accent: var(--cms-secondary);
+  --set-background-color: var(--set-color-0);
+  --set-text-color: var(--set-color-4);
+  --set-color: var(--set-text-color);
 }
 
 .cms-dialog.light,
 .cms-dialog.cms-state-light {
   --cms-dialog-accent: var(--cms-light);
+  --set-background-color: var(--set-color-0);
+  --set-text-color: var(--set-color-4);
+  --set-color: var(--set-text-color);
 }
 
 .cms-dialog.dark,
 .cms-dialog.cms-state-dark {
   --cms-dialog-accent: var(--cms-dark);
+  --set-background-color: var(--set-color-0);
+  --set-text-color: var(--set-color-4);
+  --set-color: var(--set-text-color);
 }
 
 .cms-popover {
@@ -4672,6 +4696,7 @@
   --set-background-color: var(--cms-primary);
   --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-primary-950) 40%, transparent);
   --set-hover: var(--cms-primary-hover);
+  --set-color-0: var(--cms-primary-50);
   --set-color-1: var(--cms-primary-100);
   --set-color-2: var(--cms-primary-400);
   --set-color-3: var(--cms-primary-700);
@@ -4688,6 +4713,7 @@
   --set-background-color: var(--cms-secondary);
   --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-gray-600) 40%, transparent);
   --set-hover: var(--cms-secondary-hover);
+  --set-color-0: var(--cms-gray-50);
   --set-color-1: var(--cms-gray-100);
   --set-color-2: var(--cms-gray-400);
   --set-color-3: var(--cms-gray-700);
@@ -4704,6 +4730,7 @@
   --set-background-color: var(--cms-success);
   --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-success-950) 40%, transparent);
   --set-hover: var(--cms-success-hover);
+  --set-color-0: var(--cms-success-50);
   --set-color-1: var(--cms-success-100);
   --set-color-2: var(--cms-success-400);
   --set-color-3: var(--cms-success-700);
@@ -4720,6 +4747,7 @@
   --set-background-color: var(--cms-warning);
   --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-warning-950) 40%, transparent);
   --set-hover: var(--cms-warning-hover);
+  --set-color-0: var(--cms-warning-50);
   --set-color-1: var(--cms-warning-100);
   --set-color-2: var(--cms-warning-400);
   --set-color-3: var(--cms-warning-700);
@@ -4736,6 +4764,7 @@
   --set-background-color: var(--cms-danger);
   --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-danger-950) 40%, transparent);
   --set-hover: var(--cms-danger-hover);
+  --set-color-0: var(--cms-danger-50);
   --set-color-1: var(--cms-danger-100);
   --set-color-2: var(--cms-danger-400);
   --set-color-3: var(--cms-danger-700);
@@ -4752,6 +4781,7 @@
   --set-background-color: var(--cms-info);
   --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-info-950) 40%, transparent);
   --set-hover: var(--cms-info-hover);
+  --set-color-0: var(--cms-info-50);
   --set-color-1: var(--cms-info-100);
   --set-color-2: var(--cms-info-400);
   --set-color-3: var(--cms-info-700);
@@ -4768,6 +4798,7 @@
   --set-background-color: var(--cms-light-soft);
   --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-gray-600) 40%, transparent);
   --set-hover: var(--cms-light-hover);
+  --set-color-0: var(--cms-gray-50);
   --set-color-1: var(--cms-gray-100);
   --set-color-2: var(--cms-gray-300);
   --set-color-3: var(--cms-gray-300);
@@ -4784,6 +4815,7 @@
   --set-background-color: var(--cms-dark);
   --set-shadow: 0 3px 6px color-mix(in srgb, var(--cms-gray-800) 50%, transparent);
   --set-hover: var(--cms-dark-hover);
+  --set-color-0: var(--cms-gray-50);
   --set-color-1: var(--cms-gray-100);
   --set-color-2: var(--cms-gray-400);
   --set-color-3: var(--cms-gray-700);
