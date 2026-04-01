@@ -2888,186 +2888,141 @@
     return null;
   }
 
-  UI.Layout = ({
-    header = null,
-    aside = null,
-    page = null,
-    footer = null,
-    slots = null,
-
-    // behavior
-    noDrawer = false,
-    drawerOpen = null,     // rod | [get,set] signal | boolean (controllo)
-    drawerBreakpoint = 1024, // px: sotto -> overlay
-    drawerWidth = 280,     // px
-    overlayClose = true,   // click overlay closes
-    escClose = true,       // esc closes
-
-    stickyHeader = false,
-    stickyFooter = false,
-    stickyAside = true,
-
-    tagPage = false,
-    class: className
-  } = {}) => {
-
-    // --- normalize slots ---
-    const slotMap = slots || {};
-    const H = renderSlotToArray(slotMap, "header", {}, header);
-    const A = renderSlotToArray(slotMap, "aside", {}, aside);
-    const P = renderSlotToArray(slotMap, "page", {}, page);
-    const F = renderSlotToArray(slotMap, "footer", {}, footer);
-
-    // --- aside open state ---
-    const [getOpen, setOpen] = (() => {
-      if (drawerOpen === null) {
-        const [g, s] = CMSwift.reactive.signal(true);
-        return [g, s];
+  UI.Layout = (...args) => {
+    const { props, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = props.slots || {};
+    const hasOwn = (obj, key) => !!obj && Object.prototype.hasOwnProperty.call(obj, key);
+    const resolveProp = (...keys) => {
+      for (const key of keys) {
+        if (hasOwn(props, key)) return props[key];
       }
-      // rod
-      if (typeof drawerOpen === "object" && typeof drawerOpen._bind === "function") {
-        return [() => !!drawerOpen.value, (v) => drawerOpen.value = !!v];
-      }
-      // signal tuple
-      if (Array.isArray(drawerOpen) && typeof drawerOpen[0] === "function" && typeof drawerOpen[1] === "function") {
-        return [() => !!drawerOpen[0](), (v) => drawerOpen[1](!!v)];
-      }
-      // boolean
-      if (typeof drawerOpen === "boolean") {
-        const [g, s] = CMSwift.reactive.signal(!!drawerOpen);
-        return [g, s];
-      }
-      const [g, s] = CMSwift.reactive.signal(true);
-      return [g, s];
-    })();
+      return undefined;
+    };
+    const toLayoutCssSize = (value, fallback = null) => {
+      if (value == null || value === false || value === "") return fallback;
+      return typeof value === "number" ? `${value}px` : String(value);
+    };
 
-    // --- is mobile? ---
+    const headerSource = resolveProp("header", "headerContent");
+    const drawerSource = resolveProp("aside", "drawer", "nav");
+    const pageSource = resolveProp("page", "main", "content", "body");
+    const footerSource = resolveProp("footer", "footerContent");
+
+    const controlledDrawer = resolveModel(props.drawerOpen, "UI.Layout:drawerOpen");
+    const initialOpen = controlledDrawer
+      ? !!controlledDrawer.get()
+      : (typeof props.drawerOpen === "boolean" ? !!props.drawerOpen : true);
+    const [getOpen, syncOpen] = CMSwift.reactive.signal(initialOpen);
+    const setOpen = (value) => {
+      const next = !!value;
+      if (getOpen() !== next) syncOpen(next);
+      controlledDrawer?.set(next);
+    };
+    controlledDrawer?.watch?.(() => {
+      const next = !!controlledDrawer.get();
+      if (getOpen() !== next) syncOpen(next);
+    });
+
+    const drawerBreakpoint = Number(uiUnwrap(props.drawerBreakpoint) ?? 1024);
     const [getMobile, setMobile] = CMSwift.reactive.signal(false);
-    const checkMobile = () => setMobile(window.innerWidth < drawerBreakpoint);
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    // --- elements ---
-    const root = _.div({ class: uiClass(["cms-app", className]) });
-
-    const createHeaderWrap = () => _[tagPage ? "header" : "div"]({
-      class: uiClass(["cms-layout header", uiWhen(stickyHeader, "sticky")])
-    });
-    const createFooterWrap = () => _[tagPage ? "footer" : "div"]({
-      class: uiClass(["cms-layout footer", uiWhen(stickyFooter, "sticky")])
-    });
-    let headerWrap = H.length ? createHeaderWrap() : null;
-    let footerWrap = F.length ? createFooterWrap() : null;
-
-    // overlay for mobile aside
-    const overlay = _.div({
-      class: "cms-aside-overlay",
-      onClick: () => {
-        if (!overlayClose) return;
-        setOpen(false);
-      }
-    });
-
-    const asideWrap = _[tagPage ? "aside" : "div"]({
-      class: uiClass(["cms-layout-aside", "aside", uiWhen(stickyAside, "sticky")]),
-      style: { width: `${drawerWidth}px` },
-      role: "navigation",
-      "aria-hidden": "false"
-    });
-
-    const shell = _.div({ class: "cms-layout-shell-grid" });
-    root.appendChild(shell);
-
-    const mainWrap = _[tagPage ? "main" : "div"]({ class: "cms-layout main", role: "main" });
-
-    // compose
-    if (headerWrap) shell.appendChild(headerWrap);
-    if (asideWrap) shell.appendChild(asideWrap);
-    shell.appendChild(mainWrap);
-    if (footerWrap) shell.appendChild(footerWrap);
-
-    // overlay only when drawer exists
-    let hasDrawerContent = A.length > 0;
-    if (!noDrawer && hasDrawerContent) root.appendChild(overlay);
-
-    // listen fot header size changes
-    if (headerWrap) {
-      const observer = new ResizeObserver((entries) => {
-        const entry = entries[0];
-        root.style.setProperty("--layout-header-height", `${entry.contentRect.height}px`);
-      });
-      observer.observe(headerWrap);
+    const checkMobile = () => {
+      if (typeof window === "undefined") return;
+      setMobile(window.innerWidth < drawerBreakpoint);
+    };
+    if (typeof window !== "undefined") {
+      checkMobile();
+      window.addEventListener("resize", checkMobile);
     }
 
-    // --- reactive classes / aria ---
-    CMSwift.reactive.effect(() => {
-      const mobile = getMobile();
-      root.classList.toggle("is-mobile", mobile);
-    }, "UI.Layout:mobile");
-
-    CMSwift.reactive.effect(() => {
-      const open = !!getOpen();
-      const mobile = getMobile();
-
-      const drawerVisible = noDrawer ? false : open;
-
-      root.classList.toggle("drawer-open", drawerVisible);
-      overlay.classList.toggle("show", mobile && open);
-
-      if (!noDrawer && A) {
-        asideWrap.setAttribute("aria-hidden", drawerVisible ? "false" : "true");
-
-        // mobile slide
-        asideWrap.classList.toggle("open", open);
-
-        if (mobile) {
-          asideWrap.style.removeProperty("display");
-          root.style.removeProperty("grid-template-columns");
-          root.style.removeProperty("grid-template-areas");
-        } else {
-          if (drawerVisible) {
-            asideWrap.style.removeProperty("display");
-            root.style.removeProperty("grid-template-columns");
-            root.style.removeProperty("grid-template-areas");
-          } else {
-            asideWrap.style.display = "none";
-            root.style.gridTemplateColumns = "1fr";
-            root.style.gridTemplateAreas = "\"header\" \"main\" \"footer\"";
-          }
-        }
+    const createCtx = () => ({
+      props,
+      openAside: () => setOpen(true),
+      closeAside: () => setOpen(false),
+      toggleAside: () => setOpen(!getOpen()),
+      isDrawerOpen: () => !!getOpen(),
+      isMobile: () => !!getMobile()
+    });
+    const renderAliasSlot = (names, fallback) => {
+      const ctx = createCtx();
+      for (const name of names) {
+        if (!hasOwn(slots, name)) continue;
+        const raw = typeof slots[name] === "function" ? slots[name](ctx) : slots[name];
+        return renderSlotToArray(null, "default", ctx, raw);
       }
-    }, "UI.Layout:drawerState");
+      const raw = typeof fallback === "function" ? fallback(ctx) : fallback;
+      return renderSlotToArray(null, "default", ctx, raw);
+    };
 
-    // ESC close (mobile)
-    const onKeyDown = (e) => {
-      if (!escClose) return;
-      if (!getMobile()) return;
-      if (!getOpen()) return;
-      if (e.key === "Escape") {
-        e.preventDefault();
+    const explicitNoDrawer = uiUnwrap(props.noDrawer) === true || drawerSource === false;
+    const pageFallback = pageSource !== undefined ? pageSource : children;
+
+    const cls = uiClass(["cms-app", "cms-layout", props.class]);
+    const p = CMSwift.omit(props, [
+      "header", "headerContent",
+      "aside", "drawer", "nav",
+      "page", "main", "content", "body",
+      "footer", "footerContent",
+      "noDrawer", "drawerOpen", "drawerBreakpoint", "drawerWidth",
+      "overlayClose", "escClose",
+      "stickyHeader", "stickyFooter", "stickyAside",
+      "tagPage",
+      "shellClass", "headerClass", "asideClass", "pageClass", "footerClass", "overlayClass",
+      "gap", "headerOffset", "minHeight",
+      "slots"
+    ]);
+    p.class = cls;
+    p.style = { ...(props.style || {}) };
+    p.style["--cms-layout-drawer-width"] = toLayoutCssSize(uiUnwrap(props.drawerWidth) ?? 280, "280px");
+    const layoutGap = toLayoutCssSize(uiUnwrap(props.gap), null);
+    if (layoutGap != null) p.style["--cms-layout-gap"] = layoutGap;
+    const headerOffset = toLayoutCssSize(uiUnwrap(props.headerOffset), null);
+    if (headerOffset != null) p.style["--layout-header-height"] = headerOffset;
+    const minHeight = toLayoutCssSize(uiUnwrap(props.minHeight), null);
+    if (minHeight != null) p.style["--cms-layout-min-height"] = minHeight;
+
+    const root = _.div(p);
+    const tagPage = uiUnwrap(props.tagPage) === true;
+    const tags = tagPage
+      ? { header: "header", aside: "aside", page: "main", footer: "footer" }
+      : { header: "div", aside: "div", page: "div", footer: "div" };
+
+    const shell = _.div({ class: uiClass(["cms-layout-shell-grid", props.shellClass]) });
+    const headerWrap = _[tags.header]({
+      class: uiClass(["cms-layout-section", "cms-layout-header", "header", uiWhen(props.stickyHeader, "sticky"), props.headerClass])
+    });
+    const asideWrap = _[tags.aside]({
+      class: uiClass(["cms-layout-section", "cms-layout-aside", "aside", uiWhen(props.stickyAside !== false, "sticky"), props.asideClass]),
+      role: "navigation",
+      "aria-hidden": "true"
+    });
+    const mainWrap = _[tags.page]({
+      class: uiClass(["cms-layout-section", "cms-layout-main", "main", props.pageClass]),
+      role: tags.page === "main" ? null : "main"
+    });
+    const footerWrap = _[tags.footer]({
+      class: uiClass(["cms-layout-section", "cms-layout-footer", "footer", uiWhen(props.stickyFooter, "sticky"), props.footerClass])
+    });
+
+    shell.appendChild(headerWrap);
+    shell.appendChild(asideWrap);
+    shell.appendChild(mainWrap);
+    shell.appendChild(footerWrap);
+    root.appendChild(shell);
+
+    const overlay = _.div({
+      class: uiClass(["cms-aside-overlay", props.overlayClass]),
+      onClick: () => {
+        if (uiUnwrap(props.overlayClose) === false) return;
         setOpen(false);
       }
-    };
-    document.addEventListener("keydown", onKeyDown, true);
+    });
+    root.appendChild(overlay);
 
-    // cleanup hook (finché non hai auto-cleanup)
-    root._dispose = () => {
-      window.removeEventListener("resize", checkMobile);
-      document.removeEventListener("keydown", onKeyDown, true);
-    };
-
-    // API handy
-    root.openAside = () => setOpen(true);
-    root.closeAside = () => setOpen(false);
-    root.toggleAside = () => setOpen(!getOpen());
-
-    // slots
-    root.header = () => headerWrap;
-    root.aside = () => asideWrap;
-    root.page = () => mainWrap;
-    root.footer = () => footerWrap;
-
+    let hasHeaderContent = false;
+    let hasDrawerContent = false;
+    let hasPageContent = false;
+    let hasFooterContent = false;
+    let headerObserver = null;
 
     const disposeTree = (node) => {
       if (!node || typeof node !== "object") return;
@@ -3078,140 +3033,213 @@
 
     const clearWrap = (wrap) => {
       if (!wrap) return;
-      const nodes = Array.from(wrap.childNodes);
-      nodes.forEach((n) => {
-        disposeTree(n);
-        n.remove();
+      Array.from(wrap.childNodes).forEach((node) => {
+        disposeTree(node);
+        node.remove();
       });
     };
 
     const normalizeUpdateNodes = (value) => {
-      const ctx = {};
-      const raw = (typeof value === "function") ? value(ctx) : value;
+      const ctx = createCtx();
+      const raw = typeof value === "function" ? value(ctx) : value;
       return renderSlotToArray(null, "default", ctx, raw);
     };
 
-    const ensureOverlay = () => {
-      if (noDrawer) return;
-      if (hasDrawerContent) {
-        if (!overlay.parentNode) root.appendChild(overlay);
-      } else if (overlay.parentNode) {
-        overlay.remove();
+    const syncHeaderHeight = () => {
+      const height = hasHeaderContent ? headerWrap.getBoundingClientRect().height : 0;
+      root.style.setProperty("--layout-header-height", `${height}px`);
+    };
+
+    const fillWrap = (wrap, nodes) => {
+      clearWrap(wrap);
+      nodes.forEach((node) => wrap.appendChild(node));
+      return nodes.length > 0;
+    };
+
+    const syncLayoutState = () => {
+      const mobile = !!getMobile();
+      const open = !!getOpen();
+      const drawerEnabled = !explicitNoDrawer && hasDrawerContent;
+      const drawerVisible = drawerEnabled && open;
+
+      root.classList.toggle("is-mobile", mobile);
+      root.classList.toggle("drawer-open", drawerVisible);
+      root.classList.toggle("no-drawer", !drawerEnabled);
+      root.classList.toggle("has-header", hasHeaderContent);
+      root.classList.toggle("has-drawer", drawerEnabled);
+      root.classList.toggle("has-footer", hasFooterContent);
+
+      headerWrap.hidden = !hasHeaderContent;
+      footerWrap.hidden = !hasFooterContent;
+      mainWrap.hidden = !hasPageContent;
+
+      overlay.hidden = !drawerEnabled;
+      overlay.classList.toggle("show", mobile && drawerVisible);
+
+      if (!drawerEnabled) {
+        asideWrap.hidden = true;
+        asideWrap.classList.remove("open");
+        asideWrap.setAttribute("aria-hidden", "true");
+        shell.style.gridTemplateColumns = "minmax(0, 1fr)";
+        shell.style.gridTemplateAreas = "\"header\" \"main\" \"footer\"";
+        return;
+      }
+
+      asideWrap.hidden = false;
+      asideWrap.classList.toggle("open", open);
+      asideWrap.setAttribute("aria-hidden", drawerVisible ? "false" : "true");
+
+      if (mobile) {
+        asideWrap.style.removeProperty("display");
+        shell.style.gridTemplateColumns = "minmax(0, 1fr)";
+        shell.style.gridTemplateAreas = "\"header\" \"main\" \"footer\"";
+        return;
+      }
+
+      if (drawerVisible) {
+        asideWrap.style.removeProperty("display");
+        shell.style.removeProperty("grid-template-columns");
+        shell.style.removeProperty("grid-template-areas");
+      } else {
+        asideWrap.style.display = "none";
+        shell.style.gridTemplateColumns = "minmax(0, 1fr)";
+        shell.style.gridTemplateAreas = "\"header\" \"main\" \"footer\"";
       }
     };
 
-    const headerUpdate = (children, newUrl) => {
-      const nodes = normalizeUpdateNodes(children);
-      if (!nodes.length) {
-        if (headerWrap) {
-          clearWrap(headerWrap);
-          headerWrap.remove();
-          headerWrap = null;
-        }
-        return null;
-      }
-      if (!headerWrap) {
-        headerWrap = createHeaderWrap();
-        root.insertBefore(headerWrap, shell);
-      }
-      clearWrap(headerWrap);
-      nodes.forEach((n) => headerWrap.appendChild(n));
-      if (newUrl) {
-        CMSwift.router.setURLOnly(newUrl);
-      }
+    const headerUpdate = (value, newUrl) => {
+      hasHeaderContent = fillWrap(headerWrap, normalizeUpdateNodes(value));
+      syncHeaderHeight();
+      syncLayoutState();
+      if (newUrl) CMSwift.router.setURLOnly(newUrl);
       return headerWrap;
     };
-
-    const asideUpdate = (children, newUrl) => {
-      const nodes = normalizeUpdateNodes(children);
-      clearWrap(asideWrap);
-      nodes.forEach((n) => asideWrap.appendChild(n));
-      hasDrawerContent = nodes.length > 0;
-      ensureOverlay();
-      if (newUrl) {
-        CMSwift.router.setURLOnly(newUrl);
-      }
+    const asideUpdate = (value, newUrl) => {
+      hasDrawerContent = fillWrap(asideWrap, normalizeUpdateNodes(value));
+      if (!hasDrawerContent) setOpen(false);
+      syncLayoutState();
+      if (newUrl) CMSwift.router.setURLOnly(newUrl);
       return asideWrap;
     };
-
-    const mainUpdate = (children, newUrl) => {
-      const nodes = normalizeUpdateNodes(children);
-      clearWrap(mainWrap);
-      nodes.forEach((n) => mainWrap.appendChild(n));
-      if (newUrl) {
-        CMSwift.router.setURLOnly(newUrl);
-      }
+    const pageUpdate = (value, newUrl) => {
+      hasPageContent = fillWrap(mainWrap, normalizeUpdateNodes(value));
+      syncLayoutState();
+      if (newUrl) CMSwift.router.setURLOnly(newUrl);
       return mainWrap;
     };
-
-    const footerUpdate = (children, newUrl) => {
-      const nodes = normalizeUpdateNodes(children);
-      if (!nodes.length) {
-        if (footerWrap) {
-          clearWrap(footerWrap);
-          footerWrap.remove();
-          footerWrap = null;
-        }
-        return null;
-      }
-      if (!footerWrap) {
-        footerWrap = createFooterWrap();
-        const anchor = overlay.parentNode ? overlay : null;
-        if (anchor) root.insertBefore(footerWrap, anchor);
-        else root.appendChild(footerWrap);
-      }
-      clearWrap(footerWrap);
-      nodes.forEach((n) => footerWrap.appendChild(n));
-      if (newUrl) {
-        CMSwift.router.setURLOnly(newUrl);
-      }
+    const footerUpdate = (value, newUrl) => {
+      hasFooterContent = fillWrap(footerWrap, normalizeUpdateNodes(value));
+      syncLayoutState();
+      if (newUrl) CMSwift.router.setURLOnly(newUrl);
       return footerWrap;
     };
 
+    hasHeaderContent = fillWrap(headerWrap, renderAliasSlot(["header"], headerSource));
+    hasDrawerContent = fillWrap(asideWrap, explicitNoDrawer ? [] : renderAliasSlot(["aside", "drawer", "nav"], drawerSource));
+    hasPageContent = fillWrap(mainWrap, renderAliasSlot(["page", "main", "default"], pageFallback));
+    hasFooterContent = fillWrap(footerWrap, renderAliasSlot(["footer"], footerSource));
+
+    if (typeof ResizeObserver !== "undefined") {
+      headerObserver = new ResizeObserver(() => syncHeaderHeight());
+      headerObserver.observe(headerWrap);
+    }
+    syncHeaderHeight();
+
+    CMSwift.reactive.effect(() => {
+      getMobile();
+      getOpen();
+      syncLayoutState();
+    }, "UI.Layout:state");
+
+    const onKeyDown = (e) => {
+      if (uiUnwrap(props.escClose) === false) return;
+      if (!getMobile() || !getOpen()) return;
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      setOpen(false);
+    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("keydown", onKeyDown, true);
+    }
+
+    root.openAside = () => setOpen(true);
+    root.closeAside = () => setOpen(false);
+    root.toggleAside = () => setOpen(!getOpen());
+    root.isDrawerOpen = () => !!getOpen();
+    root.isMobile = () => !!getMobile();
+    root.header = () => headerWrap;
+    root.aside = () => asideWrap;
+    root.page = () => mainWrap;
+    root.main = () => mainWrap;
+    root.footer = () => footerWrap;
     root.headerUpdate = headerUpdate;
     root.asideUpdate = asideUpdate;
-    root.mainUpdate = mainUpdate;
+    root.pageUpdate = pageUpdate;
+    root.mainUpdate = pageUpdate;
     root.footerUpdate = footerUpdate;
+    root.reflow = syncLayoutState;
+    root._dispose = () => {
+      if (typeof window !== "undefined") window.removeEventListener("resize", checkMobile);
+      if (typeof document !== "undefined") document.removeEventListener("keydown", onKeyDown, true);
+      headerObserver?.disconnect?.();
+    };
 
-    headerUpdate(H);
-    asideUpdate(A);
-    mainUpdate(P);
-    footerUpdate(F);
+    setPropertyProps(root, props);
+    syncLayoutState();
     return root;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.Layout = {
-      signature: "UI.Layout({ header, aside, page, footer, ... })",
+      signature: "UI.Layout(...children) | UI.Layout(props, ...children)",
       props: {
         header: "Node|Function|Array",
-        aside: "Node|Function|Array",
+        headerContent: "Node|Function|Array",
+        aside: "Node|Function|Array|false",
+        drawer: "Node|Function|Array|false",
+        nav: "Node|Function|Array|false",
         page: "Node|Function|Array",
+        main: "Node|Function|Array",
+        content: "Node|Function|Array",
+        body: "Node|Function|Array",
         footer: "Node|Function|Array",
+        footerContent: "Node|Function|Array",
         noDrawer: "boolean",
-
         drawerOpen: "rod | [get,set] signal | boolean",
         drawerBreakpoint: "number(px)",
-        drawerWidth: "number(px)",
+        drawerWidth: "number|string",
         overlayClose: "boolean",
         escClose: "boolean",
-
         stickyHeader: "boolean",
         stickyFooter: "boolean",
         stickyAside: "boolean",
-
-        slots: "{ header?, aside?, page?, footer? }",
-        tagPage: "boolean", // default: false 
-        class: "string"
+        tagPage: "boolean",
+        gap: "number|string",
+        headerOffset: "number|string",
+        minHeight: "number|string",
+        shellClass: "string",
+        headerClass: "string",
+        asideClass: "string",
+        pageClass: "string",
+        footerClass: "string",
+        overlayClass: "string",
+        slots: "{ header?, aside?, drawer?, nav?, page?, main?, footer?, default? }",
+        class: "string",
+        style: "object"
       },
       slots: {
         header: "Header content",
-        aside: "Drawer content",
+        aside: "Aside / drawer content",
+        drawer: "Alias di aside",
+        nav: "Alias di aside",
         page: "Page content",
-        footer: "Footer content"
+        main: "Alias di page",
+        footer: "Footer content",
+        default: "Fallback page content"
       },
-      returns: "HTMLDivElement (.cms-layout) con methods openAside/closeAside/toggleAside, _dispose(), " +
-        " header, aside, page, footer, headerUpdate(Node, newUrl), asideUpdate(Node, newUrl), pageUpdate(Node, newUrl), footerUpdate(Node, newUrl)",
+      returns: "HTMLDivElement con methods openAside/closeAside/toggleAside/isDrawerOpen/isMobile/reflow, " +
+        "header()/aside()/page()/footer(), headerUpdate/asideUpdate/pageUpdate/mainUpdate/footerUpdate e _dispose()",
+      description: "Shell layout composabile con slot alias, drawer responsivo e update runtime delle sezioni."
     };
   }
   // Esempio: CMSwift.ui.Layout({ header, aside, page, footer })
