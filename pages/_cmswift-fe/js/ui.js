@@ -9585,7 +9585,13 @@
       const drawerEl = document.querySelector(".cms-drawer");
       if (drawerEl) drawerEl.classList.toggle("open", drawerOpen);
     }
-    drawerToggleIcons.forEach(({ el, openIcon, closeIcon }) => {
+    drawerToggleIcons.forEach((entry) => {
+      if (!entry) return;
+      if (typeof entry.update === "function") {
+        entry.update(drawerOpen);
+        return;
+      }
+      const { el, openIcon, closeIcon } = entry;
       if (el) el.textContent = drawerOpen ? openIcon : closeIcon;
     });
     writeDrawerOpen(drawerOpen, key);
@@ -9593,95 +9599,194 @@
   };
 
   UI.Header = (...args) => {
-    const { props, children } = CMSwift.uiNormalizeArgs(args);
-    const slots = props.slots || {};
-    const title = props.title ?? "App";
-    const subtitle = props.subtitle ?? "";
-    const left = props.left ?? null;
-    const right = props.right ?? null;
-    const drawerOpenIcon = props.drawerOpenIcon ?? "✕";
-    const drawerCloseIcon = props.drawerCloseIcon ?? "☰";
-    const headerDrawerStateKey = props.drawerStateKey ?? null;
+    const { props: rawProps, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = rawProps.slots || {};
+    const props = { ...rawProps };
+    applyCommonProps(props);
 
-    if (headerDrawerStateKey) {
-      drawerStateKey = headerDrawerStateKey;
-      drawerOpen = readDrawerOpen();
+    const hasOwn = (key) => Object.prototype.hasOwnProperty.call(rawProps, key);
+    const currentStateKey = rawProps.drawerStateKey ?? drawerStateKey;
+    if (currentStateKey) {
+      drawerStateKey = currentStateKey;
+      drawerOpen = readDrawerOpen(currentStateKey);
     }
-    const iconEl = left == null ? _.span(drawerOpen ? drawerOpenIcon : drawerCloseIcon) : null;
-    if (iconEl) drawerToggleIcons.add({ el: iconEl, openIcon: drawerOpenIcon, closeIcon: drawerCloseIcon });
 
-    const cls = uiClass([
-      "cms-panel",
-      "cms-header",
-      uiWhen(props.sticky, "sticky"),
-      uiWhen(props.dense, "dense"),
-      uiWhen(props.elevated, "elevated"),
-      uiWhen(props.divider, "divider"),
-      props.class
-    ]);
-    const p = CMSwift.omit(props, [
-      "title", "subtitle", "left", "right",
-      "drawerOpenIcon", "drawerCloseIcon", "drawerStateKey",
-      "sticky", "dense", "elevated", "divider", "slots"
-    ]);
-    p.class = cls;
-
-    const toggleAside = () => {
-      const isOpen = setDrawerOpen(!drawerOpen);
-      if (iconEl) iconEl.textContent = isOpen ? drawerOpenIcon : drawerCloseIcon;
+    const isDrawerOpen = () => readDrawerOpen(currentStateKey);
+    const openDrawer = () => setDrawerOpen(true, currentStateKey);
+    const closeDrawer = () => setDrawerOpen(false, currentStateKey);
+    const toggleDrawer = () => setDrawerOpen(!isDrawerOpen(), currentStateKey);
+    const ctx = {
+      props: rawProps,
+      stateKey: currentStateKey,
+      isDrawerOpen,
+      openDrawer,
+      closeDrawer,
+      toggleDrawer,
+      toggleAside: toggleDrawer
     };
-    const leftFallback = left != null ? left : UI.Btn({ onClick: toggleAside }, iconEl);
-    const leftNode = left === false && !CMSwift.ui.getSlot(slots, "left")
-      ? null
-      : CMSwift.ui.renderSlot(slots, "left", { toggleAside }, leftFallback);
-    const rightNode = CMSwift.ui.renderSlot(slots, "right", {}, right);
 
-    const titleNode = CMSwift.ui.renderSlot(slots, "title", {}, title);
-    const subtitleNode = subtitle ? CMSwift.ui.renderSlot(slots, "subtitle", {}, subtitle) : null;
-    const defaultCenter = [
-      _.div({ class: "cms-title" }, ...renderSlotToArray(null, "default", {}, titleNode)),
-      subtitleNode ? _.div({ class: "cms-muted", style: { fontSize: "12px", marginTop: "2px" } }, ...renderSlotToArray(null, "default", {}, subtitleNode)) : null
+    const renderIconValue = (value, as = "icon", sizeFallback = rawProps.iconSize || rawProps.size || "md") => {
+      if (value == null || value === false) return null;
+      if (typeof value === "string") return UI.Icon({ name: value, size: sizeFallback });
+      return CMSwift.ui.slot(value, { as });
+    };
+    const renderDrawerToggleValue = (open) => {
+      const value = open ? (rawProps.drawerOpenIcon ?? "✕") : (rawProps.drawerCloseIcon ?? "☰");
+      if (value == null || value === false) return null;
+      if (typeof value === "string") return value;
+      return CMSwift.ui.slot(value, { as: open ? "drawerOpenIcon" : "drawerCloseIcon" });
+    };
+
+    const toggleIconHost = _.span({ class: "cms-header-toggle-icon" });
+    const paintToggleIcon = (open) => {
+      const nodes = renderSlotToArray(null, "default", ctx, renderDrawerToggleValue(open));
+      toggleIconHost.replaceChildren(...(nodes.length ? nodes : [""]));
+    };
+    paintToggleIcon(isDrawerOpen());
+
+    const autoLeft = UI.Btn({
+      class: "cms-header-toggle",
+      outline: true,
+      size: rawProps.toggleSize ?? rawProps.size ?? "sm",
+      onClick: toggleDrawer,
+      "aria-label": rawProps.toggleLabel || "Toggle navigation"
+    }, toggleIconHost);
+    if (rawProps.left == null && rawProps.left !== false && !CMSwift.ui.getSlot(slots, "left")) {
+      drawerToggleIcons.add({ update: paintToggleIcon });
+    }
+
+    const leftFallback = rawProps.left === false
+      ? null
+      : (rawProps.left != null ? rawProps.left : autoLeft);
+    const titleFallback = hasOwn("title") ? rawProps.title : (rawProps.label ?? "App");
+    const subtitleFallback = rawProps.subtitle ?? rawProps.description ?? "";
+    const rightFallback = hasOwn("right") ? rawProps.right : rawProps.end;
+    const contentFallback = hasOwn("content")
+      ? rawProps.content
+      : (hasOwn("body") ? rawProps.body : (children?.length ? children : null));
+
+    const startNodes = [
+      ...renderSlotToArray(slots, "left", ctx, leftFallback),
+      ...renderSlotToArray(slots, "start", ctx, null)
+    ];
+    const iconNodes = renderSlotToArray(slots, "icon", ctx, renderIconValue(rawProps.icon));
+    const eyebrowNodes = renderSlotToArray(slots, "eyebrow", ctx, rawProps.eyebrow ?? rawProps.kicker);
+    const titleNodes = renderSlotToArray(slots, "title", ctx, titleFallback);
+    const subtitleNodes = renderSlotToArray(slots, "subtitle", ctx, subtitleFallback);
+    const metaNodes = renderSlotToArray(slots, "meta", ctx, rawProps.meta);
+    const contentNodes = renderSlotToArray(slots, "content", ctx, contentFallback);
+    const customCenterNodes = [
+      ...renderSlotToArray(slots, "center", ctx, null),
+      ...renderSlotToArray(slots, "body", ctx, null)
+    ];
+    const rightNodes = [
+      ...renderSlotToArray(slots, "right", ctx, rightFallback),
+      ...renderSlotToArray(slots, "end", ctx, null)
+    ];
+    const actionNodes = renderSlotToArray(slots, "actions", ctx, rawProps.actions);
+
+    const structuredCenter = _.div(
+      { class: uiClass(["cms-header-body", rawProps.bodyClass, rawProps.centerClass]) },
+      _.div(
+        { class: "cms-header-heading" },
+        iconNodes.length ? _.div({ class: "cms-header-icon" }, ...iconNodes) : null,
+        _.div(
+          { class: "cms-header-copy" },
+          eyebrowNodes.length ? _.div({ class: uiClass(["cms-header-eyebrow", rawProps.eyebrowClass]) }, ...eyebrowNodes) : null,
+          titleNodes.length ? _.div({ class: uiClass(["cms-header-title", rawProps.titleClass]) }, ...titleNodes) : null,
+          subtitleNodes.length ? _.div({ class: uiClass(["cms-header-subtitle", rawProps.subtitleClass]) }, ...subtitleNodes) : null,
+          contentNodes.length ? _.div({ class: uiClass(["cms-header-content", rawProps.contentClass]) }, ...contentNodes) : null
+        ),
+        metaNodes.length ? _.div({ class: uiClass(["cms-header-meta", rawProps.metaClass]) }, ...metaNodes) : null
+      )
+    );
+
+    const endContent = [
+      ...rightNodes,
+      ...(actionNodes.length ? [_.div({ class: uiClass(["cms-header-actions", rawProps.actionsClass]) }, ...actionNodes)] : [])
     ];
 
-    const centerContent = renderSlotToArray(slots, "center", {}, (children && children.length) ? children : defaultCenter);
+    const p = CMSwift.omit(props, [
+      "actions", "actionsClass", "body", "bodyClass", "centerClass", "content", "contentClass",
+      "description", "divider", "drawerCloseIcon", "drawerOpenIcon", "drawerStateKey", "elevated",
+      "end", "eyebrow", "eyebrowClass", "icon", "iconSize", "kicker", "label", "left", "meta",
+      "metaClass", "right", "slots", "stack", "sticky", "subtitle", "subtitleClass", "title",
+      "titleClass", "toggleLabel", "toggleSize", "gap", "minHeight", "startClass", "endClass"
+    ]);
+    p.class = uiClass([
+      "cms-panel",
+      "cms-header",
+      "cms-singularity",
+      uiWhen(rawProps.sticky !== false, "sticky"),
+      uiWhen(rawProps.stack, "stack"),
+      uiWhen(rawProps.elevated, "elevated"),
+      uiWhen(rawProps.divider !== false, "divider"),
+      props.class
+    ]);
+    p.style = { ...(props.style || {}) };
+    if (rawProps.gap != null) p.style["--cms-header-gap"] = toCssSize(uiUnwrap(rawProps.gap));
+    if (rawProps.minHeight != null) p.style.minHeight = toCssSize(uiUnwrap(rawProps.minHeight));
 
-    return _.div(
+    const el = _.div(
       p,
-      ...(leftNode ? renderSlotToArray(null, "default", {}, leftNode) : []),
-      _.div(...centerContent),
-      UI.Spacer(),
-      ...(rightNode ? renderSlotToArray(null, "default", {}, rightNode) : [])
+      ...(startNodes.length ? [_.div({ class: uiClass(["cms-header-start", rawProps.startClass]) }, ...startNodes)] : []),
+      _.div(
+        { class: "cms-header-main" },
+        ...(customCenterNodes.length
+          ? [_.div({ class: uiClass(["cms-header-body", rawProps.bodyClass, rawProps.centerClass]) }, ...customCenterNodes)]
+          : [structuredCenter]),
+        ...(endContent.length ? [_.div({ class: uiClass(["cms-header-end", rawProps.endClass]) }, ...endContent)] : [])
+      )
     );
+
+    setPropertyProps(el, rawProps);
+    return el;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.Header = {
       signature: "UI.Header(...children) | UI.Header(props, ...children)",
       props: {
-        title: "string",
-        subtitle: "string",
+        title: "String|Node|Function|Array",
+        subtitle: "String|Node|Function|Array",
+        eyebrow: "String|Node|Function|Array",
+        content: "Node|Function|Array",
+        meta: "Node|Function|Array",
+        icon: "String|Node|Function|Array",
         left: "Node|Function|Array|false",
         right: "Node|Function|Array",
+        actions: "Node|Function|Array",
         drawerOpenIcon: "string|Node",
         drawerCloseIcon: "string|Node",
         drawerStateKey: "string",
         sticky: "boolean",
+        stack: "boolean",
         dense: "boolean",
         elevated: "boolean",
         divider: "boolean",
-        slots: "{ left?, right?, center?, title?, subtitle? }",
+        gap: "string|number",
+        minHeight: "string|number",
+        slots: "{ left?, start?, right?, end?, center?, body?, icon?, eyebrow?, title?, subtitle?, meta?, content?, actions? }",
         class: "string",
         style: "object"
       },
       slots: {
-        left: "Left area (ctx: { toggleAside })",
-        right: "Right area",
-        center: "Center content",
-        title: "Title content",
-        subtitle: "Subtitle content"
+        left: "Area sinistra, fallback al toggle drawer",
+        start: "Alias/addon area sinistra",
+        right: "Area destra principale",
+        end: "Alias/addon area destra",
+        center: "Override completo del body centrale",
+        body: "Alias di center",
+        icon: "Icona leading",
+        eyebrow: "Eyebrow / kicker",
+        title: "Titolo",
+        subtitle: "Sottotitolo",
+        meta: "Meta info accanto al contenuto centrale",
+        content: "Contenuto extra sotto il sottotitolo",
+        actions: "Azioni raggruppate nella zona destra"
       },
       returns: "HTMLDivElement",
-      description: "Header con supporto drawer e slot laterali."
+      description: "Header strutturato con regioni start/body/end, toggle drawer integrato, metadata e slot composabili."
     };
   }
 

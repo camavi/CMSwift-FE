@@ -372,6 +372,7 @@
   --cms-b-radius-default: 4px;
   --cms-input-height-default: var(--cms-input-height-md);
   --cms-select-bg-default: var(--cms-panel);
+  --cms-bg-default: var(--cms-panel);
 }
 
 /* =====================================================================
