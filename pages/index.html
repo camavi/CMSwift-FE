@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark2">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,6 +12,14 @@
     <script src="/config-fe/setting.js"></script>
     <script src="/_cmswift-fe/js/cms.js"></script>
     <script src="/_cmswift-fe/js/ui.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+
+    <!-- and it's easy to individually load additional languages -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
     <style>
       body {
         margin: 0;
@@ -23,357 +31,542 @@
       a {
         color: inherit;
       }
+      .demo-section {
+        margin-top: var(--cms-s-xs);
+      }
+      .wrap-class .cms-control {
+        border: 1px solid red;
+      }
     </style>
   </head>
   <body>
     <div id="app"></div>
   </body>
   <script>
-    CMSwift.ready(() => {
-      const title = _.rod("Landing Demo");
-      const published = _.rod(true);
-      const visibility = _.rod("public");
-      const featured = _.rod(false);
-      const completion = _.rod(62);
+    const listThemes = [
+      { label: "Default", icon: "label", iconRight: "sell" },
+      {
+        label: "Success",
+        color: "success",
+        icon: "task_alt",
+        iconRight: "verified",
+      },
+      {
+        label: "Warning",
+        color: "warning",
+        icon: "warning_amber",
+        iconRight: "priority_high",
+      },
+      {
+        label: "Danger",
+        color: "danger",
+        icon: "dangerous",
+        iconRight: "report",
+      },
+      {
+        label: "Info",
+        color: "info",
+        icon: "info",
+        iconRight: "tips_and_updates",
+      },
+      {
+        label: "Primary",
+        color: "primary",
+        icon: "rocket_launch",
+        iconRight: "bolt",
+      },
+      {
+        label: "Secondary",
+        color: "secondary",
+        icon: "palette",
+        iconRight: "auto_awesome",
+      },
+      {
+        label: "Dark",
+        color: "dark",
+        icon: "dark_mode",
+        iconRight: "nights_stay",
+      },
+      {
+        label: "Light",
+        color: "light",
+        icon: "light_mode",
+        iconRight: "wb_sunny",
+      },
+    ];
 
-      const progress = _.Progress({ value: completion.value });
-      const progressLabel = _.span(
-        { class: "cms-muted" },
-        `${completion.value}%`,
+    const buttonThemeMap = Object.fromEntries(
+      listThemes.map((theme) => [theme.label, theme]),
+    );
+
+    const sizeConfigs = [
+      { theme: "Success", label: "Success xxs", size: "xxs" },
+      { theme: "Success", label: "Success xs", size: "xs" },
+      { theme: "Warning", label: "Warning sm", size: "sm" },
+      { theme: "Danger", label: "Danger md", size: "md" },
+      { theme: "Info", label: "Info lg", size: "lg" },
+      { theme: "Primary", label: "Primary xl", size: "xl" },
+      { theme: "Secondary", label: "Secondary xxl", size: "xxl" },
+    ];
+
+    const iconModes = {
+      None: "both",
+      Success: "both",
+      Warning: "right",
+      Danger: "both",
+      Info: "both",
+      Primary: "both",
+      Secondary: "both",
+      Dark: "both",
+      Light: "both",
+    };
+
+    const gradientValues = [true, true, -90, 90, 1, 25, -25, 270, true];
+    const serializeValue = (value) =>
+      typeof value === "string" ? `"${value}"` : String(value);
+
+    const serializeOptions = (options) => {
+      const entries = Object.entries(options).filter(([key, value]) => value);
+      //remove la class
+      entries.splice(
+        entries.findIndex(([key]) => key === "class"),
+        1,
       );
-      completion.action((v) => {
-        progress.querySelector(".cms-progress-bar").style.width = `${v}%`;
-        progressLabel.textContent = `${v}%`;
-      });
+      return entries
+        .map(([key, value]) => `${key}: ${serializeValue(value)}`)
+        .join(", ");
+    };
 
-      const statusLine = _.div(
-        { class: "cms-muted", style: { marginTop: "10px" } },
-        "",
-      );
-      const updateStatus = () => {
-        statusLine.textContent = `Titolo: ${title.value} • Pubblicato: ${
-          published.value ? "si" : "no"
-        } • Visibilità: ${visibility.value} • In evidenza: ${
-          featured.value
-        } • Avanzamento: ${completion.value}%`;
-      };
-      [title, published, visibility, featured, completion].forEach((r) =>
-        r.action(updateStatus),
-      );
-      updateStatus();
+    const getIconOptions = (theme, mode = "left") => {
+      const options = {};
+      if (mode === "left" || mode === "both") options.icon = theme.icon;
+      if (mode === "right" || mode === "both")
+        options.iconRight = theme.iconRight;
+      return options;
+    };
 
-      const dialog = _.Dialog({
-        title: "Dialog di esempio",
-        content: () => _.div("Questo dialog conferma l'uso di _.Dialog. 🤩"),
-        actions: ({ close }) => [
-          _.Btn({ onClick: close }, "Chiudi"),
-          _.Btn({ variant: "primary", onClick: close }, "Conferma"),
-        ],
-      });
+    const makeOptions = (theme, extraOptions = {}, mode = "left") => {
+      const options = {};
 
-      const navCard = _.Card(
-        _.h3("Layout e navigazione"),
-        _.Breadcrumbs({
-          items: [
-            { label: "Home", to: "#" },
-            { label: "UI" },
-            { label: "Demo" },
+      if (theme.color) options.color = theme.color;
+
+      Object.assign(options, getIconOptions(theme, mode), extraOptions);
+
+      return options;
+    };
+
+    const boxCode = (title, content, numCol = 12) => {
+      const openCode = _.rod(false);
+      return _.Card(
+        {
+          class: "cms-m-t-sm",
+          //gradient: true,
+          identifier: title,
+          header: [
+            _.Spacer(),
+            _.Btn({
+              icon: "code",
+              class: "cms-m-l-auto",
+              dense: true,
+              onClick: () => {
+                openCode.value = !openCode.value;
+              },
+            }),
+            _.Btn({
+              icon: "#brand-github",
+              class: "cms-m-l-auto",
+              dense: true,
+            }),
+            _.Btn({
+              icon: "#brand-codepen",
+              class: "cms-m-l-auto",
+              dense: true,
+            }),
           ],
-        }),
-        _.div(
-          { style: { marginTop: "12px" } },
-          _.Toolbar(
-            _.Btn({ icon: "#home", iconAlign: "right" }, "Dashboard"),
-            _.Btn({ icon: "#search" }, "Cerca"),
-            _.Btn({ variant: "primary", icon: "#plus" }, "Nuovo"),
+        },
+        _.Row(
+          _.Col({ class: "cms-gutter-sm", col: numCol }, content.code),
+          _.Col(
+            {
+              col: 24,
+              class: "cms-scroll-locked",
+              style: {
+                height: () => (openCode.value ? "fit-content" : "0px"),
+              },
+            },
+            _.pre(
+              _.code(
+                {
+                  class: "cms-r-md language-javascript",
+                },
+                content.sample.join("\n"),
+              ),
+            ),
           ),
         ),
       );
+    };
+  </script>
+  <script type="module">
+    const demoRoutes = [
+      [
+        "/demo/component/color",
+        "../tutorial/color.cms.js",
+        "ColorTokensDemoPage",
+      ],
+      ["/demo/component/btn", "../tutorial/btn.cms.js", "btn"],
+      ["/demo/component/icon", "../tutorial/icon.cms.js", "icon"],
 
-      const interactiveCard = _.Card(
-        _.h3("Elementi interattivi"),
-        _.div(
-          {
-            class: "cms-row",
-            style: { gap: "var(--cms-s-sm)", flexWrap: "wrap" },
-          },
-          _.Btn({ variant: "primary" }, "Primario"),
-          _.Btn({ variant: "success" }, "Successo"),
-          _.Btn({ variant: "danger" }, "Pericolo"),
-          _.Btn({ outline: true }, "Outline"),
-        ),
-        _.div(
-          {
-            class: "cms-row",
-            style: {
-              marginTop: "12px",
-              gap: "var(--cms-s-md)",
-              alignItems: "center",
-              flexWrap: "wrap",
-            },
-          },
-          _.Input({ placeholder: "Titolo pagina", model: title }),
-          _.Checkbox({ label: "Pubblicato", model: published }),
-          _.Toggle({ label: "In evidenza", model: featured }),
-        ),
-        _.div(
-          {
-            class: "cms-row",
-            style: {
-              marginTop: "12px",
-              gap: "var(--cms-s-md)",
-              alignItems: "center",
-              flexWrap: "wrap",
-            },
-          },
-          _.Radio({
-            name: "vis",
-            value: "public",
-            label: "Pubblico",
-            model: visibility,
-          }),
-          _.Radio({
-            name: "vis",
-            value: "private",
-            label: "Privato",
-            model: visibility,
-          }),
-          _.div(
-            { style: { minWidth: "170px" } },
-            _.Slider({ min: 0, max: 100, model: completion }),
-          ),
-          progress,
-          progressLabel,
-        ),
-        statusLine,
-      );
+      ["/demo/component/tap-panel", "../tutorial/tap-panel.cms.js", "tapPanel"],
+      ["/demo/component/appshell", "../tutorial/app-shell.cms.js", "appShell"],
+      ["/demo/component/layout", "../tutorial/layout.cms.js", "layout"],
+      ["/demo/component/page", "../tutorial/page.cms.js", "page"],
+      ["/demo/component/header", "../tutorial/header.cms.js", "header"],
+      ["/demo/component/footer", "../tutorial/footer.cms.js", "footer"],
+      [
+        "/demo/component/container",
+        "../tutorial/container.cms.js",
+        "container",
+      ],
+      ["/demo/component/parallax", "../tutorial/parallax.cms.js", "parallax"],
+      ["/demo/component/row", "../tutorial/row.cms.js", "row"],
+      ["/demo/component/col", "../tutorial/col.cms.js", "col"],
+      ["/demo/component/grid", "../tutorial/grid.cms.js", "grid"],
+      ["/demo/component/gridcol", "../tutorial/grid-col.cms.js", "gridCol"],
 
-      const infoList = _.List(
-        _.Item({}, "Dashboard"),
-        _.Item({}, "Articoli"),
-        _.Item({}, "Media"),
-        _.Item({}, "Impostazioni"),
-      );
+      ["/demo/component/card", "../tutorial/card.cms.js", "card"],
+      [
+        "/demo/component/cardheader",
+        "../tutorial/card-header.cms.js",
+        "cardHeader",
+      ],
+      ["/demo/component/cardbody", "../tutorial/card-body.cms.js", "cardBody"],
+      [
+        "/demo/component/cardfooter",
+        "../tutorial/card-footer.cms.js",
+        "cardFooter",
+      ],
+      ["/demo/component/tooltip", "../tutorial/tooltip.cms.js", "tooltip"],
+      ["/demo/component/banner", "../tutorial/banner.cms.js", "banner"],
+      ["/demo/component/notify", "../tutorial/notify.cms.js", "notify"],
+      ["/demo/component/spinner", "../tutorial/spinner.cms.js", "spinner"],
+      ["/demo/component/progress", "../tutorial/progress.cms.js", "progress"],
+      [
+        "/demo/component/loadingbar",
+        "../tutorial/loading-bar.cms.js",
+        "loadingBar",
+      ],
+      ["/demo/component/badge", "../tutorial/badge.cms.js", "badge"],
+      ["/demo/component/chip", "../tutorial/chip.cms.js", "chip"],
 
-      const dataCard = _.Card(
-        _.h3("Dati e visualizzazione"),
-        _.div(
-          {
-            class: "cms-row",
-            style: {
-              gap: "var(--cms-s-sm)",
-              alignItems: "center",
-              flexWrap: "wrap",
-            },
-          },
-          _.Avatar({ label: "CM", size: 40 }),
-          _.Badge({ label: "New" }),
-          _.Chip({
-            label: "Marketing",
-            removable: true,
-            onRemove: () => _.Notify.info("Tag rimosso"),
-          }),
-          _.Chip({ label: "Design" }),
-        ),
-        _.div({ style: { marginTop: "12px" } }, infoList),
-      );
+      ["/demo/component/toolbar", "../tutorial/toolbar.cms.js", "toolbar"],
+      ["/demo/component/tabs", "../tutorial/tabs.cms.js", "tabs"],
+      ["/demo/component/routetab", "../tutorial/route-tab.cms.js", "routeTab"],
+      ["/demo/component/menu", "../tutorial/menu.cms.js", "menu"],
+      [
+        "/demo/component/contextmenu",
+        "../tutorial/context-menu.cms.js",
+        "contextMenu",
+      ],
+      [
+        "/demo/component/breadcrumbs",
+        "../tutorial/breadcrumbs.cms.js",
+        "breadcrumbs",
+      ],
+      ["/demo/component/drawer", "../tutorial/drawer.cms.js", "drawer"],
 
-      const rows = [
+      ["/demo/component/form", "../tutorial/form.cms.js", "form"],
+      [
+        "/demo/component/formfield",
+        "../tutorial/form-field.cms.js",
+        "formField",
+      ],
+      ["/demo/component/input", "../tutorial/input.cms.js", "input"],
+      ["/demo/component/inputraw", "../tutorial/input-raw.cms.js", "inputRaw"],
+      ["/demo/component/select", "../tutorial/select.cms.js", "select"],
+      ["/demo/component/checkbox", "../tutorial/checkbox.cms.js", "checkbox"],
+      ["/demo/component/radio", "../tutorial/radio.cms.js", "radio"],
+      ["/demo/component/toggle", "../tutorial/toggle.cms.js", "toggle"],
+      ["/demo/component/slider", "../tutorial/slider.cms.js", "slider"],
+      ["/demo/component/rating", "../tutorial/rating.cms.js", "rating"],
+      ["/demo/component/date", "../tutorial/date.cms.js", "date"],
+      ["/demo/component/time", "../tutorial/time.cms.js", "time"],
+
+      ["/demo/component/list", "../tutorial/list.cms.js", "list"],
+      ["/demo/component/table", "../tutorial/table.cms.js", "table"],
+      [
+        "/demo/component/pagination",
+        "../tutorial/pagination.cms.js",
+        "pagination",
+      ],
+      ["/demo/component/dialog", "../tutorial/dialog.cms.js", "dialog"],
+      ["/demo/component/popover", "../tutorial/popover.cms.js", "popover"],
+      ["/demo/component/avatar", "../tutorial/avatar.cms.js", "avatar"],
+      ["/demo/component/item", "../tutorial/item.cms.js", "item"],
+      [
+        "/demo/component/separator",
+        "../tutorial/separator.cms.js",
+        "separator",
+      ],
+      ["/demo/component/spacer", "../tutorial/spacer.cms.js", "spacer"],
+    ];
+
+    const demoImportBase = new URL("/demo/", window.location.origin);
+    const demoRouteMap = new Map(
+      demoRoutes.map(([route, modulePath, exportName]) => [
+        route,
         {
-          id: 1,
-          title: "Homepage",
-          status: "Published",
-          updated: "2024-07-18",
+          moduleUrl: new URL(modulePath, demoImportBase).href,
+          exportName,
         },
-        { id: 2, title: "Chi siamo", status: "Draft", updated: "2024-07-16" },
-        {
-          id: 3,
-          title: "Contatti",
-          status: "Published",
-          updated: "2024-07-11",
-        },
-        { id: 4, title: "Blog", status: "Archived", updated: "2024-06-30" },
-        {
-          id: 5,
-          title: "Landing Prodotto",
-          status: "Draft",
-          updated: "2024-06-25",
-        },
-      ];
+      ]),
+    );
+    const demoViewCache = new Map();
 
-      const table = _.Table({
-        columns: [
-          { key: "title", label: "Pagina", sortable: true },
-          {
-            key: "status",
-            label: "Stato",
-            sortable: true,
-            render: (row) =>
-              _.Badge({
-                label: row.status,
-                color:
-                  row.status === "Published"
-                    ? "var(--cms-success)"
-                    : "var(--cms-primary)",
+    function loadDemoView(route) {
+      const entry = demoRouteMap.get(route);
+      if (!entry) return Promise.resolve(null);
+
+      if (!demoViewCache.has(route)) {
+        demoViewCache.set(
+          route,
+          import(entry.moduleUrl).then((module) => {
+            const view = module[entry.exportName];
+            if (view == null) {
+              throw new Error(`Demo export non valida: ${entry.exportName}`);
+            }
+            return view;
+          }),
+        );
+      }
+
+      return demoViewCache.get(route);
+    }
+
+    function preloadDemoView(route) {
+      if (!demoRouteMap.has(route)) return;
+      loadDemoView(route).catch(() => {});
+    }
+
+    function createLazyDemoRoute(route) {
+      return (ctx) => {
+        const host = _.div({ class: "cms-p-md" }, "Loading...");
+
+        loadDemoView(route)
+          .then((view) => {
+            if (!host.isConnected) return;
+            _.mount(host, typeof view === "function" ? () => view(ctx) : view, {
+              clear: true,
+            });
+            requestAnimationFrame(() => hljs.highlightAll());
+          })
+          .catch((error) => {
+            console.error(`[demo] load failed for ${route}`, error);
+            if (!host.isConnected) return;
+            _.mount(
+              host,
+              _.Banner({
+                color: "danger",
+                title: "Errore nel caricamento",
+                message: `Impossibile caricare ${route}`,
               }),
-          },
-          { key: "updated", label: "Aggiornato", sortable: true },
+              { clear: true },
+            );
+          });
+
+        return host;
+      };
+    }
+
+    const createComponentItem = (label, path, onNavigate = null) => ({
+      label,
+      onClick: () => {
+        preloadDemoView(path);
+        CMSwift.router.navigate(path);
+        onNavigate?.();
+      },
+    });
+
+    let currentLayout = null;
+
+    const componentItems = [
+      {
+        label: "Layout & Structure",
+        icon: "mobile_layout",
+        items: [
+          createComponentItem("tapPanel", "/demo/component/tap-panel"),
+          createComponentItem("appShell", "/demo/component/appshell"),
+          createComponentItem("Layout", "/demo/component/layout"),
+          createComponentItem("Page", "/demo/component/page"),
+          createComponentItem("Header", "/demo/component/header"),
+          createComponentItem("Footer", "/demo/component/footer"),
+          createComponentItem("Container", "/demo/component/container"),
+          createComponentItem("Parallax", "/demo/component/parallax"),
+          createComponentItem("Row", "/demo/component/row"),
+          createComponentItem("Col", "/demo/component/col"),
+          createComponentItem("Grid", "/demo/component/grid"),
+          createComponentItem("Grid Col", "/demo/component/gridcol"),
         ],
-        rows,
-        pageSize: 5,
-        actions: (row) =>
-          _.Btn(
-            {
-              outline: true,
-              onClick: () => _.Notify.info(`Apri: ${row.title}`),
-            },
-            "Apri",
+      },
+      {
+        label: "Surface & Feedback",
+        icon: "newsmode",
+        items: [
+          createComponentItem("Card", "/demo/component/card"),
+          createComponentItem("CardHeader", "/demo/component/cardheader"),
+          createComponentItem("CardBody", "/demo/component/cardbody"),
+          createComponentItem("CardFooter", "/demo/component/cardfooter"),
+          createComponentItem("Tooltip", "/demo/component/tooltip"),
+          createComponentItem("Banner", "/demo/component/banner"),
+          createComponentItem("Notify", "/demo/component/notify"),
+          createComponentItem("Spinner", "/demo/component/spinner"),
+          createComponentItem("Progress", "/demo/component/progress"),
+          createComponentItem("Loading Bar", "/demo/component/loadingbar"),
+          createComponentItem("Badge", "/demo/component/badge"),
+          createComponentItem("Chip", "/demo/component/chip", () =>
+            hljs.highlightAll(),
           ),
-      });
+        ],
+      },
+      {
+        label: "Navigation & Actions",
+        icon: "burst_mode",
+        items: [
+          createComponentItem("Toolbar", "/demo/component/toolbar"),
+          createComponentItem("Tabs", "/demo/component/tabs"),
+          createComponentItem("RouteTab", "/demo/component/routetab"),
+          createComponentItem("Menu", "/demo/component/menu"),
+          createComponentItem("ContextMenu", "/demo/component/contextmenu"),
+          createComponentItem("Breadcrumbs", "/demo/component/breadcrumbs"),
+          createComponentItem("Drawer", "/demo/component/drawer"),
+          createComponentItem("Btn", "/demo/component/btn", () =>
+            hljs.highlightAll(),
+          ),
+          createComponentItem("Icon", "/demo/component/icon"),
+        ],
+      },
+      {
+        label: "Forms & Inputs",
+        icon: "list_alt",
+        items: [
+          createComponentItem("Form", "/demo/component/form"),
+          createComponentItem("FormField", "/demo/component/formfield"),
+          createComponentItem("InputRaw", "/demo/component/inputraw"),
+          createComponentItem("Input", "/demo/component/input"),
+          createComponentItem("Select", "/demo/component/select"),
+          createComponentItem("Checkbox", "/demo/component/checkbox"),
+          createComponentItem("Radio", "/demo/component/radio"),
+          createComponentItem("Toggle", "/demo/component/toggle"),
+          createComponentItem("Slider", "/demo/component/slider"),
+          createComponentItem("Rating", "/demo/component/rating"),
+          createComponentItem("Date", "/demo/component/date"),
+          createComponentItem("Time", "/demo/component/time"),
+        ],
+      },
+      {
+        label: "Data & Overlays",
+        icon: "date_range",
+        items: [
+          createComponentItem("List", "/demo/component/list"),
+          createComponentItem("Table", "/demo/component/table"),
+          createComponentItem("Pagination", "/demo/component/pagination"),
+          createComponentItem("Dialog", "/demo/component/dialog"),
+          createComponentItem("Popover", "/demo/component/popover"),
+          createComponentItem("Avatar", "/demo/component/avatar"),
+          createComponentItem("Item", "/demo/component/item"),
+          createComponentItem("Separator", "/demo/component/separator"),
+          createComponentItem("Spacer", "/demo/component/spacer"),
+        ],
+      },
+    ];
 
-      const notifyCard = _.Card(
-        _.h3("Notifiche e feedback"),
-        _.div(
-          {
-            class: "cms-row",
-            style: { gap: "var(--cms-s-sm)", flexWrap: "wrap" },
-          },
-          _.Btn({ onClick: () => dialog.open() }, "Apri dialog"),
-          _.Btn(
-            {
-              onClick: () => _.Notify.success("Operazione completata"),
-            },
-            "Notify success",
+    function layoutPage(
+      _content = null,
+      _header = null,
+      _drawer = null,
+      _footer = null,
+    ) {
+      const header =
+        _header ||
+        _.Header({
+          title: "CMSwift",
+          subtitle: "Demo componenti UI",
+          right: _.Toolbar(
+            _.Btn(
+              {
+                icon: "#bell",
+                onClick: () => _.Notify.info("Hai nuove notifiche"),
+              },
+              "Notifiche",
+            ),
+            _.Btn(
+              {
+                variant: "primary",
+                icon: "#plus",
+                onClick: () => {
+                  drawerOpen.value = false;
+                  _.Notify.info("Nuovo elemento");
+                  CMSwift.router.navigate("/demo/component/card");
+                },
+              },
+              "Nuovo",
+            ),
           ),
-          _.Btn(
-            {
-              onClick: () => _.Notify.error("Si è verificato un errore"),
-            },
-            "Notify error",
-          ),
-        ),
-        _.div(
-          {
-            class: "cms-row",
-            style: {
-              marginTop: "12px",
-              gap: "var(--cms-s-sm)",
-              alignItems: "center",
-            },
-          },
-          _.Spinner({ size: 22 }),
-          _.span("Caricamento in corso"),
-        ),
-      );
-
-      const parallax = _.Parallax(
-        { height: "320px", startTop: 105 },
-        _.div(
-          _.h2({ style: { margin: 0 } }, "CMSwift UI Kit"),
-          _.p(
-            { style: { margin: "6px 0 0" } },
-            "Tutti i componenti in azione su una singola pagina.",
-          ),
-        ),
-      );
-
-      const page = _.Page(
+        });
+      const content =
+        _content ||
         _.Container(
-          parallax,
           _.div(
             { style: { margin: "16px 0" } },
-            _.Breadcrumbs({
-              items: [{ label: "Home", to: "#" }, { label: "Demo componenti" }],
-            }),
+            _.h2("CMSwift UI Kit"),
+            _.p("Tutti i componenti in azione su una singola pagina."),
           ),
-          _.Row(
-            { gap: "var(--cms-s-lg)" },
-            _.Col({ col: 24, sm: 24, class: "cms-m-b-sm" }, navCard),
-            _.Col({ col: 24, sm: 24, class: "cms-m-b-sm" }, interactiveCard),
-            _.Col({ col: 24, sm: 24, class: "cms-m-b-sm" }, dataCard),
-            _.Col({ col: 24, sm: 24, class: "cms-m-b-sm" }, notifyCard),
-            _.Col({ col: 24, sm: 24, class: "cms-m-b-sm" }, table),
-            _.Col({ col: 24 }, CMSwift.docTable("Btn")),
+        );
+      const drawer =
+        _drawer ||
+        _.Drawer({
+          stateKey: "demo:drawer",
+          header: _.h3({ class: "cms-t-center" }, "Menu principale"),
+          items: [
+            { label: "Home", to: "/demo", icon: "home" },
+            ...componentItems,
+          ],
+        });
+      const footer =
+        _footer ||
+        _.Footer(
+          _.div(
+            "CMSwift UI Demo • Layout completo con componenti attivi",
+            _.Icon({ textColor: "red", name: "#heart" }),
           ),
-        ),
-      );
+        );
 
-      const header = _.Header({
-        title: "CMSwift",
-        subtitle: "Demo componenti UI",
-        right: _.Toolbar(
-          _.Btn(
-            {
-              icon: "#bell",
-              onClick: () => _.Notify.info("Hai nuove notifiche"),
-            },
-            "Notifiche",
-          ),
-          _.Btn(
-            { variant: "primary", icon: "#plus", onClick: () => dialog.open() },
-            "Nuovo",
-          ),
-        ),
+      const drawerOpen = _.rod(true);
+
+      currentLayout = _.Layout({
+        header: header,
+        aside: drawer,
+        page: content,
+        footer: footer,
+        drawerOpen: drawerOpen,
+        tagPage: true,
       });
 
-      const drawer = _.Drawer({
-        stateKey: "demo:drawer",
-        header: _.Banner({ message: "Menu principale" }),
-        items: [
-          { label: "Home", to: "/", icon: "🏠" },
-          { label: "Blog", to: "/blog", icon: "📰" },
-          {
-            label: "Gestione",
-            icon: "🧰",
-            iconPosition: "right",
-            expanded: true,
-            items: [
-              { label: "Utenti", to: "/users" },
-              {
-                label: "Impostazioni",
-                icon: "⚙️",
-                iconSidePosition: "right",
-                openIcon: _.Icon("#minus"),
-                closeIcon: _.Icon("#plus"),
-                items: [
-                  { label: "Generali", to: "/settings/general" },
-                  { label: "Billing", to: "/settings/billing" },
-                ],
-              },
-            ],
-          },
-          {
-            label: "Docs esterne",
-            href: "https://example.com/docs",
-            icon: "🔗",
-            external: true,
-          },
-          {
-            label: "Nuovo contenuto",
-            icon: "➕",
-            button: true,
-            onClick: () => _.Notify.success("Azione eseguita"),
-          },
-        ],
-      });
+      return currentLayout;
+    }
+    let contentPage = _.div("Start");
+    const layoutApp = layoutPage(contentPage);
+    _.mount("#app", layoutApp);
+    _.router.setOutlet(contentPage);
 
-      const footer = _.Footer(
-        _.div(
-          "CMSwift UI Demo • Layout completo con componenti attivi",
-          _.Icon({ textColor: "red", name: "#heart" }),
-        ),
-      );
+    //CMSwift.router.add("/demo", () => page.home());
+    for (const [route] of demoRoutes) {
+      _.router.add(route, createLazyDemoRoute(route));
+    }
 
-      CMSwift.mount(
-        "#app",
-        _.Layout({
-          header,
-          aside: drawer,
-          page,
-          footer,
-        }),
-      );
-    });
+    preloadDemoView(window.location.pathname);
+    _.router.start();
+    /* */
+    hljs.highlightAll();
   </script>
 </html>
-

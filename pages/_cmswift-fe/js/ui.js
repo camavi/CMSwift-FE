@@ -11643,11 +11643,249 @@
   }
   // Esempio: const lb = CMSwift.ui.LoadingBar({ autoStart: true }); lb.done();
 
-  UI.Notify = (opts = {}) => app.services.notify?.show?.(opts);
-  UI.Notify.success = (message, title = "Success") => app.services.notify?.success?.(message, title);
-  UI.Notify.error = (message, title = "Error") => app.services.notify?.error?.(message, title);
-  UI.Notify.info = (message, title = "Info") => app.services.notify?.info?.(message, title);
-  // Esempio: CMSwift.ui.Notify({ type: "success", title: "OK", message: "Salvato" })
+  const NOTIFY_POSITIONS = new Set([
+    "top-left",
+    "top-center",
+    "top-right",
+    "bottom-left",
+    "bottom-center",
+    "bottom-right"
+  ]);
+  const NOTIFY_VARIANTS = new Set(["soft", "solid", "outline"]);
+  const NOTIFY_DEFAULT_TITLES = {
+    success: "Success",
+    warning: "Warning",
+    danger: "Error",
+    info: "Info",
+    primary: "Notice",
+    secondary: "Notice",
+    light: "Notice",
+    dark: "Notice"
+  };
+  const notifyIconMap = {
+    success: "check_circle",
+    warning: "warning",
+    danger: "error",
+    info: "info",
+    primary: "bolt",
+    secondary: "notifications",
+    light: "notifications",
+    dark: "shield"
+  };
+
+  const normalizeNotifyPosition = (value) => {
+    const raw = String(uiUnwrap(value) || "").trim().toLowerCase();
+    if (!raw) return "bottom-right";
+    if (NOTIFY_POSITIONS.has(raw)) return raw;
+    if (raw === "top") return "top-right";
+    if (raw === "bottom") return "bottom-right";
+    if (raw === "left") return "bottom-left";
+    if (raw === "right") return "bottom-right";
+    if (raw === "center") return "bottom-center";
+    return "bottom-right";
+  };
+
+  const normalizeNotifyVariant = (value) => {
+    const raw = String(uiUnwrap(value) || "").trim().toLowerCase();
+    return NOTIFY_VARIANTS.has(raw) ? raw : "soft";
+  };
+
+  const normalizeNotifyTimeout = (value, tone) => {
+    const raw = uiUnwrap(value);
+    if (raw === false || raw === null) return 0;
+    if (raw === true) return tone === "danger" ? 3500 : 2500;
+    if (raw === "" || raw === undefined) return tone === "danger" ? 3500 : 2500;
+    const num = Number(raw);
+    return Number.isFinite(num) && num >= 0 ? num : (tone === "danger" ? 3500 : 2500);
+  };
+
+  const normalizeNotifyPayload = (input = {}, forcedType = "") => {
+    const src = uiIsPlainObject(input) ? { ...input } : { message: input };
+    const tone = normalizeState(uiUnwrap(forcedType) || uiUnwrap(src.type) || uiUnwrap(src.state) || uiUnwrap(src.color) || "info") || "info";
+    const timeout = normalizeNotifyTimeout(src.timeout ?? src.duration ?? src.delay, tone);
+    const closable = src.closable ?? src.dismissible ?? (src.dismiss != null) ?? (timeout === 0);
+    const title = src.title === undefined
+      ? (src.label === undefined ? NOTIFY_DEFAULT_TITLES[tone] : src.label)
+      : src.title;
+
+    return {
+      ...src,
+      type: tone,
+      state: tone,
+      title,
+      message: src.message ?? src.content ?? src.text ?? null,
+      description: src.description ?? src.subtitle ?? src.note ?? null,
+      meta: src.meta ?? src.caption ?? null,
+      body: src.body ?? null,
+      timeout,
+      closable: !!closable,
+      dismissLabel: src.dismissLabel || src.closeLabel || "Chiudi notifica",
+      position: normalizeNotifyPosition(src.position),
+      variant: normalizeNotifyVariant(src.variant),
+      slots: src.slots || {},
+      role: src.role || ((tone === "danger" || tone === "warning") ? "alert" : "status")
+    };
+  };
+
+  const buildNotifyOptionsFromArgs = (args, forcedType = "", defaultTitle = "") => {
+    if (!args.length) {
+      return normalizeNotifyPayload(defaultTitle ? { type: forcedType, title: defaultTitle } : { type: forcedType });
+    }
+
+    if (uiIsPlainObject(args[0])) {
+      const { props, children } = CMSwift.uiNormalizeArgs(args);
+      const next = { ...props };
+      if (!next.type && !next.state && !next.color && forcedType) next.type = forcedType;
+      if (next.title == null && defaultTitle) next.title = defaultTitle;
+      if (children.length) {
+        if (next.message == null && next.description == null && next.body == null && children.length === 1) {
+          next.message = children[0];
+        } else if (next.body == null) {
+          next.body = children.length === 1 ? children[0] : children;
+        }
+      }
+      return normalizeNotifyPayload(next, forcedType);
+    }
+
+    const [message, second, third] = args;
+    let next = {};
+    if (uiIsPlainObject(second)) {
+      next = { ...second, message };
+    } else if (uiIsPlainObject(third)) {
+      next = { ...third, message, title: second };
+    } else {
+      next = { message, title: second };
+    }
+    if (forcedType && !next.type && !next.state && !next.color) next.type = forcedType;
+    if (next.title == null && defaultTitle) next.title = defaultTitle;
+    return normalizeNotifyPayload(next, forcedType);
+  };
+
+  const createNotifyShortcut = (type, defaultTitle) => (...args) =>
+    app.services.notify?.show?.(buildNotifyOptionsFromArgs(args, type, defaultTitle));
+
+  const resolveNotifyPromiseOutcome = (value, fallbackMessage, fallbackTitle) => {
+    if (value === false) return false;
+    if (typeof value === "function") {
+      const next = value();
+      return resolveNotifyPromiseOutcome(next, fallbackMessage, fallbackTitle);
+    }
+    if (uiIsPlainObject(value)) return value;
+    if (value != null) return { message: value, title: fallbackTitle };
+    return { message: fallbackMessage, title: fallbackTitle };
+  };
+
+  UI.Notify = (...args) => app.services.notify?.show?.(buildNotifyOptionsFromArgs(args));
+  UI.Notify.show = UI.Notify;
+  UI.Notify.success = createNotifyShortcut("success", "Success");
+  UI.Notify.error = createNotifyShortcut("danger", "Error");
+  UI.Notify.warning = createNotifyShortcut("warning", "Warning");
+  UI.Notify.info = createNotifyShortcut("info", "Info");
+  UI.Notify.primary = createNotifyShortcut("primary", "Notice");
+  UI.Notify.secondary = createNotifyShortcut("secondary", "Notice");
+  UI.Notify.remove = (id) => app.services.notify?.remove?.(id);
+  UI.Notify.clear = () => app.services.notify?.clear?.();
+  UI.Notify.update = (id, patch = {}) => app.services.notify?.update?.(id, patch);
+  UI.Notify.promise = async (task, opts = {}) => {
+    const loadingInput = opts.loading === false
+      ? false
+      : resolveNotifyPromiseOutcome(
+        typeof opts.loading === "function" ? () => opts.loading() : opts.loading,
+        "Operazione in corso...",
+        "In corso"
+      );
+    const loadingId = loadingInput === false
+      ? null
+      : app.services.notify?.show?.(normalizeNotifyPayload({
+        type: "info",
+        timeout: 0,
+        closable: false,
+        ...loadingInput
+      }, "info"));
+
+    try {
+      const promise = typeof task === "function" ? task() : task;
+      const result = await promise;
+      const successInput = resolveNotifyPromiseOutcome(
+        typeof opts.success === "function" ? () => opts.success(result) : opts.success,
+        "Operazione completata con successo.",
+        "Completato"
+      );
+      if (successInput !== false) {
+        if (loadingId != null) app.services.notify?.update?.(loadingId, normalizeNotifyPayload(successInput, "success"));
+        else app.services.notify?.show?.(normalizeNotifyPayload(successInput, "success"));
+      } else if (loadingId != null) {
+        app.services.notify?.remove?.(loadingId);
+      }
+      return result;
+    } catch (error) {
+      const errorInput = resolveNotifyPromiseOutcome(
+        typeof opts.error === "function" ? () => opts.error(error) : opts.error,
+        error?.message || "Operazione fallita.",
+        "Errore"
+      );
+      if (errorInput !== false) {
+        if (loadingId != null) app.services.notify?.update?.(loadingId, normalizeNotifyPayload(errorInput, "danger"));
+        else app.services.notify?.show?.(normalizeNotifyPayload(errorInput, "danger"));
+      } else if (loadingId != null) {
+        app.services.notify?.remove?.(loadingId);
+      }
+      throw error;
+    }
+  };
+  if (CMSwift.isDev?.()) {
+    UI.meta = UI.meta || {};
+    UI.meta.Notify = {
+      signature: "UI.Notify(message, title?, opts?) | UI.Notify(opts, ...children)",
+      props: {
+        id: "string",
+        type: "success|warning|danger|error|info|primary|secondary|light|dark",
+        state: "Alias di type",
+        color: "Alias di type",
+        title: "String|Node|Function|Array|false",
+        message: "String|Node|Function|Array",
+        description: "String|Node|Function|Array",
+        meta: "String|Node|Function|Array",
+        body: "Node|Function|Array",
+        icon: "String|Node|Function|Array|false",
+        actions: "Node|Function|Array",
+        dismiss: "Node|Function|Array",
+        timeout: "number|false",
+        duration: "Alias di timeout",
+        closable: "boolean",
+        dismissLabel: "string",
+        position: "top-left|top-center|top-right|bottom-left|bottom-center|bottom-right",
+        variant: "soft|solid|outline",
+        slots: "{ icon?, title?, message?, description?, meta?, actions?, dismiss?, default? }",
+        class: "string",
+        style: "object"
+      },
+      slots: {
+        icon: "Leading visual/icon content",
+        title: "Toast title content",
+        message: "Primary message content",
+        description: "Secondary/supporting text",
+        meta: "Meta info or badges",
+        actions: "Actions area content",
+        dismiss: "Custom dismiss control",
+        default: "Extra body content under the message"
+      },
+      methods: {
+        show: "Alias di UI.Notify(...)",
+        success: "UI.Notify.success(message|opts, title?)",
+        error: "UI.Notify.error(message|opts, title?)",
+        warning: "UI.Notify.warning(message|opts, title?)",
+        info: "UI.Notify.info(message|opts, title?)",
+        update: "UI.Notify.update(id, patch)",
+        remove: "UI.Notify.remove(id)",
+        clear: "UI.Notify.clear()",
+        promise: "UI.Notify.promise(promise|fn, { loading?, success?, error? })"
+      },
+      returns: "string|null (toast id)",
+      description: "Notify standardizzato con payload strutturato, shortcut semantiche, update/remove/clear e supporto promise."
+    };
+  }
+
 
   UI.Banner = (...args) => {
     const { props: rawProps, children } = CMSwift.uiNormalizeArgs(args);
@@ -13346,48 +13584,165 @@
   // 4) NOTIFY SERVICE (toast)
   // -------------------------------
   const [toasts, setToasts] = app.reactive.signal([]);
+  const toastTimers = new Map();
+
+  function clearToastTimer(id) {
+    const timer = toastTimers.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      toastTimers.delete(id);
+    }
+  }
+
+  function removeToast(id) {
+    if (!id) return null;
+    clearToastTimer(id);
+    setToasts(toasts().filter((entry) => entry.id !== id));
+    return id;
+  }
+
+  function clearToasts() {
+    for (const id of toastTimers.keys()) clearToastTimer(id);
+    setToasts([]);
+  }
+
+  function scheduleToastTimer(entry) {
+    if (!entry?.id) return;
+    clearToastTimer(entry.id);
+    if (!(entry.timeout > 0)) return;
+    toastTimers.set(entry.id, setTimeout(() => {
+      removeToast(entry.id);
+    }, entry.timeout));
+  }
+
+  function updateToast(id, patch = {}) {
+    if (!id) return null;
+    let nextEntry = null;
+    setToasts(toasts().map((entry) => {
+      if (entry.id !== id) return entry;
+      nextEntry = normalizeNotifyPayload({ ...entry, ...patch, id: entry.id }, patch.type || patch.state || patch.color || entry.type);
+      return nextEntry;
+    }));
+    if (nextEntry) scheduleToastTimer(nextEntry);
+    return nextEntry?.id || null;
+  }
+
+  function renderNotifyToast(entry) {
+    const close = () => removeToast(entry.id);
+    const update = (patch = {}) => updateToast(entry.id, patch);
+    const ctx = { toast: entry, id: entry.id, close, update };
+    const resolveNotifyRender = (value) => typeof value === "function" ? value(ctx) : value;
+    const iconFallback = (() => {
+      if (entry.icon === false || entry.icon === null) return null;
+      if (entry.icon != null) {
+        const resolvedIcon = resolveNotifyRender(entry.icon);
+        return typeof resolvedIcon === "string" ? UI.Icon({ name: resolvedIcon, size: "sm" }) : CMSwift.ui.slot(resolvedIcon, { as: "icon" });
+      }
+      const iconName = notifyIconMap[entry.type];
+      return iconName ? UI.Icon({ name: iconName, size: "sm" }) : null;
+    })();
+
+    const iconNodes = renderSlotToArray(entry.slots, "icon", ctx, iconFallback);
+    const titleNodes = renderSlotToArray(entry.slots, "title", ctx, resolveNotifyRender(entry.title));
+    const messageNodes = renderSlotToArray(entry.slots, "message", ctx, resolveNotifyRender(entry.message));
+    const descriptionNodes = renderSlotToArray(entry.slots, "description", ctx, resolveNotifyRender(entry.description));
+    const metaNodes = renderSlotToArray(entry.slots, "meta", ctx, resolveNotifyRender(entry.meta));
+    const actionsNodes = renderSlotToArray(entry.slots, "actions", ctx, resolveNotifyRender(entry.actions));
+    const bodyNodes = renderSlotToArray(entry.slots, "default", ctx, resolveNotifyRender(entry.body));
+    const dismissNodes = renderSlotToArray(entry.slots, "dismiss", ctx, resolveNotifyRender(entry.dismiss));
+    const dismissContent = dismissNodes.length
+      ? dismissNodes
+      : (entry.closable
+        ? [UI.Btn({
+          class: "cms-toast-close",
+          outline: true,
+          size: "xs",
+          "aria-label": entry.dismissLabel,
+          onClick: close
+        }, UI.Icon({ name: "close", size: "xs" }))]
+        : []);
+
+    const node = _.div({
+      class: uiClass([
+        "cms-toast",
+        `cms-toast-${entry.type}`,
+        `cms-toast-${entry.variant}`,
+        uiWhen(entry.closable, "is-closable"),
+        entry.class
+      ]),
+      style: entry.style || {},
+      role: entry.role
+    },
+      iconNodes.length ? _.div({ class: "cms-toast-icon" }, ...iconNodes) : null,
+      _.div(
+        { class: "cms-toast-main" },
+        _.div(
+          { class: "cms-toast-copy" },
+          titleNodes.length ? _.div({ class: "cms-toast-title" }, ...titleNodes) : null,
+          messageNodes.length ? _.div({ class: "cms-toast-message" }, ...messageNodes) : null,
+          descriptionNodes.length ? _.div({ class: "cms-toast-description" }, ...descriptionNodes) : null,
+          bodyNodes.length ? _.div({ class: "cms-toast-body" }, ...bodyNodes) : null,
+          metaNodes.length ? _.div({ class: "cms-toast-meta" }, ...metaNodes) : null
+        ),
+        actionsNodes.length ? _.div({ class: "cms-toast-actions" }, ...actionsNodes) : null
+      ),
+      dismissContent.length ? _.div({ class: "cms-toast-dismiss" }, ...dismissContent) : null
+    );
+
+    setPropertyProps(node, entry);
+    return node;
+  }
 
   function ensureToastRoot() {
-    let root = document.querySelector(".cms-toast-wrap");
+    let root = document.querySelector(".cms-toast-layer");
     if (root) return root;
     root = document.createElement("div");
-    root.className = "cms-toast-wrap";
+    root.className = "cms-toast-layer";
     document.body.appendChild(root);
 
-    // render reattivo
     app.reactive.effect(() => {
       const list = toasts();
       root.innerHTML = "";
-      for (const t of list) {
-        const node = _.div({ class: `cms-toast ${t.type || "info"}` },
-          _.div({ class: "t-title" }, t.title || (t.type || "info").toUpperCase()),
-          t.message ? _.div(t.message) : null
+      const groups = new Map();
+      for (const toast of list) {
+        const key = normalizeNotifyPosition(toast.position);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(toast);
+      }
+
+      for (const position of NOTIFY_POSITIONS) {
+        const entries = groups.get(position);
+        if (!entries?.length) continue;
+        const wrap = _.div({ class: uiClass(["cms-toast-wrap", `is-${position}`]) },
+          ...entries.map((entry) => renderNotifyToast(entry))
         );
-        root.appendChild(node);
+        root.appendChild(wrap);
       }
     }, "CMSwiftUI:toasts");
 
     return root;
   }
 
-  function pushToast({ type = "info", title = "", message = "", timeout = 2500 } = {}) {
+  function pushToast(input = {}) {
     ensureToastRoot();
-    const id = Math.random().toString(36).slice(2);
-    const next = [...toasts(), { id, type, title, message }];
-    setToasts(next);
-
-    if (timeout > 0) {
-      setTimeout(() => {
-        setToasts(toasts().filter(x => x.id !== id));
-      }, timeout);
-    }
-    return id;
+    const entry = normalizeNotifyPayload(input);
+    entry.id = entry.id || Math.random().toString(36).slice(2);
+    setToasts([...toasts().filter((item) => item.id !== entry.id), entry]);
+    scheduleToastTimer(entry);
+    return entry.id;
   }
 
   app.services.notify.show = pushToast;
-  app.services.notify.success = (message, title = "Success") => pushToast({ type: "success", title, message });
-  app.services.notify.error = (message, title = "Error") => pushToast({ type: "error", title, message, timeout: 3500 });
-  app.services.notify.info = (message, title = "Info") => pushToast({ type: "info", title, message });
+  app.services.notify.success = createNotifyShortcut("success", "Success");
+  app.services.notify.error = createNotifyShortcut("danger", "Error");
+  app.services.notify.warning = createNotifyShortcut("warning", "Warning");
+  app.services.notify.info = createNotifyShortcut("info", "Info");
+  app.services.notify.primary = createNotifyShortcut("primary", "Notice");
+  app.services.notify.secondary = createNotifyShortcut("secondary", "Notice");
+  app.services.notify.update = updateToast;
+  app.services.notify.remove = removeToast;
+  app.services.notify.clear = clearToasts;
+  app.services.notify.promise = UI.Notify.promise;
 
   // Optional shortcut
   app.notify = app.services.notify;

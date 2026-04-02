@@ -155,6 +155,10 @@ const descriptions = {
     title: "Banner",
     description: "Banner strutturato con titolo, messaggio, descrizione, CTA, dismiss e slots per avvisi operativi o contestuali."
   },
+  "_.Notify": {
+    title: "Notify",
+    description: "Toast/notify standardizzato con payload strutturato, shortcut semantiche, slots, update/remove/clear e helper per promise."
+  },
   "_.Header": {
     title: "Header",
     description: "Header di app con title/subtitle e aree left/right. Include toggle drawer e icone personalizzabili."
