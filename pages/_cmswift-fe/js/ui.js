@@ -3245,43 +3245,165 @@
   // Esempio: CMSwift.ui.Layout({ header, aside, page, footer })
 
   UI.Footer = (...args) => {
-    const { props, children } = CMSwift.uiNormalizeArgs(args);
-    const slots = props.slots || {};
+    const { props: rawProps, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = rawProps.slots || {};
+    const hasOwn = (key) => Object.prototype.hasOwnProperty.call(rawProps, key);
+    const ctx = { props: rawProps };
 
-    const cls = uiClass([
-      "cms-footer",
-      uiWhen(props.sticky, "sticky"),
-      uiWhen(props.dense, "dense"),
-      uiWhen(props.elevated, "elevated"),
-      uiClassValue(props.align, "align-"),
-      props.class
+    const renderIconValue = (value, as = "icon", sizeFallback = rawProps.iconSize || rawProps.size || "md") => {
+      if (value == null || value === false) return null;
+      if (typeof value === "string") return UI.Icon({ name: value, size: sizeFallback });
+      return CMSwift.ui.slot(value, { as });
+    };
+
+    const startFallback = hasOwn("left") ? rawProps.left : rawProps.start;
+    const endFallback = hasOwn("right") ? rawProps.right : rawProps.end;
+    const titleFallback = hasOwn("title") ? rawProps.title : rawProps.label;
+    const subtitleFallback = rawProps.subtitle ?? rawProps.description ?? rawProps.note;
+    const contentFallback = hasOwn("content")
+      ? rawProps.content
+      : (hasOwn("body") ? rawProps.body : (children?.length ? children : null));
+
+    const startNodes = [
+      ...renderSlotToArray(slots, "left", ctx, startFallback),
+      ...renderSlotToArray(slots, "start", ctx, null)
+    ];
+    const iconNodes = renderSlotToArray(slots, "icon", ctx, renderIconValue(rawProps.icon));
+    const eyebrowNodes = renderSlotToArray(slots, "eyebrow", ctx, rawProps.eyebrow ?? rawProps.kicker);
+    const titleNodes = renderSlotToArray(slots, "title", ctx, titleFallback);
+    const subtitleNodes = renderSlotToArray(slots, "subtitle", ctx, subtitleFallback);
+    const metaNodes = renderSlotToArray(slots, "meta", ctx, rawProps.meta);
+    const contentNodes = (() => {
+      const explicit = renderSlotToArray(slots, "content", ctx, null);
+      return explicit.length ? explicit : renderSlotToArray(slots, "default", ctx, contentFallback);
+    })();
+    const customBodyNodes = [
+      ...renderSlotToArray(slots, "center", ctx, null),
+      ...renderSlotToArray(slots, "body", ctx, null)
+    ];
+    const endNodes = [
+      ...renderSlotToArray(slots, "right", ctx, endFallback),
+      ...renderSlotToArray(slots, "end", ctx, null)
+    ];
+    const actionNodes = renderSlotToArray(slots, "actions", ctx, rawProps.actions);
+
+    const structuredBody = _.div(
+      { class: uiClass(["cms-footer-body", rawProps.bodyClass, rawProps.centerClass]) },
+      _.div(
+        { class: "cms-footer-heading" },
+        iconNodes.length ? _.div({ class: "cms-footer-icon" }, ...iconNodes) : null,
+        _.div(
+          { class: "cms-footer-copy" },
+          eyebrowNodes.length ? _.div({ class: uiClass(["cms-footer-eyebrow", rawProps.eyebrowClass]) }, ...eyebrowNodes) : null,
+          titleNodes.length ? _.div({ class: uiClass(["cms-footer-title", rawProps.titleClass]) }, ...titleNodes) : null,
+          subtitleNodes.length ? _.div({ class: uiClass(["cms-footer-subtitle", rawProps.subtitleClass]) }, ...subtitleNodes) : null,
+          contentNodes.length ? _.div({ class: uiClass(["cms-footer-content", rawProps.contentClass]) }, ...contentNodes) : null
+        ),
+        metaNodes.length ? _.div({ class: uiClass(["cms-footer-meta", rawProps.metaClass]) }, ...metaNodes) : null
+      )
+    );
+
+    const mainChildren = [];
+    if (customBodyNodes.length) {
+      mainChildren.push(_.div({ class: uiClass(["cms-footer-body", rawProps.bodyClass, rawProps.centerClass]) }, ...customBodyNodes));
+    } else if (iconNodes.length || eyebrowNodes.length || titleNodes.length || subtitleNodes.length || contentNodes.length || metaNodes.length) {
+      mainChildren.push(structuredBody);
+    }
+    if (endNodes.length || actionNodes.length) {
+      mainChildren.push(
+        _.div(
+          { class: uiClass(["cms-footer-end", rawProps.endClass]) },
+          ...endNodes,
+          ...(actionNodes.length ? [_.div({ class: uiClass(["cms-footer-actions", rawProps.actionsClass]) }, ...actionNodes)] : [])
+        )
+      );
+    }
+
+    const p = CMSwift.omit(rawProps, [
+      "actions", "actionsClass", "align", "body", "bodyClass", "center", "centerClass", "content",
+      "contentClass", "dense", "description", "divider", "elevated", "end", "endClass", "eyebrow",
+      "eyebrowClass", "gap", "icon", "iconSize", "kicker", "label", "left", "meta", "metaClass",
+      "minHeight", "note", "right", "slots", "stack", "start", "startClass", "sticky", "subtitle",
+      "subtitleClass", "title", "titleClass", "wrap", "justify"
     ]);
+    p.class = uiClass([
+      "cms-panel",
+      "cms-footer",
+      "cms-singularity",
+      uiWhen(rawProps.sticky, "sticky"),
+      uiWhen(rawProps.dense, "dense"),
+      uiWhen(rawProps.elevated, "elevated"),
+      uiWhen(rawProps.divider !== false, "divider"),
+      uiWhen(rawProps.stack, "stack"),
+      uiClassValue(rawProps.align, "align-"),
+      rawProps.class
+    ]);
+    p.style = { ...(rawProps.style || {}) };
+    const justify = uiStyleValue(rawProps.justify);
+    if (justify != null) p.style.justifyContent = justify;
+    const wrap = uiStyleValue(rawProps.wrap, (v) => v ? "wrap" : "nowrap");
+    if (wrap != null) p.style.flexWrap = wrap;
+    if (rawProps.gap != null) p.style["--cms-footer-gap"] = toCssSize(uiUnwrap(rawProps.gap));
+    if (rawProps.minHeight != null) p.style.minHeight = toCssSize(uiUnwrap(rawProps.minHeight));
 
-    // props speciali da non passare al DOM
-    const p = CMSwift.omit(props, ["sticky", "dense", "elevated", "align", "slots"]);
-    p.class = cls;
+    const el = _.footer(
+      p,
+      ...(startNodes.length ? [_.div({ class: uiClass(["cms-footer-start", rawProps.startClass]) }, ...startNodes)] : []),
+      ...(mainChildren.length ? [_.div({ class: "cms-footer-main" }, ...mainChildren)] : [])
+    );
 
-    const content = renderSlotToArray(slots, "default", {}, children);
-
-    return _.footer(p, ...content);
+    setPropertyProps(el, rawProps);
+    return el;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.Footer = {
       signature: "UI.Footer(...children) | UI.Footer(props, ...children)",
       props: {
+        title: "String|Node|Function|Array",
+        subtitle: "String|Node|Function|Array",
+        eyebrow: "String|Node|Function|Array",
+        content: "Node|Function|Array",
+        meta: "Node|Function|Array",
+        icon: "String|Node|Function|Array",
+        left: "Node|Function|Array",
+        start: "Alias di left",
+        right: "Node|Function|Array",
+        end: "Alias di right",
+        body: "Alias di content",
+        actions: "Node|Function|Array",
         sticky: "boolean",
         dense: "boolean",
         elevated: "boolean",
+        divider: "boolean",
         align: `left|center|right`,
-        slots: "{ default? }",
+        justify: `flex-start|center|flex-end|space-between|space-around|space-evenly`,
+        wrap: "boolean",
+        stack: "boolean",
+        gap: "string|number",
+        minHeight: "string|number",
+        slots: "{ left?, start?, right?, end?, center?, body?, icon?, eyebrow?, title?, subtitle?, meta?, content?, actions?, default? }",
         class: "string",
         style: "object"
       },
       slots: {
-        default: "Footer content"
+        left: "Area iniziale del footer",
+        start: "Alias/addon area iniziale",
+        right: "Area finale del footer",
+        end: "Alias/addon area finale",
+        center: "Override completo del body centrale",
+        body: "Alias di center",
+        icon: "Icona leading",
+        eyebrow: "Eyebrow / kicker",
+        title: "Titolo principale",
+        subtitle: "Sottotitolo o nota",
+        meta: "Meta info accanto al contenuto centrale",
+        content: "Contenuto extra o fallback dei children",
+        actions: "Azioni raggruppate nella zona finale",
+        default: "Fallback content per la body area"
       },
-      returns: "HTMLElement <footer>"
+      returns: "HTMLElement <footer>",
+      description: "Footer strutturato con regioni start/body/end, copy opzionale, azioni e slot composabili."
     };
   }
   // Esempio: CMSwift.ui.Footer({}, "Footer")

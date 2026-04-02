@@ -232,10 +232,10 @@ const header = _.div({ class: "cms-panel cms-page" },
   _.h2("Documentazione API"),
   _.docTable("Header"),
   _.h2("Esempi completi"),
-  boxCode("Basic", listSample.basic),
-  boxCode("Structured Header", listSample.structured),
-  boxCode("Reactive Preview", listSample.reactive),
-  boxCode("Slots / Custom Layout", listSample.slots)
+  boxCode("Basic", listSample.basic, 24),
+  boxCode("Structured Header", listSample.structured, 24),
+  boxCode("Reactive Preview", listSample.reactive, 24),
+  boxCode("Slots / Custom Layout", listSample.slots, 24)
 );
 
 export { header };
