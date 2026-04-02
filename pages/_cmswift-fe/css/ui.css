@@ -78,14 +78,222 @@
   gap: 4px;
 }
 
+.cms-menu-panel {
+  width: var(--cms-menu-width, auto);
+  min-width: var(--cms-menu-min-width, 200px);
+  max-width: var(--cms-menu-max-width, min(420px, calc(100vw - 16px)));
+  max-height: var(--cms-menu-max-height, min(80vh, 560px));
+  overflow: hidden;
+  background: var(--set-background-color, var(--cms-bg-default));
+  color: var(--set-color, var(--cms-text));
+  border-color: var(--set-border-color, var(--cms-border-color));
+}
+
+.cms-menu-shell {
+  gap: 12px;
+  width: 100%;
+  min-width: inherit;
+  max-width: 100%;
+  max-height: inherit;
+  padding: 12px;
+  background: inherit;
+  border-radius: inherit;
+  box-sizing: border-box;
+}
+
+.cms-menu-shell.dense {
+  gap: 8px;
+  padding: 10px;
+}
+
+.cms-menu-before,
+.cms-menu-after,
+.cms-menu-content,
+.cms-menu-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cms-menu-content {
+  max-height: var(--cms-menu-body-max-height, none);
+  overflow: auto;
+}
+
+.cms-menu-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cms-menu-head-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cms-menu-head-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(127, 127, 127, 0.12);
+  color: inherit;
+  flex: 0 0 auto;
+}
+
+.cms-menu-eyebrow {
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cms-muted);
+}
+
+.cms-menu-title {
+  font-size: 14px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.cms-menu-subtitle,
+.cms-menu-status,
+.cms-menu-empty,
+.cms-menu-group-label,
+.cms-menu-entry-subtitle,
+.cms-menu-entry-shortcut {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--cms-muted);
+}
+
+.cms-menu-items,
+.cms-menu-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cms-menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cms-menu-group-label {
+  padding: 0 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .cms-menu-item {
   padding: 6px 10px;
   border-radius: var(--cms-r-sm);
   cursor: pointer;
 }
 
+.cms-menu-entry {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-align: left;
+  text-decoration: none;
+  transition: background 140ms ease, transform 140ms ease, color 140ms ease;
+}
+
+.cms-menu-shell.dense .cms-menu-entry {
+  padding: 8px 10px;
+  gap: 8px;
+}
+
+.cms-menu-entry:focus-visible {
+  outline: 0;
+  background: rgba(127, 127, 127, 0.14);
+}
+
 .cms-menu-item:hover {
   background: rgba(255, 255, 255, 0.06);
+}
+
+.cms-menu-entry:hover,
+.cms-menu-entry.is-active,
+.cms-menu-entry.is-checked {
+  background: rgba(127, 127, 127, 0.1);
+}
+
+.cms-menu-entry.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cms-menu-entry-icon,
+.cms-menu-entry-aside,
+.cms-menu-entry-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.cms-menu-entry-icon {
+  width: 18px;
+  min-width: 18px;
+}
+
+.cms-menu-entry-aside {
+  gap: 8px;
+  margin-left: auto;
+}
+
+.cms-menu-entry-main {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cms-menu-entry-title {
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.cms-menu-entry-shortcut {
+  white-space: nowrap;
+}
+
+.cms-menu-divider {
+  height: 1px;
+  margin: 2px 4px;
+  background: var(--cms-border-color);
+  opacity: 0.8;
+}
+
+.cms-menu-empty {
+  padding: 4px 8px;
+}
+
+.cms-menu-footer {
+  padding-top: 10px;
+  border-top: 1px solid rgba(127, 127, 127, 0.12);
+}
+
+.cms-menu-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .cms-tooltip-wrap {
@@ -4984,6 +5192,258 @@
   margin: 0;
   display: inline-flex;
   align-items: center;
+}
+
+.cms-breadcrumbs {
+  --cms-breadcrumb-accent: var(--cms-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.cms-breadcrumbs-before,
+.cms-breadcrumbs-after {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.cms-breadcrumbs-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.cms-breadcrumbs.no-wrap .cms-breadcrumbs-list {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.cms-breadcrumbs-entry,
+.cms-breadcrumbs-separator-item {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.cms-breadcrumbs-separator-item {
+  padding: 0 4px;
+}
+
+.cms-breadcrumbs-separator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cms-muted);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.cms-breadcrumb {
+  --cms-breadcrumb-bg: transparent;
+  --cms-breadcrumb-border: transparent;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: var(--set-border-radius, var(--cms-r-md));
+  border: 1px solid var(--cms-breadcrumb-border);
+  background: var(--cms-breadcrumb-bg);
+  color: var(--cms-text);
+  text-decoration: none;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, opacity 160ms ease;
+}
+
+button.cms-breadcrumb {
+  appearance: none;
+  cursor: pointer;
+}
+
+a.cms-breadcrumb {
+  cursor: pointer;
+}
+
+.cms-breadcrumb:hover,
+.cms-breadcrumb:focus-visible {
+  color: color-mix(in srgb, var(--cms-breadcrumb-accent) 78%, var(--cms-text) 22%);
+}
+
+.cms-breadcrumb:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cms-breadcrumb-accent) 18%, transparent);
+}
+
+.cms-breadcrumbs.variant-line .cms-breadcrumb {
+  --cms-breadcrumb-bg: transparent;
+  --cms-breadcrumb-border: transparent;
+}
+
+.cms-breadcrumbs.variant-line .cms-breadcrumb:hover,
+.cms-breadcrumbs.variant-line .cms-breadcrumb:focus-visible {
+  --cms-breadcrumb-bg: color-mix(in srgb, var(--cms-breadcrumb-accent) 7%, transparent);
+  --cms-breadcrumb-border: color-mix(in srgb, var(--cms-breadcrumb-accent) 12%, transparent);
+}
+
+.cms-breadcrumbs.variant-line .cms-breadcrumb.is-current {
+  --cms-breadcrumb-bg: color-mix(in srgb, var(--cms-breadcrumb-accent) 12%, transparent);
+  --cms-breadcrumb-border: color-mix(in srgb, var(--cms-breadcrumb-accent) 20%, transparent);
+  color: color-mix(in srgb, var(--cms-breadcrumb-accent) 82%, var(--cms-text) 18%);
+}
+
+.cms-breadcrumbs.variant-pills .cms-breadcrumb {
+  --cms-breadcrumb-bg: color-mix(in srgb, var(--cms-panel) 92%, transparent);
+  --cms-breadcrumb-border: var(--cms-border-color);
+}
+
+.cms-breadcrumbs.variant-pills .cms-breadcrumb:hover,
+.cms-breadcrumbs.variant-pills .cms-breadcrumb:focus-visible {
+  --cms-breadcrumb-bg: color-mix(in srgb, var(--cms-breadcrumb-accent) 7%, var(--cms-panel) 93%);
+  --cms-breadcrumb-border: color-mix(in srgb, var(--cms-breadcrumb-accent) 24%, var(--cms-border-color));
+}
+
+.cms-breadcrumbs.variant-pills .cms-breadcrumb.is-current {
+  --cms-breadcrumb-bg: color-mix(in srgb, var(--cms-breadcrumb-accent) 14%, transparent);
+  --cms-breadcrumb-border: color-mix(in srgb, var(--cms-breadcrumb-accent) 30%, var(--cms-border-color));
+  color: color-mix(in srgb, var(--cms-breadcrumb-accent) 82%, var(--cms-text) 18%);
+}
+
+.cms-breadcrumbs.variant-soft .cms-breadcrumb {
+  --cms-breadcrumb-bg: color-mix(in srgb, var(--cms-breadcrumb-accent) 5%, transparent);
+  --cms-breadcrumb-border: color-mix(in srgb, var(--cms-breadcrumb-accent) 10%, transparent);
+}
+
+.cms-breadcrumbs.variant-soft .cms-breadcrumb:hover,
+.cms-breadcrumbs.variant-soft .cms-breadcrumb:focus-visible {
+  --cms-breadcrumb-bg: color-mix(in srgb, var(--cms-breadcrumb-accent) 9%, transparent);
+  --cms-breadcrumb-border: color-mix(in srgb, var(--cms-breadcrumb-accent) 18%, transparent);
+}
+
+.cms-breadcrumbs.variant-soft .cms-breadcrumb.is-current {
+  --cms-breadcrumb-bg: color-mix(in srgb, var(--cms-breadcrumb-accent) 14%, transparent);
+  --cms-breadcrumb-border: color-mix(in srgb, var(--cms-breadcrumb-accent) 26%, transparent);
+  color: color-mix(in srgb, var(--cms-breadcrumb-accent) 82%, var(--cms-text) 18%);
+}
+
+.cms-breadcrumb.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cms-breadcrumb-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  width: 100%;
+}
+
+.cms-breadcrumb-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.cms-breadcrumb-label,
+.cms-breadcrumb-note,
+.cms-breadcrumb-extra {
+  display: block;
+  min-width: 0;
+}
+
+.cms-breadcrumb-label {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.cms-breadcrumb-note,
+.cms-breadcrumb-extra {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--cms-muted);
+}
+
+.cms-breadcrumb.is-current .cms-breadcrumb-note,
+.cms-breadcrumb.is-current .cms-breadcrumb-extra {
+  color: color-mix(in srgb, var(--cms-breadcrumb-accent) 62%, var(--cms-text) 38%);
+}
+
+.cms-breadcrumb-icon,
+.cms-breadcrumb-badge,
+.cms-breadcrumb-aside {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.cms-breadcrumb-aside {
+  color: var(--cms-muted);
+}
+
+.cms-breadcrumb .cms-icon {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cms-breadcrumb-collapsed {
+  --cms-breadcrumb-bg: color-mix(in srgb, var(--cms-panel) 88%, transparent);
+  --cms-breadcrumb-border: color-mix(in srgb, var(--cms-border-color) 80%, transparent);
+  color: var(--cms-muted);
+}
+
+.cms-breadcrumbs.dense {
+  gap: 8px;
+}
+
+.cms-breadcrumbs.dense .cms-breadcrumb {
+  padding: 5px 8px;
+  gap: 8px;
+}
+
+.cms-breadcrumbs.cms-size-xs .cms-breadcrumb {
+  padding: 4px 7px;
+  font-size: 12px;
+}
+
+.cms-breadcrumbs.cms-size-sm .cms-breadcrumb {
+  padding: 5px 8px;
+  font-size: 13px;
+}
+
+.cms-breadcrumbs.cms-size-md .cms-breadcrumb {
+  padding: 7px 10px;
+  font-size: 14px;
+}
+
+.cms-breadcrumbs.cms-size-lg .cms-breadcrumb {
+  padding: 9px 12px;
+  font-size: 15px;
+}
+
+.cms-breadcrumbs.cms-size-xl .cms-breadcrumb {
+  padding: 11px 14px;
+  font-size: 16px;
+}
+
+.cms-breadcrumbs.is-empty .cms-breadcrumbs-list {
+  flex: 0 1 auto;
 }
 
 .cms-tabpanel {

@@ -243,7 +243,7 @@
     import { tabs } from "../tutorial/tabs.cms.js";
     import { routeTab } from "../tutorial/route-tab.cms.js";
     import { menu } from "../tutorial/menu.cms.js";
-    //import { contextmenu } from "../tutorial/contextmenu.cms.js";
+    import { contextMenu } from "../tutorial/context-menu.cms.js";
     import { breadcrumbs } from "../tutorial/breadcrumbs.cms.js";
     import { drawer } from "../tutorial/drawer.cms.js";
     import { btn } from "../tutorial/btn.cms.js";
@@ -493,6 +493,9 @@
     _.router.add("/demo/component/toolbar", () => toolbar);
     _.router.add("/demo/component/tabs", () => tabs);
     _.router.add("/demo/component/routetab", () => routeTab);
+    _.router.add("/demo/component/menu", () => menu);
+    _.router.add("/demo/component/contextmenu", () => contextMenu);
+    _.router.add("/demo/component/breadcrumbs", () => breadcrumbs);
 
     //_.router.add("/demo/component/stepper", () => stepper);
 

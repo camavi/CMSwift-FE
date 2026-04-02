@@ -209,7 +209,7 @@ const descriptions = {
   },
   "_.ContextMenu": {
     title: "ContextMenu",
-    description: "Menu contestuale su right-click con `bind` o `openAt(x,y)`. Supporta closeOnSelect e onOpen/onClose."
+    description: "Context menu specializzato per click destro e tastiera con `items`, contenuto custom, `bind(el, overrides)` e API `open/openAt/update`."
   }
 };
 

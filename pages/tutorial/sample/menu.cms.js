@@ -1,13 +1,22 @@
-const menuBtn = _.Btn("Apri menu");
-const menuApi = _.Menu({ content: _.List(_.Item("Profilo"), _.Item("Logout")) });
-menuBtn.addEventListener("click", () => menuApi.open(menuBtn));
-const menuExample = _.Row(menuBtn);
+const menuBtn = _.Btn({ color: "primary" }, "Apri menu");
+const menuApi = _.Menu({
+  title: "Azioni rapide",
+  subtitle: "Menu item-driven con chiusura automatica su select.",
+  items: [
+    { label: "Profilo", icon: "person" },
+    { label: "Workspace", icon: "workspaces" },
+    { divider: true },
+    { label: "Logout", icon: "logout", color: "danger" }
+  ]
+});
+
+menuApi.bind(menuBtn);
 
 const menuSample = _.div({ class: "cms-panel cms-page" },
   _.h2("Menu sample"),
-  _.p("Menu overlay ancorato con close-on-select. API `open/close` e slot `content`."),
+  _.p("Menu overlay ancorato con `items`, header standard e API `bind/open/close/toggle/update`."),
   _.Card({ header: "Esempio" },
-    menuExample
+    _.Row(menuBtn)
   )
 );
 

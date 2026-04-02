@@ -9930,23 +9930,365 @@
   // Esempio: CMSwift.ui.RouteTab({ label: "Home", to: "/" })
 
   UI.Breadcrumbs = (...args) => {
-    const { props } = CMSwift.uiNormalizeArgs(args);
+    const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const items = props.items || [];
-    const sep = props.separator || "/";
-    const wrap = _.nav({ class: uiClass(["cms-breadcrumbs", props.class]) });
-    items.forEach((it, i) => {
-      const label = it.label || it.title || it.to || it.href || "";
-      const defaultNode = it.to || it.href
-        ? _.a({ href: it.to || it.href }, label)
-        : _.span(label);
-      const itemNode = CMSwift.ui.renderSlot(slots, "item", { item: it, index: i }, defaultNode);
-      renderSlotToArray(null, "default", {}, itemNode).forEach(n => wrap.appendChild(n));
-      if (i < items.length - 1) {
-        const sepNode = CMSwift.ui.renderSlot(slots, "separator", { index: i }, sep);
-        wrap.appendChild(_.span({ class: "cms-breadcrumb-sep", style: { margin: "0 6px" } }, ...renderSlotToArray(null, "default", {}, sepNode)));
-      }
+    const router = CMSwift.router || app?.router || null;
+    const model = resolveModel(props.model, "UI.Breadcrumbs:model");
+    const sizeClass = uiComputed(props.size, () => {
+      const v = uiUnwrap(props.size);
+      return (typeof v === "string" && CMSwift.uiSizes?.includes(v)) ? `cms-size-${v}` : "";
     });
+    const variantClass = uiComputed(props.variant, () => {
+      const raw = String(uiUnwrap(props.variant || (props.pills ? "pills" : (props.soft ? "soft" : "line"))) || "").toLowerCase();
+      if (raw === "pill" || raw === "pills") return "variant-pills";
+      if (raw === "soft" || raw === "card") return "variant-soft";
+      return "variant-line";
+    });
+    const nowrapClass = uiComputed([props.wrap, props.nowrap], () => {
+      return (uiUnwrap(props.wrap) === false || !!uiUnwrap(props.nowrap)) ? "no-wrap" : "";
+    });
+    const wrap = _.nav({
+      class: uiClass([
+        "cms-breadcrumbs",
+        "cms-clear-set",
+        sizeClass,
+        variantClass,
+        nowrapClass,
+        uiWhen(props.dense, "dense"),
+        props.class
+      ]),
+      style: { ...(props.style || {}) },
+      role: "navigation",
+      "aria-label": props.ariaLabel || "Breadcrumb"
+    });
+    const beforeEl = _.div({ class: "cms-breadcrumbs-before" });
+    const listEl = _.ol({ class: "cms-breadcrumbs-list" });
+    const afterEl = _.div({ class: "cms-breadcrumbs-after" });
+    wrap.appendChild(beforeEl);
+    wrap.appendChild(listEl);
+    wrap.appendChild(afterEl);
+
+    const resolveAccent = (value) => {
+      const raw = uiUnwrap(value);
+      if (raw == null || raw === "") return null;
+      return CMSwift.uiColors?.includes(raw) ? `var(--cms-${raw})` : String(raw);
+    };
+    const isExternalLink = (entry) => {
+      if (!entry) return false;
+      if (uiUnwrap(entry.external) === true) return true;
+      const href = uiUnwrap(entry.href ?? entry.to);
+      if (!href) return false;
+      return /^(mailto:|tel:|https?:\/\/|\/\/)/i.test(String(href));
+    };
+    const cloneIfNode = (value) => {
+      if (value?.nodeType && value.cloneNode) return value.cloneNode(true);
+      return value;
+    };
+    const renderInto = (host, nodes) => {
+      host.innerHTML = "";
+      nodes.forEach((node) => host.appendChild(node));
+    };
+    const renderNamedSlot = (slotBag, name, ctx, fallback, alias = null) => {
+      const primary = CMSwift.ui.getSlot(slotBag, name) != null
+        ? renderSlotToArray(slotBag, name, ctx, fallback)
+        : [];
+      if (primary.length) return primary;
+      if (alias && CMSwift.ui.getSlot(slotBag, alias) != null) {
+        return renderSlotToArray(slotBag, alias, ctx, fallback);
+      }
+      return renderSlotToArray(null, "default", ctx, fallback);
+    };
+    const resolveIconNode = (value, size, as) => {
+      const raw = uiUnwrap(value);
+      if (raw == null || raw === false || raw === "") return null;
+      if (typeof raw === "string") return UI.Icon({ name: raw, size });
+      return CMSwift.ui.slot(raw, { as });
+    };
+    const normalizeItems = () => {
+      const source = model ? model.get() : uiUnwrap(props.items ?? props.value ?? props.breadcrumbs);
+      const list = [];
+      const pushItem = (entry) => {
+        if (entry == null || entry === false) return;
+        if (Array.isArray(entry)) {
+          entry.forEach(pushItem);
+          return;
+        }
+        if (typeof entry === "string" || typeof entry === "number") {
+          list.push({ label: String(entry) });
+          return;
+        }
+        if (entry?.nodeType || typeof entry === "function") {
+          list.push({ label: entry });
+          return;
+        }
+        list.push(entry);
+      };
+
+      const home = uiUnwrap(props.home);
+      if (home) {
+        pushItem(home === true ? { label: "Home", to: "/", icon: "home" } : home);
+      }
+      pushItem(source);
+      if (!list.length && children?.length) {
+        children.forEach((child) => pushItem(child));
+      }
+      return list.filter((item) => !uiUnwrap(item?.hidden));
+    };
+    const getCurrentIndex = (items) => {
+      const explicitIndex = items.findIndex((item) => !!uiUnwrap(item?.current ?? item?.active ?? item?.selected));
+      if (explicitIndex > -1) return explicitIndex;
+      return uiUnwrap(props.autoCurrent) === false ? -1 : (items.length ? items.length - 1 : -1);
+    };
+    const collapseItems = (items) => {
+      const maxRaw = Number(uiUnwrap(props.max ?? props.maxItems ?? props.collapseAfter ?? props.collapse));
+      const max = Number.isFinite(maxRaw) ? Math.max(0, Math.trunc(maxRaw)) : 0;
+      if (!max || max < 3 || items.length <= max) {
+        return items.map((item, index) => ({ type: "item", item, index, key: `item-${index}` }));
+      }
+
+      let leading = Number(uiUnwrap(props.leadingCount ?? props.keepStart ?? 1));
+      let trailing = Number(uiUnwrap(props.trailingCount ?? props.keepEnd ?? Math.max(1, max - 2)));
+      leading = Number.isFinite(leading) ? Math.max(1, Math.trunc(leading)) : 1;
+      trailing = Number.isFinite(trailing) ? Math.max(1, Math.trunc(trailing)) : Math.max(1, max - 2);
+      if (leading + trailing + 1 > max) {
+        trailing = Math.max(1, max - leading - 1);
+        if (leading + trailing + 1 > max) leading = Math.max(1, max - trailing - 1);
+      }
+      if (leading + trailing >= items.length) {
+        return items.map((item, index) => ({ type: "item", item, index, key: `item-${index}` }));
+      }
+
+      const entries = [];
+      for (let i = 0; i < leading; i++) {
+        entries.push({ type: "item", item: items[i], index: i, key: `item-${i}` });
+      }
+      const hiddenItems = items.slice(leading, items.length - trailing);
+      entries.push({
+        type: "collapsed",
+        key: `collapsed-${leading}-${items.length - trailing}`,
+        items: hiddenItems,
+        from: leading,
+        to: items.length - trailing - 1
+      });
+      for (let i = items.length - trailing; i < items.length; i++) {
+        entries.push({ type: "item", item: items[i], index: i, key: `item-${i}` });
+      }
+      return entries;
+    };
+    const navigateItem = (item, event = null) => {
+      if (!item) return false;
+      const href = uiUnwrap(item.href ?? item.to) || "";
+      const to = uiUnwrap(item.to) || "";
+      if (!isExternalLink(item) && to && router?.navigate) {
+        if (event?.preventDefault) event.preventDefault();
+        router.navigate(to);
+        item.onNavigate?.(to, event || null);
+        props.onNavigate?.(to, item, event || null);
+        return true;
+      }
+      item.onNavigate?.(to || href, event || null);
+      props.onNavigate?.(to || href, item, event || null);
+      return false;
+    };
+    const createSeparator = (entry, index, total) => {
+      const prev = entry;
+      const next = total[index + 1] || null;
+      const ctx = { index, entry, previous: prev, next };
+      const fallback = cloneIfNode(uiUnwrap((entry?.type === "item" ? entry.item?.separator : null) ?? props.separator ?? "/"));
+      const nodes = renderNamedSlot(slots, "separator", ctx, fallback);
+      return _.li({ class: "cms-breadcrumbs-separator-item", "aria-hidden": "true" },
+        _.span({ class: "cms-breadcrumbs-separator" }, ...nodes)
+      );
+    };
+    const createCollapsedEntry = (entry, items, currentIndex) => {
+      const ctx = {
+        type: "collapsed",
+        collapsed: true,
+        items,
+        hiddenItems: entry.items,
+        currentIndex,
+        from: entry.from,
+        to: entry.to
+      };
+      const fallback = _.span({ class: "cms-breadcrumb cms-breadcrumb-collapsed" },
+        _.span({ class: "cms-breadcrumb-inner" },
+          _.span({ class: "cms-breadcrumb-copy" },
+            _.span({ class: "cms-breadcrumb-label" }, String(uiUnwrap(props.collapsedLabel) || "…"))
+          )
+        )
+      );
+      const nodes = renderNamedSlot(slots, "collapsed", ctx, fallback, "item");
+      return _.li({ class: "cms-breadcrumbs-entry is-collapsed" }, ...nodes);
+    };
+    const createItemEntry = (entry, items, currentIndex, visibleIndex) => {
+      const item = entry.item || {};
+      const slotBag = item.slots ? { ...slots, ...item.slots } : slots;
+      const href = uiUnwrap(item.href ?? item.to) || "";
+      const disabled = !!uiUnwrap(item.disabled);
+      const current = entry.index === currentIndex;
+      const iconSize = item.iconSize ?? props.itemSize ?? props.size ?? null;
+      const accent = resolveAccent(item.color ?? item.state ?? props.color ?? props.state);
+      const state = !uiUnwrap(item.color) && uiUnwrap(item.state)
+        ? normalizeState(uiUnwrap(item.state))
+        : "";
+      const labelFallback = item.label ?? item.title ?? item.text ?? item.to ?? item.href ?? "";
+      const noteFallback = item.note ?? item.subtitle ?? item.caption ?? item.description;
+      const badgeFallback = item.badge ?? item.counter ?? item.count;
+      const asideFallback = item.aside ?? item.trailing ?? resolveIconNode(item.iconRight, iconSize, "iconRight");
+      const defaultFallback = item.content ?? item.body;
+      const ctx = {
+        item,
+        index: entry.index,
+        visibleIndex,
+        total: items.length,
+        current,
+        active: current,
+        disabled,
+        href,
+        to: uiUnwrap(item.to) || "",
+        external: isExternalLink(item),
+        isFirst: entry.index === 0,
+        isLast: entry.index === items.length - 1,
+        navigate: (event) => navigateItem(item, event)
+      };
+
+      const iconNodes = renderNamedSlot(slotBag, "icon", ctx, resolveIconNode(item.icon, iconSize, "icon"));
+      const labelNodes = renderNamedSlot(slotBag, "label", ctx, labelFallback);
+      const noteNodes = renderNamedSlot(slotBag, "note", ctx, noteFallback);
+      const badgeNodes = renderNamedSlot(slotBag, "badge", ctx, badgeFallback);
+      const asideNodes = renderNamedSlot(slotBag, "aside", ctx, asideFallback);
+      const defaultNodes = renderNamedSlot(slotBag, "default", ctx, defaultFallback);
+
+      const content = _.span({ class: "cms-breadcrumb-inner" },
+        iconNodes.length ? _.span({ class: "cms-breadcrumb-icon" }, ...iconNodes) : null,
+        _.span({ class: "cms-breadcrumb-copy" },
+          _.span({ class: "cms-breadcrumb-label" }, ...(labelNodes.length ? labelNodes : [href || ""])),
+          noteNodes.length ? _.span({ class: "cms-breadcrumb-note" }, ...noteNodes) : null,
+          defaultNodes.length ? _.span({ class: "cms-breadcrumb-extra" }, ...defaultNodes) : null
+        ),
+        badgeNodes.length ? _.span({ class: "cms-breadcrumb-badge" }, ...badgeNodes) : null,
+        asideNodes.length ? _.span({ class: "cms-breadcrumb-aside" }, ...asideNodes) : null
+      );
+
+      const interactive = !disabled && (!current || !!uiUnwrap(item.linkCurrent ?? props.linkCurrent));
+      const sharedProps = {
+        class: uiClass([
+          "cms-breadcrumb",
+          "cms-clear-set",
+          "cms-singularity",
+          uiWhen(current, "is-current"),
+          uiWhen(current, "active"),
+          uiWhen(disabled, "is-disabled"),
+          state ? `cms-state-${state}` : "",
+          item.class
+        ]),
+        style: {
+          ...(item.style || {})
+        },
+        "aria-current": current ? String(uiUnwrap(item.ariaCurrent ?? props.ariaCurrent) || "page") : null
+      };
+      if (accent) sharedProps.style["--cms-breadcrumb-accent"] = accent;
+
+      let node = null;
+      if (interactive && href) {
+        node = _.a({
+          ...sharedProps,
+          href,
+          target: item.target,
+          rel: item.rel,
+          onClick: (event) => {
+            item.onClick?.(event, ctx);
+            props.onItemClick?.(item, ctx, event);
+            if (event.defaultPrevented) return;
+            ctx.navigate(event);
+          }
+        }, content);
+        if (ctx.external && node.target === "_blank" && !node.rel) node.rel = "noopener noreferrer";
+      } else if (interactive && typeof item.onClick === "function") {
+        node = _.button({
+          ...sharedProps,
+          type: item.type || "button",
+          onClick: (event) => {
+            item.onClick?.(event, ctx);
+            props.onItemClick?.(item, ctx, event);
+          }
+        }, content);
+      } else {
+        node = _.span({
+          ...sharedProps,
+          "aria-disabled": disabled ? "true" : null
+        }, content);
+      }
+
+      setPropertyProps(node, {
+        size: item.size ?? props.itemSize ?? props.size,
+        radius: item.radius ?? props.radius,
+        gradient: item.gradient ?? props.gradient
+      });
+
+      const fallback = node;
+      const rendered = renderNamedSlot(slotBag, "item", ctx, fallback);
+      return _.li({
+        class: uiClass([
+          "cms-breadcrumbs-entry",
+          uiWhen(current, "is-current"),
+          uiWhen(disabled, "is-disabled")
+        ])
+      }, ...rendered);
+    };
+    const render = () => {
+      const items = normalizeItems();
+      const currentIndex = getCurrentIndex(items);
+      const visibleItems = collapseItems(items);
+      const accent = resolveAccent(props.color ?? props.state);
+      wrap.classList.toggle("is-empty", items.length === 0);
+      if (accent) wrap.style.setProperty("--cms-breadcrumb-accent", accent);
+      else wrap.style.removeProperty("--cms-breadcrumb-accent");
+
+      const rootCtx = {
+        items,
+        visibleItems,
+        currentIndex,
+        count: items.length,
+        collapsed: visibleItems.some((entry) => entry.type === "collapsed")
+      };
+      renderInto(beforeEl, renderNamedSlot(slots, "before", rootCtx, props.before));
+      renderInto(afterEl, renderNamedSlot(slots, "after", rootCtx, props.after));
+
+      listEl.innerHTML = "";
+      if (!items.length) {
+        const emptyNodes = renderNamedSlot(slots, "empty", rootCtx, props.empty);
+        if (emptyNodes.length) listEl.appendChild(_.li({ class: "cms-breadcrumbs-entry is-empty" }, ...emptyNodes));
+        return;
+      }
+
+      visibleItems.forEach((entry, visibleIndex) => {
+        if (visibleIndex > 0) listEl.appendChild(createSeparator(visibleItems[visibleIndex - 1], visibleIndex - 1, visibleItems));
+        listEl.appendChild(
+          entry.type === "collapsed"
+            ? createCollapsedEntry(entry, items, currentIndex)
+            : createItemEntry(entry, items, currentIndex, visibleIndex)
+        );
+      });
+    };
+
+    app.reactive.effect(() => {
+      render();
+    }, "UI.Breadcrumbs:render");
+
+    wrap.getItems = () => normalizeItems();
+    wrap.getVisibleItems = () => collapseItems(normalizeItems());
+    wrap.refresh = () => {
+      render();
+      return wrap;
+    };
+    wrap.setItems = (next) => {
+      if (model) model.set(next);
+      else props.items = next;
+      render();
+      return wrap;
+    };
+    setPropertyProps(wrap, props);
     return wrap;
   };
   if (CMSwift.isDev?.()) {
@@ -9954,18 +10296,48 @@
     UI.meta.Breadcrumbs = {
       signature: "UI.Breadcrumbs(props)",
       props: {
-        items: "Array<{label,to,href}>",
-        separator: "string|Node",
-        slots: "{ item?, separator? }",
+        items: "Array<string|number|Node|Function|{ label?, to?, href?, icon?, note?, badge?, current?, disabled?, hidden?, slots? }>",
+        model: "[get,set] signal|Array",
+        home: "boolean|Object",
+        separator: "string|Node|Function",
+        before: "Node|Function|Array",
+        after: "Node|Function|Array",
+        empty: "Node|Function|Array",
+        variant: "\"line\"|\"pills\"|\"soft\"",
+        max: "number",
+        leadingCount: "number",
+        trailingCount: "number",
+        dense: "boolean",
+        wrap: "boolean",
+        nowrap: "boolean",
+        linkCurrent: "boolean",
+        color: "string",
+        state: "string",
+        itemSize: "string|number",
+        ariaLabel: "string",
         class: "string",
         style: "object"
       },
       slots: {
-        item: "Item renderer (ctx: { item, index })",
-        separator: "Separator content (ctx: { index })"
+        before: "Content before breadcrumb list",
+        after: "Content after breadcrumb list",
+        item: "Full renderer for a breadcrumb entry",
+        icon: "Leading icon for each breadcrumb",
+        label: "Main breadcrumb label",
+        note: "Secondary line for the breadcrumb",
+        badge: "Badge/counter area",
+        aside: "Trailing area",
+        default: "Extra content under note",
+        separator: "Separator renderer",
+        collapsed: "Renderer for collapsed middle items",
+        empty: "Renderer for empty state"
       },
-      returns: "HTMLElement <nav>",
-      description: "Breadcrumbs con separatore configurabile."
+      events: {
+        onItemClick: "(item, ctx, event)",
+        onNavigate: "(toOrHref, item, event)"
+      },
+      returns: "HTMLElement <nav> con .getItems(), .getVisibleItems(), .refresh(), .setItems(items)",
+      description: "Breadcrumbs standardizzati con item strutturati, slot completi, collapse automatico e supporto a link/router."
     };
   }
   // Esempio: CMSwift.ui.Breadcrumbs({ items: [{ label: "Home", to: "/" }, { label: "Pagina" }] })
@@ -15024,109 +15396,658 @@ transition: width 200ms ease;
     };
   }
 
-  UI.Menu = (props = {}) => {
+  UI.Menu = (...args) => {
+    const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
+    const stateList = ["primary", "secondary", "warning", "danger", "success", "info", "light", "dark"];
+    const sizeList = ["xs", "sm", "md", "lg", "xl"];
+    let currentProps = { ...props };
     let entry = null;
+    let boundEl = null;
+    let lastActive = null;
+    let openTimer = null;
+    let closeTimer = null;
 
-    const buildContent = (close) => {
-      const ctx = { close };
-      const raw = typeof props.content === "function" ? props.content(ctx) : props.content;
-      let nodes = renderSlotToArray(slots, "content", ctx, raw);
-      if (!nodes.length) nodes = renderSlotToArray(slots, "default", ctx, raw);
-      const box = _.div(
-        { class: uiClass(["cms-menu", props.class]), style: props.style || {} },
-        ...nodes
+    const hasOwn = (obj, key) => Object.prototype.hasOwnProperty.call(obj || {}, key);
+    const resolveRender = (value, ctx) => typeof value === "function" ? value(ctx) : value;
+    const splitClasses = (value) => String(value || "").split(/\s+/).filter(Boolean);
+    const isPlainObject = (value) => value && typeof value === "object" && !value.nodeType && !Array.isArray(value) && !(value instanceof Function);
+    const isAnchorLike = (value) => !!value && typeof value === "object" && (value.nodeType === 1 || typeof value.getBoundingClientRect === "function");
+    const clearTimers = () => {
+      clearTimeout(openTimer);
+      clearTimeout(closeTimer);
+      openTimer = null;
+      closeTimer = null;
+    };
+    const setTrackedClasses = (target, key, classes) => {
+      if (!target) return;
+      const prev = target[key] || [];
+      if (prev.length) target.classList.remove(...prev);
+      const next = (classes || []).filter(Boolean);
+      if (next.length) target.classList.add(...next);
+      target[key] = next;
+    };
+    const setStyleValue = (target, name, value, formatter = (v) => v) => {
+      if (!target) return;
+      if (value == null || value === "") {
+        target.style.removeProperty(name);
+        return;
+      }
+      target.style.setProperty(name, formatter(value));
+    };
+    const getOptions = () => currentProps || {};
+    const getStateClass = (opts) => {
+      const value = String(uiUnwrap(opts.state ?? opts.color) || "").toLowerCase();
+      return stateList.includes(value) ? value : "";
+    };
+    const getSizeClass = (opts) => {
+      const value = String(uiUnwrap(opts.size) || "").toLowerCase();
+      return sizeList.includes(value) ? value : "";
+    };
+    const getPlacement = (opts) => String(uiUnwrap(opts.placement ?? opts.position ?? "bottom-start"));
+    const getDelay = () => {
+      const raw = uiUnwrap(getOptions().delay ?? getOptions().showDelay);
+      const value = Number(raw);
+      return Number.isFinite(value) ? Math.max(0, value) : 0;
+    };
+    const getHideDelay = () => {
+      const raw = uiUnwrap(getOptions().hideDelay);
+      const value = Number(raw);
+      return Number.isFinite(value) ? Math.max(0, value) : 80;
+    };
+    const getAnchor = (fallback = null) => {
+      if (fallback) return fallback;
+      const opts = getOptions();
+      return boundEl || uiUnwrap(opts.anchorEl ?? opts.triggerEl ?? opts.target ?? opts.anchor) || null;
+    };
+    const parseTriggers = (value) => {
+      if (value == null || value === true) return new Set(["click"]);
+      if (value === false) return new Set(["manual"]);
+      const raw = Array.isArray(value) ? value : String(value).split(/[\s,|/]+/);
+      const out = new Set();
+      raw.forEach((item) => {
+        const key = String(item || "").trim().toLowerCase();
+        if (!key) return;
+        if (key === "mouseenter" || key === "mouseover") out.add("hover");
+        else if (key === "blur" || key === "focusin") out.add("focus");
+        else if (key === "tap") out.add("click");
+        else out.add(key);
+      });
+      return out.size ? out : new Set(["manual"]);
+    };
+    const parseOpenArgs = (arg1, arg2) => {
+      let anchorEl = null;
+      let nextProps = null;
+      if (isAnchorLike(arg1)) {
+        anchorEl = arg1;
+        if (isPlainObject(arg2)) nextProps = arg2;
+      } else if (isPlainObject(arg1)) {
+        nextProps = arg1;
+        const maybeAnchor = arg1.anchorEl ?? arg1.triggerEl ?? arg1.target ?? arg1.anchor;
+        if (isAnchorLike(maybeAnchor)) anchorEl = maybeAnchor;
+      } else if (arg1 != null) {
+        anchorEl = arg1;
+      }
+      return { anchorEl, nextProps };
+    };
+    const getFocusableItems = (root = entry?.panel) => Array.from(root?.querySelectorAll?.(
+      "[data-menu-item]:not([disabled]):not([tabindex='-1']), .cms-menu-item:not([disabled]):not([tabindex='-1']), [role='menuitem']:not([disabled]):not([tabindex='-1']), a[href]:not([tabindex='-1']), button:not([disabled]):not([tabindex='-1'])"
+    ) || []).filter((el) => el.offsetParent !== null && el.getAttribute("aria-hidden") !== "true");
+    const focusInitialItem = () => {
+      if (uiUnwrap(getOptions().autoFocus) === false) return;
+      setTimeout(() => {
+        const items = getFocusableItems();
+        if (!items.length) return;
+        const active = items.find((el) => el.classList.contains("is-active") || el.classList.contains("is-selected") || el.classList.contains("is-checked"));
+        (active || items[0]).focus();
+      }, 0);
+    };
+    const buildIconNode = (value, ctx, size = "sm") => {
+      const raw = resolveRender(value, ctx);
+      if (raw == null) return [];
+      if (typeof raw === "string") return [UI.Icon({ name: raw, size })];
+      return slotToArray(raw, { ...ctx, as: "icon" });
+    };
+    const renderItemEntries = (source, ctx) => {
+      const raw = resolveRender(source, ctx);
+      if (raw == null || raw === false) return [];
+      if (Array.isArray(raw)) return raw.flatMap((entryValue, index) => renderItemEntries(entryValue, { ...ctx, index }));
+      if (typeof raw === "function") return renderItemEntries(raw(ctx), ctx);
+      if (raw?.nodeType) return [raw];
+      if (typeof raw === "string" || typeof raw === "number") {
+        return renderItemEntries({ label: raw }, ctx);
+      }
+      if (!isPlainObject(raw)) {
+        return slotToArray(raw, { ...ctx, as: "item" });
+      }
+
+      const kind = String(raw.type ?? raw.kind ?? "").toLowerCase();
+      if (kind === "separator" || kind === "divider" || raw.separator === true || raw.divider === true) {
+        return [_.div({ class: "cms-menu-divider", role: "separator" })];
+      }
+
+      const groupItems = raw.items ?? raw.children;
+      if ((kind === "group" || kind === "section" || Array.isArray(groupItems)) && groupItems != null) {
+        const groupCtx = { ...ctx, item: raw };
+        const labelNodes = renderSlotToArray(slots, "groupLabel", groupCtx, resolveRender(raw.label ?? raw.title, groupCtx));
+        const contentNodes = renderItemEntries(groupItems, groupCtx);
+        if (!contentNodes.length) return [];
+        return [_.div(
+          { class: uiClass(["cms-menu-group", raw.class]) },
+          labelNodes.length ? _.div({ class: "cms-menu-group-label" }, ...labelNodes) : null,
+          _.div({ class: "cms-menu-group-items" }, ...contentNodes)
+        )];
+      }
+
+      const itemCtx = {
+        ...ctx,
+        item: raw,
+        close,
+        dismiss: close,
+        open,
+        toggle,
+        update,
+        isOpen,
+        entry: () => entry,
+        anchorEl: getAnchor(),
+        props: getOptions()
+      };
+      const disabled = !!uiUnwrap(raw.disabled);
+      const checked = raw.checked == null ? null : !!uiUnwrap(raw.checked);
+      const active = !!uiUnwrap(raw.active ?? raw.selected);
+      const itemState = getStateClass(raw);
+      const href = uiUnwrap(raw.href);
+      const to = uiUnwrap(raw.to);
+      const closeOnSelect = hasOwn(raw, "closeOnSelect")
+        ? !!uiUnwrap(raw.closeOnSelect)
+        : (raw.keepOpen === true ? false : (getOptions().closeOnSelect !== false));
+      const ariaRole = raw.role || (checked != null ? "menuitemcheckbox" : "menuitem");
+      const iconNodes = buildIconNode(raw.icon, itemCtx);
+      const iconRightNodes = buildIconNode(raw.iconRight ?? raw.endIcon, itemCtx);
+      const titleNodes = renderSlotToArray(slots, "itemTitle", itemCtx, resolveRender(raw.title ?? raw.label, itemCtx));
+      const subtitleNodes = renderSlotToArray(slots, "itemSubtitle", itemCtx, resolveRender(raw.subtitle ?? raw.description, itemCtx));
+      const shortcutNodes = renderSlotToArray(slots, "itemShortcut", itemCtx, resolveRender(raw.shortcut, itemCtx));
+      const badgeNodes = renderSlotToArray(slots, "itemBadge", itemCtx, resolveRender(raw.badge, itemCtx));
+      const customBodyNodes = renderSlotToArray(slots, "item", itemCtx, resolveRender(raw.content ?? raw.body ?? raw.render, itemCtx));
+      const asideNodes = [
+        ...badgeNodes,
+        ...shortcutNodes,
+        ...(checked === true && !iconRightNodes.length && !badgeNodes.length
+          ? [_.span({ class: "cms-menu-entry-check" }, UI.Icon({ name: raw.checkedIcon || "check", size: "sm" }))]
+          : []),
+        ...iconRightNodes
+      ];
+      const entryClass = uiClass([
+        "cms-menu-entry",
+        "cms-menu-item",
+        itemState ? `cms-state-${itemState}` : "",
+        uiWhen(active, "is-active"),
+        uiWhen(checked === true, "is-checked"),
+        uiWhen(disabled, "is-disabled"),
+        raw.class
+      ]);
+      const entryProps = {
+        class: entryClass,
+        role: ariaRole,
+        tabIndex: disabled ? -1 : (raw.tabIndex ?? -1),
+        "data-menu-item": true,
+        "data-menu-select": closeOnSelect ? "true" : "false",
+        "data-menu-close": raw.close === true ? "true" : null,
+        "data-menu-keep-open": closeOnSelect ? null : "true",
+        "aria-disabled": disabled ? "true" : null,
+        "aria-checked": checked == null ? null : String(checked),
+        title: raw.titleAttr ?? raw.tooltip ?? null,
+        type: href ? null : "button",
+        href: href || null,
+        target: raw.target || null,
+        rel: raw.rel || (raw.target === "_blank" ? "noopener noreferrer" : null),
+        onClick: (e) => {
+          if (disabled) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          getOptions().onItemClick?.(raw, itemCtx, e);
+          const result = raw.onClick?.(itemCtx, e);
+          if (e.defaultPrevented) return;
+          if (to && CMSwift.router?.navigate) {
+            e.preventDefault();
+            CMSwift.router.navigate(to);
+          }
+          if (result === false) return;
+          if (closeOnSelect) close();
+        }
+      };
+      if (raw.attrs && typeof raw.attrs === "object") Object.assign(entryProps, raw.attrs);
+
+      const Tag = href ? _.a : _.button;
+      const bodyNodes = customBodyNodes.length
+        ? customBodyNodes
+        : [
+          titleNodes.length ? _.div({ class: "cms-menu-entry-title" }, ...titleNodes) : null,
+          subtitleNodes.length ? _.div({ class: "cms-menu-entry-subtitle" }, ...subtitleNodes) : null
+        ].filter(Boolean);
+
+      return [Tag(
+        entryProps,
+        iconNodes.length ? _.span({ class: "cms-menu-entry-icon" }, ...iconNodes) : null,
+        _.span(
+          { class: "cms-menu-entry-main" },
+          ...bodyNodes
+        ),
+        asideNodes.length ? _.span({ class: "cms-menu-entry-aside" }, ...asideNodes) : null
+      )];
+    };
+    const buildContent = () => {
+      const opts = getOptions();
+      const ctx = {
+        close,
+        dismiss: close,
+        open,
+        toggle,
+        update,
+        isOpen,
+        entry: () => entry,
+        anchorEl: getAnchor(),
+        props: opts
+      };
+      const iconNodes = buildIconNode(opts.icon, ctx, opts.iconSize || "md");
+      const eyebrowNodes = renderSlotToArray(slots, "eyebrow", ctx, resolveRender(opts.eyebrow, ctx));
+      const titleNodes = renderSlotToArray(slots, "title", ctx, resolveRender(opts.title ?? opts.heading ?? opts.label, ctx));
+      const subtitleNodes = renderSlotToArray(slots, "subtitle", ctx, resolveRender(opts.subtitle ?? opts.description, ctx));
+      const beforeNodes = renderSlotToArray(slots, "before", ctx, resolveRender(opts.before, ctx));
+      const headerNodes = renderSlotToArray(slots, "header", ctx, resolveRender(opts.header, ctx));
+      const afterNodes = renderSlotToArray(slots, "after", ctx, resolveRender(opts.after, ctx));
+      const footerNodes = renderSlotToArray(slots, "footer", ctx, resolveRender(opts.footer, ctx));
+      const statusNodes = renderSlotToArray(slots, "status", ctx, resolveRender(opts.status, ctx));
+
+      let contentRaw = opts.content ?? opts.body;
+      if (contentRaw == null && children && children.length) contentRaw = children;
+      let contentNodes = renderSlotToArray(slots, "content", ctx, resolveRender(contentRaw, ctx));
+      if (!contentNodes.length) contentNodes = renderSlotToArray(slots, "body", ctx, resolveRender(contentRaw, ctx));
+      if (!contentNodes.length) contentNodes = renderSlotToArray(slots, "default", ctx, resolveRender(contentRaw, ctx));
+
+      const itemNodes = renderItemEntries(opts.items ?? opts.actionsList ?? opts.entries, ctx);
+      const emptyNodes = !itemNodes.length
+        ? renderSlotToArray(slots, "empty", ctx, resolveRender(opts.empty ?? opts.emptyText, ctx))
+        : [];
+
+      let headerEl = null;
+      if (headerNodes.length) {
+        headerEl = _.div({ class: uiClass(["cms-menu-head", "cms-menu-head-custom", opts.headerClass]) }, ...headerNodes);
+      } else if (iconNodes.length || eyebrowNodes.length || titleNodes.length || subtitleNodes.length) {
+        headerEl = _.div(
+          { class: uiClass(["cms-menu-head", opts.headerClass]) },
+          iconNodes.length ? _.div({ class: "cms-menu-head-icon" }, ...iconNodes) : null,
+          _.div(
+            { class: "cms-menu-head-main" },
+            eyebrowNodes.length ? _.div({ class: "cms-menu-eyebrow" }, ...eyebrowNodes) : null,
+            titleNodes.length ? _.div({ class: "cms-menu-title" }, ...titleNodes) : null,
+            subtitleNodes.length ? _.div({ class: "cms-menu-subtitle" }, ...subtitleNodes) : null
+          )
+        );
+      }
+
+      return _.div(
+        {
+          class: uiClass([
+            "cms-menu",
+            "cms-menu-shell",
+            uiWhen(opts.dense, "dense"),
+            uiWhen(itemNodes.length > 0, "has-items"),
+            uiWhen(footerNodes.length > 0 || statusNodes.length > 0, "has-footer"),
+            opts.class
+          ]),
+          style: opts.style || {},
+          role: opts.role || "menu",
+          "aria-label": opts.ariaLabel || null
+        },
+        beforeNodes.length ? _.div({ class: "cms-menu-before" }, ...beforeNodes) : null,
+        headerEl,
+        contentNodes.length ? _.div({ class: uiClass(["cms-menu-content", opts.contentClass]) }, ...contentNodes) : null,
+        itemNodes.length ? _.div({ class: uiClass(["cms-menu-items", opts.itemsClass]) }, ...itemNodes) : null,
+        (!itemNodes.length && emptyNodes.length) ? _.div({ class: "cms-menu-empty" }, ...emptyNodes) : null,
+        afterNodes.length ? _.div({ class: "cms-menu-after" }, ...afterNodes) : null,
+        (statusNodes.length || footerNodes.length)
+          ? _.div(
+            { class: uiClass(["cms-menu-footer", opts.footerClass]) },
+            statusNodes.length ? _.div({ class: "cms-menu-status" }, ...statusNodes) : null,
+            footerNodes.length ? _.div({ class: "cms-menu-footer-actions" }, ...footerNodes) : null
+          )
+          : null
       );
-
-      box.addEventListener("click", (e) => {
-        const t = e.target;
-        if (t && t.closest && t.closest("[data-menu-close]")) {
+    };
+    const applyEntryOptions = (currentEntry) => {
+      if (!currentEntry?.panel) return;
+      const opts = getOptions();
+      const stateClass = getStateClass(opts);
+      const sizeClass = getSizeClass(opts);
+      setTrackedClasses(currentEntry.panel, "_menuClassTokens", [
+        "cms-menu-panel",
+        "cms-clear-set",
+        "cms-singularity",
+        sizeClass ? `cms-menu-${sizeClass}` : "",
+        stateClass ? `cms-state-${stateClass}` : "",
+        uiUnwrap(opts.outline) ? "outline" : "",
+        ...splitClasses(opts.panelClass)
+      ]);
+      setTrackedClasses(currentEntry.overlay, "_menuOverlayClassTokens", [
+        ...splitClasses(opts.overlayClass)
+      ]);
+      currentEntry.panel.dataset.placement = getPlacement(opts);
+      setStyleValue(currentEntry.panel, "--cms-menu-width", uiUnwrap(opts.width), toCssSize);
+      setStyleValue(currentEntry.panel, "--cms-menu-min-width", uiUnwrap(opts.minWidth), toCssSize);
+      setStyleValue(currentEntry.panel, "--cms-menu-max-width", uiUnwrap(opts.maxWidth), toCssSize);
+      setStyleValue(currentEntry.panel, "--cms-menu-max-height", uiUnwrap(opts.maxHeight), toCssSize);
+      setStyleValue(currentEntry.panel, "--cms-menu-body-max-height", uiUnwrap(opts.bodyMaxHeight ?? opts.contentMaxHeight), toCssSize);
+      if (opts.panelStyle) Object.assign(currentEntry.panel.style, opts.panelStyle);
+      setPropertyProps(currentEntry.panel, opts);
+    };
+    const renderOpenContent = () => {
+      if (!entry?.panel) return;
+      entry.panel.replaceChildren(buildContent());
+    };
+    const close = () => {
+      clearTimers();
+      if (!entry) return;
+      const toClose = entry;
+      entry = null;
+      overlayLeave(toClose, () => CMSwift.overlay.close(toClose.id));
+    };
+    const update = (nextProps = {}) => {
+      if (nextProps && typeof nextProps === "object") currentProps = { ...currentProps, ...nextProps };
+      if (entry) {
+        applyEntryOptions(entry);
+        renderOpenContent();
+        focusInitialItem();
+      }
+      return api;
+    };
+    const open = (arg1 = null, arg2 = null) => {
+      clearTimers();
+      const { anchorEl, nextProps } = parseOpenArgs(arg1, arg2);
+      if (nextProps) currentProps = { ...currentProps, ...nextProps };
+      const opts = getOptions();
+      const anchor = getAnchor(anchorEl);
+      if (!anchor || uiUnwrap(opts.disabled)) return null;
+      if (entry && entry._anchorEl === anchor) {
+        applyEntryOptions(entry);
+        renderOpenContent();
+        focusInitialItem();
+        return entry;
+      }
+      if (entry) close();
+      lastActive = document.activeElement;
+      let currentRef = null;
+      entry = CMSwift.overlay.open(() => buildContent(), {
+        type: "menu",
+        anchorEl: anchor,
+        placement: getPlacement(opts),
+        offsetX: opts.offsetX ?? 0,
+        offsetY: opts.offsetY ?? opts.offset ?? 8,
+        backdrop: opts.backdrop === true,
+        lockScroll: opts.lockScroll === true,
+        trapFocus: opts.trapFocus === true,
+        autoFocus: false,
+        closeOnOutside: opts.closeOnOutside !== false,
+        closeOnBackdrop: opts.closeOnBackdrop ?? opts.backdrop === true,
+        closeOnEsc: opts.closeOnEsc !== false,
+        className: uiClassStatic(["cms-menu-panel"]),
+        onClose: () => {
+          currentRef?._menuCleanup?.();
+          getOptions().onClose?.(currentRef);
+          if (getOptions().returnFocus !== false && lastActive && typeof lastActive.focus === "function") {
+            setTimeout(() => lastActive.focus(), 0);
+          }
+        }
+      });
+      if (!entry?.panel) return entry;
+      const current = entry;
+      currentRef = current;
+      current._anchorEl = anchor;
+      const cancelHide = () => {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      };
+      const scheduleHide = () => {
+        hide();
+      };
+      const onPanelClick = (e) => {
+        const target = e.target;
+        if (!target || !target.closest) return;
+        if (target.closest("[data-menu-close]")) {
           close();
           return;
         }
-        if (props.closeOnSelect !== false) close();
-      });
-
-      box.addEventListener("keydown", (e) => {
-        if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
-        const items = Array.from(box.querySelectorAll(
-          "[data-menu-item], .cms-menu-item, [role='menuitem'], button:not([disabled]), [href], [tabindex]:not([tabindex='-1'])"
-        )).filter(el => el.offsetParent !== null);
+        if (getOptions().closeOnSelect === false) return;
+        const selected = target.closest("[data-menu-item], [data-menu-select], .cms-menu-item, [role='menuitem'], [role='menuitemcheckbox'], [role='menuitemradio'], a[href], button:not([disabled])");
+        if (!selected) return;
+        if (selected.closest("[data-menu-keep-open]")) return;
+        if (selected.getAttribute("data-menu-select") === "false") return;
+        close();
+      };
+      const onPanelKeydown = (e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          close();
+          return;
+        }
+        if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
+        const items = getFocusableItems(current.panel);
         if (!items.length) return;
         e.preventDefault();
-        const dir = e.key === "ArrowDown" ? 1 : -1;
-        const active = items.indexOf(document.activeElement);
-        const next = active < 0 ? (dir > 0 ? 0 : items.length - 1) : (active + dir + items.length) % items.length;
-        items[next].focus();
-      });
-
-      return box;
-    };
-
-    const open = (anchorEl) => {
-      const a = anchorEl || props.anchorEl;
-      if (!a) return null;
-      if (entry) {
-        const prev = entry;
-        overlayLeave(prev, () => CMSwift.overlay.close(prev.id));
-      }
-      entry = CMSwift.overlay.open(({ close }) => buildContent(close), {
-        type: "menu",
-        anchorEl: a,
-        placement: props.placement || "bottom-start",
-        offsetY: props.offsetY ?? 8,
-        offsetX: props.offsetX ?? 0,
-        backdrop: false,
-        lockScroll: false,
-        trapFocus: false,
-        closeOnOutside: props.closeOnOutside !== false,
-        closeOnEsc: true,
-        className: props.panelClass || "",
-        onClose: () => {
-          entry = null;
-          props.onClose?.();
+        const activeIndex = items.indexOf(document.activeElement);
+        if (e.key === "Home") {
+          items[0].focus();
+          return;
         }
-      });
-      overlayEnter(entry);
-      props.onOpen?.();
-      return entry;
+        if (e.key === "End") {
+          items[items.length - 1].focus();
+          return;
+        }
+        const dir = e.key === "ArrowDown" ? 1 : -1;
+        const next = activeIndex < 0
+          ? (dir > 0 ? 0 : items.length - 1)
+          : (activeIndex + dir + items.length) % items.length;
+        items[next].focus();
+      };
+      current.panel.addEventListener("click", onPanelClick);
+      current.panel.addEventListener("keydown", onPanelKeydown);
+      const activeTriggers = parseTriggers(opts.trigger ?? opts.triggers ?? (hasOwn(opts, "open") ? "manual" : null));
+      const allowHover = activeTriggers.has("hover");
+      const allowFocus = activeTriggers.has("focus");
+      if (allowHover || allowFocus) {
+        current.panel.addEventListener("mouseenter", cancelHide);
+        current.panel.addEventListener("mouseleave", scheduleHide);
+        current.panel.addEventListener("focusin", cancelHide);
+        current.panel.addEventListener("focusout", scheduleHide);
+      }
+      current._menuCleanup = () => {
+        current.panel?.removeEventListener("click", onPanelClick);
+        current.panel?.removeEventListener("keydown", onPanelKeydown);
+        current.panel?.removeEventListener("mouseenter", cancelHide);
+        current.panel?.removeEventListener("mouseleave", scheduleHide);
+        current.panel?.removeEventListener("focusin", cancelHide);
+        current.panel?.removeEventListener("focusout", scheduleHide);
+      };
+      applyEntryOptions(current);
+      overlayEnter(current);
+      getOptions().onOpen?.(current);
+      focusInitialItem();
+      return current;
     };
-
-    const close = () => {
+    const show = (anchorEl, nextProps = null) => {
+      clearTimeout(closeTimer);
+      closeTimer = null;
+      clearTimeout(openTimer);
+      openTimer = setTimeout(() => open(anchorEl, nextProps), getDelay());
+    };
+    const hide = (immediate = false) => {
+      clearTimeout(openTimer);
+      openTimer = null;
       if (!entry) return;
-      const toClose = entry;
-      overlayLeave(toClose, () => CMSwift.overlay.close(toClose.id));
+      clearTimeout(closeTimer);
+      if (immediate) {
+        close();
+        return;
+      }
+      closeTimer = setTimeout(() => close(), getHideDelay());
+    };
+    const toggle = (arg1 = null, arg2 = null) => isOpen() ? (close(), null) : open(arg1, arg2);
+    const isOpen = () => !!entry;
+    const bind = (el) => {
+      if (!el) return () => { };
+      boundEl = el;
+      const opts = getOptions();
+      const triggers = parseTriggers(opts.trigger ?? opts.triggers ?? (hasOwn(opts, "open") ? "manual" : null));
+      const allowHover = triggers.has("hover");
+      const allowFocus = triggers.has("focus");
+      const allowClick = triggers.has("click");
+      const isManual = triggers.has("manual") || (!allowHover && !allowFocus && !allowClick);
+      const cleanups = [];
+      const cleanup = () => {
+        clearTimers();
+        cleanups.forEach((fn) => fn());
+        if (boundEl === el) boundEl = null;
+      };
+      if (hasOwn(opts, "open")) {
+        if (uiIsReactive(opts.open)) {
+          CMSwift.reactive.effect(() => {
+            if (!boundEl) return;
+            if (uiUnwrap(getOptions().open)) open(boundEl);
+            else hide(true);
+          }, "UI.Menu:open");
+        } else if (opts.open === true) {
+          open(el);
+        } else if (opts.open === false) {
+          hide(true);
+        }
+        return cleanup;
+      }
+      if (isManual || uiUnwrap(opts.disabled)) return cleanup;
+      if (allowHover) {
+        const onEnter = () => show(el);
+        const onLeave = () => hide();
+        el.addEventListener("mouseenter", onEnter);
+        el.addEventListener("mouseleave", onLeave);
+        cleanups.push(() => {
+          el.removeEventListener("mouseenter", onEnter);
+          el.removeEventListener("mouseleave", onLeave);
+        });
+      }
+      if (allowFocus) {
+        const onFocus = () => show(el);
+        const onBlur = () => hide();
+        el.addEventListener("focus", onFocus);
+        el.addEventListener("blur", onBlur);
+        cleanups.push(() => {
+          el.removeEventListener("focus", onFocus);
+          el.removeEventListener("blur", onBlur);
+        });
+      }
+      if (allowClick) {
+        const onClick = (e) => {
+          getOptions().onTriggerClick?.(e);
+          if (e.defaultPrevented) return;
+          toggle(el);
+        };
+        el.addEventListener("click", onClick);
+        cleanups.push(() => el.removeEventListener("click", onClick));
+      }
+      return cleanup;
+    };
+    const api = {
+      open,
+      close,
+      show,
+      hide,
+      toggle,
+      update,
+      bind,
+      isOpen,
+      entry: () => entry,
+      props: () => ({ ...currentProps })
     };
 
-    return { open, close };
+    return api;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.Menu = {
-      signature: "UI.Menu(props) -> { open, close }",
+      signature: "UI.Menu(props) | UI.Menu(props, ...children) -> { open, close, show, hide, toggle, update, bind, isOpen }",
       props: {
+        title: "String|Node|Function|Array|({ close })=>Node",
+        subtitle: "String|Node|Function|Array|({ close })=>Node",
+        eyebrow: "String|Node|Function|Array|({ close })=>Node",
+        icon: "String|Node|Function|Array",
         content: "Node|Function|Array|({ close })=>Node",
+        body: "Alias di content",
+        items: "Array<string|object>|Function|Array",
+        before: "Node|Function|Array",
+        after: "Node|Function|Array",
+        footer: "Node|Function|Array",
+        status: "Node|Function|Array",
+        empty: "Node|Function|Array",
+        size: "xs|sm|md|lg|xl",
+        state: "primary|secondary|warning|danger|success|info|light|dark",
+        color: "Alias di state",
+        trigger: "click|hover|focus|manual|Array",
         placement: "string",
         offsetX: "number",
         offsetY: "number",
+        offset: "Alias di offsetY",
+        width: "string|number",
+        minWidth: "string|number",
+        maxWidth: "string|number",
+        maxHeight: "string|number",
+        bodyMaxHeight: "string|number",
+        contentMaxHeight: "Alias di bodyMaxHeight",
         closeOnSelect: "boolean",
         closeOnOutside: "boolean",
-        slots: "{ content?, default? }",
+        closeOnEsc: "boolean",
+        autoFocus: "boolean",
+        anchorEl: "HTMLElement|VirtualAnchor",
+        triggerEl: "Alias di anchorEl",
+        target: "Alias di anchorEl",
+        slots: "{ before?, icon?, eyebrow?, title?, subtitle?, header?, content?, body?, item?, itemTitle?, itemSubtitle?, itemBadge?, itemShortcut?, groupLabel?, empty?, status?, footer?, after?, default? }",
         class: "string",
+        panelClass: "string",
+        overlayClass: "string",
         style: "object",
+        panelStyle: "object",
         onOpen: "function",
-        onClose: "function"
+        onClose: "function",
+        onItemClick: "(item, ctx, event) => void",
+        onTriggerClick: "function"
       },
       slots: {
-        content: "Menu content ({ close })",
+        before: "Area sopra header/body ({ close })",
+        icon: "Menu icon",
+        eyebrow: "Menu eyebrow ({ close })",
+        title: "Menu title ({ close })",
+        subtitle: "Menu subtitle ({ close })",
+        header: "Header custom ({ close })",
+        content: "Custom content ({ close })",
+        body: "Alias di content ({ close })",
+        item: "Custom item body ({ item, close })",
+        itemTitle: "Item title ({ item, close })",
+        itemSubtitle: "Item subtitle ({ item, close })",
+        itemBadge: "Item badge ({ item, close })",
+        itemShortcut: "Item shortcut ({ item, close })",
+        groupLabel: "Label gruppi ({ item, close })",
+        empty: "Empty state ({ close })",
+        status: "Status row ({ close })",
+        footer: "Footer actions ({ close })",
+        after: "Area sotto body/footer ({ close })",
         default: "Fallback content ({ close })"
       },
       events: {
         onOpen: "void",
-        onClose: "void"
+        onClose: "void",
+        onItemClick: "item click"
       },
-      returns: "Object { open(), close() }",
-      description: "Menu overlay ancorato con close-on-select."
+      returns: "Object { open(), close(), show(), hide(), toggle(), update(), bind(), isOpen() }",
+      description: "Menu overlay standardizzato con item model, slot ricchi, trigger bindabili, header/footer e API imperativa."
     };
   }
 
@@ -15629,111 +16550,271 @@ transition: width 200ms ease;
     };
   }
 
-  UI.ContextMenu = (props = {}) => {
-    const slots = props.slots || {};
-    let entry = null;
+  UI.ContextMenu = (...args) => {
+    const { props, children } = CMSwift.uiNormalizeArgs(args);
+    let currentProps = { ...props };
+    let lastPoint = null;
+    let lastAnchor = null;
+    let lastTriggerEl = null;
 
-    const buildContent = (close) => {
-      const ctx = { close };
-      const raw = typeof props.content === "function" ? props.content(ctx) : props.content;
-      let nodes = renderSlotToArray(slots, "content", ctx, raw);
-      if (!nodes.length) nodes = renderSlotToArray(slots, "default", ctx, raw);
-      const box = _.div(
-        { class: uiClass(["cms-menu", props.class]), style: props.style || {} },
-        ...nodes
-      );
-      box.addEventListener("click", (e) => {
-        const t = e.target;
-        if (t && t.closest && t.closest("[data-menu-close]")) {
-          close();
-          return;
-        }
-        if (props.closeOnSelect !== false) close();
-      });
-      return box;
+    const isPlainObject = (value) => value && typeof value === "object" && !value.nodeType && !Array.isArray(value) && !(value instanceof Function);
+    const isAnchorLike = (value) => !!value && typeof value === "object" && (value.nodeType === 1 || typeof value.getBoundingClientRect === "function");
+    const isEventLike = (value) => !!value && typeof value === "object" && ("clientX" in value || "type" in value || "target" in value || "currentTarget" in value);
+    const isPointLike = (value) => !!value && Number.isFinite(Number(value.x)) && Number.isFinite(Number(value.y));
+    const getOptions = () => currentProps;
+    const normalizePoint = (x, y) => {
+      const px = Number(x);
+      const py = Number(y);
+      if (!Number.isFinite(px) || !Number.isFinite(py)) return null;
+      return { x: px, y: py };
     };
-
-    const openAt = (x, y) => {
-      const anchorEl = {
-        getBoundingClientRect: () => ({
-          top: y,
-          bottom: y,
-          left: x,
-          right: x,
-          width: 0,
-          height: 0
-        })
+    const createVirtualAnchor = (point) => point ? {
+      _cmsContextPoint: point,
+      getBoundingClientRect: () => ({
+        top: point.y,
+        bottom: point.y,
+        left: point.x,
+        right: point.x,
+        width: 0,
+        height: 0
+      })
+    } : null;
+    const getElementPoint = (el) => {
+      if (!isAnchorLike(el)) return null;
+      const rect = el.getBoundingClientRect();
+      return normalizePoint(rect.left + Math.min(rect.width / 2, 24), rect.top + Math.min(rect.height / 2, 24));
+    };
+    const extractAnchor = (value) => uiUnwrap(value?.anchorEl ?? value?.triggerEl ?? value?.target ?? value?.anchor ?? null);
+    const getEventPoint = (event, fallbackEl = null) => {
+      if (!event) return getElementPoint(fallbackEl || lastTriggerEl);
+      const point = normalizePoint(event.clientX, event.clientY);
+      if (point) return point;
+      const anchor = extractAnchor({ anchorEl: fallbackEl || event.currentTarget || event.target || lastTriggerEl });
+      return getElementPoint(anchor);
+    };
+    const stripContextKeys = (value = {}) => {
+      if (!isPlainObject(value)) return {};
+      const next = { ...value };
+      delete next.event;
+      delete next.point;
+      delete next.x;
+      delete next.y;
+      return next;
+    };
+    const buildMenuProps = () => {
+      const opts = getOptions();
+      return {
+        ...opts,
+        trigger: "manual",
+        placement: opts.placement || "bottom-start",
+        offsetX: opts.offsetX ?? 0,
+        offsetY: opts.offsetY ?? opts.offset ?? 4,
+        closeOnOutside: opts.closeOnOutside !== false,
+        closeOnEsc: opts.closeOnEsc !== false,
+        role: opts.role || "menu",
+        ariaLabel: opts.ariaLabel || opts.title || "Context menu",
+        class: uiClass(["cms-context-menu-shell", opts.class]),
+        panelClass: uiClass(["cms-context-menu-panel", opts.panelClass])
       };
-      if (entry) {
-        const prev = entry;
-        overlayLeave(prev, () => CMSwift.overlay.close(prev.id));
+    };
+    const menu = UI.Menu(buildMenuProps(), ...children);
+
+    const resolveOpenInput = (arg1 = null, arg2 = null, arg3 = null) => {
+      let point = null;
+      let anchor = null;
+      let nextProps = null;
+
+      if (isEventLike(arg1)) {
+        point = getEventPoint(arg1, lastTriggerEl);
+        nextProps = isPlainObject(arg2) ? stripContextKeys(arg2) : null;
+      } else if (typeof arg1 === "number" || typeof arg2 === "number") {
+        point = normalizePoint(arg1, arg2);
+        nextProps = isPlainObject(arg3) ? stripContextKeys(arg3) : null;
+      } else if (isPointLike(arg1)) {
+        point = normalizePoint(arg1.x, arg1.y);
+        nextProps = isPlainObject(arg2) ? stripContextKeys(arg2) : null;
+      } else if (isAnchorLike(arg1)) {
+        anchor = arg1;
+        nextProps = isPlainObject(arg2) ? stripContextKeys(arg2) : null;
+      } else if (isPlainObject(arg1)) {
+        const rawPoint = isPointLike(arg1.point) ? arg1.point : (isPointLike(arg1) ? arg1 : null);
+        const rawAnchor = extractAnchor(arg1);
+        const rawEvent = arg1.event;
+        point = rawPoint ? normalizePoint(rawPoint.x, rawPoint.y) : getEventPoint(rawEvent, rawAnchor || lastTriggerEl);
+        anchor = rawAnchor && isAnchorLike(rawAnchor) ? rawAnchor : null;
+        nextProps = {
+          ...stripContextKeys(arg1),
+          ...(isPlainObject(arg2) ? stripContextKeys(arg2) : {})
+        };
+      } else if (lastPoint) {
+        point = { ...lastPoint };
       }
-      entry = CMSwift.overlay.open(({ close }) => buildContent(close), {
-        type: "menu",
-        anchorEl,
-        placement: props.placement || "bottom-start",
-        offsetX: props.offsetX ?? 0,
-        offsetY: props.offsetY ?? 0,
-        backdrop: false,
-        lockScroll: false,
-        trapFocus: false,
-        closeOnOutside: props.closeOnOutside !== false,
-        closeOnEsc: true,
-        onClose: () => {
-          entry = null;
-          props.onClose?.();
-        }
-      });
-      overlayEnter(entry);
-      props.onOpen?.();
-      return entry;
-    };
 
-    const bind = (el) => {
-      if (!el) return () => { };
-      const onCtx = (e) => {
-        e.preventDefault();
-        openAt(e.clientX, e.clientY);
-      };
-      el.addEventListener("contextmenu", onCtx);
-      return () => el.removeEventListener("contextmenu", onCtx);
+      return { point, anchor, nextProps };
     };
-
+    const rememberAnchor = (anchor, point = null) => {
+      lastAnchor = anchor || lastAnchor;
+      lastPoint = point || (anchor && anchor._cmsContextPoint) || lastPoint;
+    };
+    const mergeProps = (nextProps = null) => {
+      if (isPlainObject(nextProps) && Object.keys(nextProps).length) {
+        currentProps = { ...currentProps, ...nextProps };
+      }
+    };
+    const getOpenAnchor = (inputAnchor = null, inputPoint = null) => {
+      if (inputPoint) return createVirtualAnchor(inputPoint);
+      if (inputAnchor && isAnchorLike(inputAnchor)) return inputAnchor;
+      const configAnchor = extractAnchor(getOptions());
+      if (isAnchorLike(configAnchor)) return configAnchor;
+      if (lastPoint) return createVirtualAnchor(lastPoint);
+      if (isAnchorLike(lastAnchor)) return lastAnchor;
+      if (isAnchorLike(lastTriggerEl)) return lastTriggerEl;
+      return null;
+    };
+    const open = (arg1 = null, arg2 = null, arg3 = null) => {
+      const { point, anchor, nextProps } = resolveOpenInput(arg1, arg2, arg3);
+      mergeProps(nextProps);
+      const openAnchor = getOpenAnchor(anchor, point);
+      if (!openAnchor) return null;
+      rememberAnchor(openAnchor, point);
+      return menu.open(openAnchor, buildMenuProps());
+    };
+    const openAt = (x, y, nextProps = null) => open(x, y, nextProps);
+    const openFromEvent = (event, nextProps = null) => open(event, nextProps);
     const close = () => {
-      if (!entry) return;
-      const toClose = entry;
-      overlayLeave(toClose, () => CMSwift.overlay.close(toClose.id));
+      menu.close();
+      return api;
+    };
+    const hide = (immediate = true) => {
+      if (immediate === false) menu.hide(false);
+      else menu.close();
+      return api;
+    };
+    const show = (arg1 = null, arg2 = null, arg3 = null) => open(arg1, arg2, arg3);
+    const toggle = (arg1 = null, arg2 = null, arg3 = null) => menu.isOpen() ? (close(), null) : open(arg1, arg2, arg3);
+    const update = (nextProps = {}) => {
+      mergeProps(stripContextKeys(nextProps));
+      menu.update(buildMenuProps());
+      return api;
+    };
+    const bind = (el, bindProps = null) => {
+      if (!el) return () => { };
+      const scopedProps = isPlainObject(bindProps) ? stripContextKeys(bindProps) : null;
+      const onContextMenu = (e) => {
+        lastTriggerEl = el;
+        e.preventDefault();
+        const result = getOptions().onTrigger?.(e, { element: el, open, close, update });
+        if (result === false || uiUnwrap(getOptions().disabled)) return;
+        open({ event: e, anchorEl: el }, scopedProps);
+      };
+      const onKeyboardOpen = (e) => {
+        if (e.key !== "ContextMenu" && !(e.shiftKey && e.key === "F10")) return;
+        lastTriggerEl = el;
+        e.preventDefault();
+        const result = getOptions().onTrigger?.(e, { element: el, open, close, update });
+        if (result === false || uiUnwrap(getOptions().disabled)) return;
+        open({ event: e, anchorEl: el }, scopedProps);
+      };
+      el.addEventListener("contextmenu", onContextMenu);
+      el.addEventListener("keydown", onKeyboardOpen);
+      return () => {
+        el.removeEventListener("contextmenu", onContextMenu);
+        el.removeEventListener("keydown", onKeyboardOpen);
+      };
+    };
+    const api = {
+      open,
+      openAt,
+      openFromEvent,
+      show,
+      hide,
+      close,
+      toggle,
+      update,
+      bind,
+      isOpen: menu.isOpen,
+      entry: menu.entry,
+      props: () => ({ ...currentProps })
     };
 
-    return { bind, openAt, close };
+    return api;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.ContextMenu = {
-      signature: "UI.ContextMenu(props) -> { bind, openAt, close }",
+      signature: "UI.ContextMenu(props) | UI.ContextMenu(props, ...children) -> { open, openAt, openFromEvent, show, hide, close, toggle, update, bind, isOpen }",
       props: {
+        title: "String|Node|Function|Array|({ close })=>Node",
+        subtitle: "String|Node|Function|Array|({ close })=>Node",
+        eyebrow: "String|Node|Function|Array|({ close })=>Node",
+        icon: "String|Node|Function|Array",
         content: "Node|Function|Array|({ close })=>Node",
+        body: "Alias di content",
+        items: "Array<string|object>|Function|Array",
+        before: "Node|Function|Array",
+        after: "Node|Function|Array",
+        footer: "Node|Function|Array",
+        status: "Node|Function|Array",
+        empty: "Node|Function|Array",
+        size: "xs|sm|md|lg|xl",
+        state: "primary|secondary|warning|danger|success|info|light|dark",
+        color: "Alias di state",
         placement: "string",
         offsetX: "number",
         offsetY: "number",
+        offset: "Alias di offsetY",
+        width: "string|number",
+        minWidth: "string|number",
+        maxWidth: "string|number",
+        maxHeight: "string|number",
+        bodyMaxHeight: "string|number",
+        contentMaxHeight: "Alias di bodyMaxHeight",
         closeOnSelect: "boolean",
         closeOnOutside: "boolean",
-        slots: "{ content?, default? }",
+        closeOnEsc: "boolean",
+        anchorEl: "HTMLElement|VirtualAnchor",
+        triggerEl: "Alias di anchorEl",
+        target: "Alias di anchorEl",
+        slots: "{ before?, icon?, eyebrow?, title?, subtitle?, header?, content?, body?, item?, itemTitle?, itemSubtitle?, itemBadge?, itemShortcut?, groupLabel?, empty?, status?, footer?, after?, default? }",
         class: "string",
+        panelClass: "string",
+        overlayClass: "string",
         style: "object",
+        panelStyle: "object",
         onOpen: "function",
-        onClose: "function"
+        onClose: "function",
+        onItemClick: "(item, ctx, event) => void",
+        onTrigger: "(event, ctx) => boolean|void"
       },
       slots: {
+        before: "Area sopra header/body ({ close })",
+        icon: "Context icon",
+        eyebrow: "Context eyebrow ({ close })",
+        title: "Context title ({ close })",
+        subtitle: "Context subtitle ({ close })",
+        header: "Header custom ({ close })",
         content: "Context menu content ({ close })",
+        body: "Alias di content ({ close })",
+        item: "Custom item body ({ item, close })",
+        itemTitle: "Item title ({ item, close })",
+        itemSubtitle: "Item subtitle ({ item, close })",
+        itemBadge: "Item badge ({ item, close })",
+        itemShortcut: "Item shortcut ({ item, close })",
+        groupLabel: "Label gruppi ({ item, close })",
+        empty: "Empty state ({ close })",
+        status: "Status row ({ close })",
+        footer: "Footer actions ({ close })",
+        after: "Area sotto body/footer ({ close })",
         default: "Fallback content ({ close })"
       },
       events: {
         onOpen: "void",
-        onClose: "void"
+        onClose: "void",
+        onItemClick: "item click",
+        onTrigger: "trigger contextmenu / tastiera"
       },
-      returns: "Object { bind(), openAt(), close() }",
-      description: "Context menu a right-click con posizionamento su mouse."
+      returns: "Object { open(), openAt(), openFromEvent(), show(), hide(), close(), toggle(), update(), bind(), isOpen() }",
+      description: "Specializzazione di Menu per click destro e tasto context menu, con items, slot ricchi, runtime overrides e posizionamento su coordinate."
     };
   }
 })(CMSwift);
