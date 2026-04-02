@@ -968,25 +968,177 @@
   UI.Row = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
-    const p = CMSwift.omit(props, ["slots"]);
+    const renderArea = (names, fallback, ctx = {}) => {
+      const list = Array.isArray(names) ? names : [names];
+      for (const name of list) {
+        if (CMSwift.ui.getSlot(slots, name) != null) {
+          return renderSlotToArray(slots, name, ctx, fallback);
+        }
+      }
+      return fallback == null ? [] : renderSlotToArray(null, "default", ctx, fallback);
+    };
+
+    const rowSpaceValue = (value) => {
+      if (value == null || value === false || value === "") return "";
+      if (typeof value === "number") return `${value}px`;
+      if (typeof value === "string" && CMSwift.uiSizes?.includes(value)) return `var(--cms-s-${value})`;
+      return String(value);
+    };
+    const rowWidthValue = (value) => {
+      if (value == null || value === false || value === "") return "";
+      if (typeof value === "number") return `${value}px`;
+      if (typeof value === "string" && CMSwift.uiSizes?.includes(value)) return `var(--cms-w-${value})`;
+      return String(value);
+    };
+
+    const p = CMSwift.omit(props, [
+      "slots",
+      "start", "left", "startClass",
+      "body", "center", "bodyClass", "centerClass",
+      "end", "right", "endClass",
+      "align", "justify", "wrap", "gap", "rowGap", "columnGap",
+      "direction", "reverse", "inline", "full", "width", "minWidth", "maxWidth"
+    ]);
     p.class = uiClass(["cms-row", props.class]);
-    const content = renderSlotToArray(slots, "default", {}, children);
-    return _.div(p, ...content);
+
+    const style = { ...(props.style || {}) };
+    const direction = uiComputed([props.direction, props.reverse], () => {
+      const raw = uiUnwrap(props.direction);
+      if (raw != null && raw !== "") return String(raw);
+      return uiUnwrap(props.reverse) ? "row-reverse" : "";
+    });
+    const align = uiStyleValue(props.align);
+    const justify = uiStyleValue(props.justify);
+    const wrap = uiStyleValue(props.wrap, (v) => typeof v === "boolean" ? (v ? "wrap" : "nowrap") : String(v));
+    const gap = uiStyleValue(props.gap, rowSpaceValue);
+    const rowGap = uiStyleValue(props.rowGap, rowSpaceValue);
+    const columnGap = uiStyleValue(props.columnGap, rowSpaceValue);
+    const display = uiStyleValue(props.inline, (v) => v ? "inline-flex" : "flex");
+    const width = uiStyleValue(props.width, rowWidthValue);
+    const minWidth = uiStyleValue(props.minWidth, rowWidthValue);
+    const maxWidth = uiStyleValue(props.maxWidth, rowWidthValue);
+    const full = uiStyleValue(props.full, (v) => v ? "100%" : "", "");
+    const inlineWidth = uiComputed([props.inline, props.full, props.width], () => {
+      const isInline = !!uiUnwrap(props.inline);
+      const isFull = !!uiUnwrap(props.full);
+      const hasWidth = uiUnwrap(props.width) != null && uiUnwrap(props.width) !== false && uiUnwrap(props.width) !== "";
+      if (!isInline || isFull || hasWidth) return "";
+      return "max-content";
+    });
+
+    if (direction != null) style.flexDirection = direction;
+    if (align != null) style.alignItems = align;
+    if (justify != null) style.justifyContent = justify;
+    if (wrap != null) style.flexWrap = wrap;
+    if (gap != null) style.gap = gap;
+    if (rowGap != null) style.rowGap = rowGap;
+    if (columnGap != null) style.columnGap = columnGap;
+    if (display != null) style.display = display;
+    if (inlineWidth != null) style.width = inlineWidth;
+    if (width != null) style.width = width;
+    if (minWidth != null) style.minWidth = minWidth;
+    if (maxWidth != null) style.maxWidth = maxWidth;
+    if (full != null) style.width = full;
+    if (Object.keys(style).length) p.style = style;
+
+    const ctx = { props };
+    const startNodes = renderArea(["start", "left"], props.start ?? props.left, ctx);
+    const bodyNodes = renderArea(["body", "center", "default"], props.body ?? props.center ?? children, ctx);
+    const endNodes = renderArea(["end", "right"], props.end ?? props.right, ctx);
+    const hasStructuredContent = startNodes.length || endNodes.length || props.body != null || props.center != null || props.startClass || props.bodyClass || props.centerClass || props.endClass
+      || CMSwift.ui.getSlot(slots, "start") != null
+      || CMSwift.ui.getSlot(slots, "left") != null
+      || CMSwift.ui.getSlot(slots, "body") != null
+      || CMSwift.ui.getSlot(slots, "center") != null
+      || CMSwift.ui.getSlot(slots, "end") != null
+      || CMSwift.ui.getSlot(slots, "right") != null;
+
+    if (!hasStructuredContent) {
+      const content = renderSlotToArray(slots, "default", ctx, children);
+      const el = _.div(p, ...content);
+      setPropertyProps(el, props);
+      return el;
+    }
+
+    const regionStyle = {
+      display: "flex",
+      alignItems: "inherit",
+      gap: "inherit",
+      flexWrap: "inherit",
+      minWidth: 0
+    };
+    const bodyClass = props.bodyClass ?? props.centerClass;
+    const endAutoMargin = uiComputed([props.direction, props.reverse], () => {
+      const rawDirection = uiUnwrap(props.direction) || (uiUnwrap(props.reverse) ? "row-reverse" : "row");
+      return rawDirection === "row" ? "auto" : "";
+    });
+
+    const parts = [
+      startNodes.length
+        ? _.div({ class: uiClass(["cms-row-start", props.startClass]), style: { ...regionStyle } }, ...startNodes)
+        : null,
+      bodyNodes.length
+        ? _.div({ class: uiClass(["cms-row-body", bodyClass]), style: { ...regionStyle, flex: "1 1 auto" } }, ...bodyNodes)
+        : null,
+      endNodes.length
+        ? _.div({
+          class: uiClass(["cms-row-end", props.endClass]),
+          style: {
+            ...regionStyle,
+            justifyContent: "flex-end",
+            marginInlineStart: endAutoMargin
+          }
+        }, ...endNodes)
+        : null
+    ].filter(Boolean);
+
+    const el = _.div(p, ...parts);
+    setPropertyProps(el, props);
+    return el;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
     UI.meta.Row = {
       signature: "UI.Row(...children) | UI.Row(props, ...children)",
       props: {
-        slots: "{ default?: Slot }",
+        start: "Node|Function|Array",
+        left: "Alias di start",
+        body: "Node|Function|Array",
+        center: "Alias di body",
+        end: "Node|Function|Array",
+        right: "Alias di end",
+        align: `stretch|flex-start|center|flex-end|baseline`,
+        justify: `flex-start|center|flex-end|space-between|space-around|space-evenly`,
+        wrap: "boolean|string",
+        direction: `row|row-reverse|column|column-reverse`,
+        reverse: "boolean",
+        gap: "string|number",
+        rowGap: "string|number",
+        columnGap: "string|number",
+        inline: "boolean",
+        full: "boolean",
+        width: "string|number",
+        minWidth: "string|number",
+        maxWidth: "string|number",
+        startClass: "string",
+        bodyClass: "string",
+        centerClass: "Alias di bodyClass",
+        endClass: "string",
+        slots: "{ start?, left?, body?, center?, end?, right?, default? }",
         class: "string",
         style: "object"
       },
       slots: {
-        default: "Row content"
+        start: "Leading content area",
+        left: "Alias di start",
+        body: "Main content area",
+        center: "Alias di body",
+        end: "Trailing content area",
+        right: "Alias di end",
+        default: "Fallback content / children"
       },
       returns: "HTMLDivElement",
-      description: "Row layout wrapper."
+      description: "Wrapper flex in riga con children, slot strutturati e props di layout per gap, allineamento, wrap e direction."
     };
   }
   function uiIsSignal(v) {

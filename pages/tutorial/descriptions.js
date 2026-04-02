@@ -1,7 +1,7 @@
 const descriptions = {
   "_.Row": {
     title: "Row",
-    description: "Wrapper di layout in riga con classe `cms-row`. Accetta children o slot `default` per impilare contenuti in orizzontale."
+    description: "Layout flex in riga con children o slot strutturati `start/default/end`, gap configurabile e controllo di align/justify/wrap/direction."
   },
   "_.Col": {
     title: "Col",
