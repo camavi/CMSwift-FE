@@ -3249,6 +3249,37 @@
     const slots = rawProps.slots || {};
     const hasOwn = (key) => Object.prototype.hasOwnProperty.call(rawProps, key);
     const ctx = { props: rawProps };
+    const appendResolvedValue = (host, value) => {
+      if (value == null || value === false) return;
+      if (Array.isArray(value)) {
+        value.forEach((item) => appendResolvedValue(host, item));
+        return;
+      }
+      if (value?.nodeType) {
+        host.appendChild(value);
+        return;
+      }
+      host.appendChild(document.createTextNode(String(value)));
+    };
+    const renderPropNodes = (name, fallback, map = (value) => value) => {
+      const slot = CMSwift.ui.getSlot(slots, name);
+      if (slot !== null && slot !== undefined) {
+        return renderSlotToArray(slots, name, ctx, null);
+      }
+      if (typeof fallback === "function") {
+        const inlineNames = new Set(["eyebrow", "title", "subtitle"]);
+        const host = _[inlineNames.has(name) ? "span" : "div"]({ class: `cms-footer-slot-${name}` });
+        CMSwift.reactive.effect(() => {
+          const nextValue = map(fallback(ctx));
+          const normalized = flattenSlotValue(CMSwift.ui.slot(nextValue));
+          host.replaceChildren();
+          if (Array.isArray(normalized)) normalized.forEach((item) => appendResolvedValue(host, item));
+          else appendResolvedValue(host, normalized);
+        }, `UI.Footer:${name}`);
+        return [host];
+      }
+      return renderSlotToArray(slots, name, ctx, map(fallback));
+    };
 
     const renderIconValue = (value, as = "icon", sizeFallback = rawProps.iconSize || rawProps.size || "md") => {
       if (value == null || value === false) return null;
@@ -3265,27 +3296,27 @@
       : (hasOwn("body") ? rawProps.body : (children?.length ? children : null));
 
     const startNodes = [
-      ...renderSlotToArray(slots, "left", ctx, startFallback),
-      ...renderSlotToArray(slots, "start", ctx, null)
+      ...renderPropNodes("left", startFallback),
+      ...renderPropNodes("start", null)
     ];
-    const iconNodes = renderSlotToArray(slots, "icon", ctx, renderIconValue(rawProps.icon));
-    const eyebrowNodes = renderSlotToArray(slots, "eyebrow", ctx, rawProps.eyebrow ?? rawProps.kicker);
-    const titleNodes = renderSlotToArray(slots, "title", ctx, titleFallback);
-    const subtitleNodes = renderSlotToArray(slots, "subtitle", ctx, subtitleFallback);
-    const metaNodes = renderSlotToArray(slots, "meta", ctx, rawProps.meta);
+    const iconNodes = renderPropNodes("icon", rawProps.icon, renderIconValue);
+    const eyebrowNodes = renderPropNodes("eyebrow", rawProps.eyebrow ?? rawProps.kicker);
+    const titleNodes = renderPropNodes("title", titleFallback);
+    const subtitleNodes = renderPropNodes("subtitle", subtitleFallback);
+    const metaNodes = renderPropNodes("meta", rawProps.meta);
     const contentNodes = (() => {
-      const explicit = renderSlotToArray(slots, "content", ctx, null);
-      return explicit.length ? explicit : renderSlotToArray(slots, "default", ctx, contentFallback);
+      const explicit = renderPropNodes("content", null);
+      return explicit.length ? explicit : renderPropNodes("default", contentFallback);
     })();
     const customBodyNodes = [
-      ...renderSlotToArray(slots, "center", ctx, null),
-      ...renderSlotToArray(slots, "body", ctx, null)
+      ...renderPropNodes("center", null),
+      ...renderPropNodes("body", null)
     ];
     const endNodes = [
-      ...renderSlotToArray(slots, "right", ctx, endFallback),
-      ...renderSlotToArray(slots, "end", ctx, null)
+      ...renderPropNodes("right", endFallback),
+      ...renderPropNodes("end", null)
     ];
-    const actionNodes = renderSlotToArray(slots, "actions", ctx, rawProps.actions);
+    const actionNodes = renderPropNodes("actions", rawProps.actions);
 
     const structuredBody = _.div(
       { class: uiClass(["cms-footer-body", rawProps.bodyClass, rawProps.centerClass]) },
@@ -9746,6 +9777,37 @@
       toggleDrawer,
       toggleAside: toggleDrawer
     };
+    const appendResolvedValue = (host, value) => {
+      if (value == null || value === false) return;
+      if (Array.isArray(value)) {
+        value.forEach((item) => appendResolvedValue(host, item));
+        return;
+      }
+      if (value?.nodeType) {
+        host.appendChild(value);
+        return;
+      }
+      host.appendChild(document.createTextNode(String(value)));
+    };
+    const renderPropNodes = (name, fallback, map = (value) => value) => {
+      const slot = CMSwift.ui.getSlot(slots, name);
+      if (slot !== null && slot !== undefined) {
+        return renderSlotToArray(slots, name, ctx, null);
+      }
+      if (typeof fallback === "function") {
+        const inlineNames = new Set(["eyebrow", "title", "subtitle"]);
+        const host = _[inlineNames.has(name) ? "span" : "div"]({ class: `cms-header-slot-${name}` });
+        CMSwift.reactive.effect(() => {
+          const nextValue = map(fallback(ctx));
+          const normalized = flattenSlotValue(CMSwift.ui.slot(nextValue));
+          host.replaceChildren();
+          if (Array.isArray(normalized)) normalized.forEach((item) => appendResolvedValue(host, item));
+          else appendResolvedValue(host, normalized);
+        }, `UI.Header:${name}`);
+        return [host];
+      }
+      return renderSlotToArray(slots, name, ctx, map(fallback));
+    };
 
     const renderIconValue = (value, as = "icon", sizeFallback = rawProps.iconSize || rawProps.size || "md") => {
       if (value == null || value === false) return null;
@@ -9788,24 +9850,27 @@
       : (hasOwn("body") ? rawProps.body : (children?.length ? children : null));
 
     const startNodes = [
-      ...renderSlotToArray(slots, "left", ctx, leftFallback),
-      ...renderSlotToArray(slots, "start", ctx, null)
+      ...renderPropNodes("left", leftFallback),
+      ...renderPropNodes("start", null)
     ];
-    const iconNodes = renderSlotToArray(slots, "icon", ctx, renderIconValue(rawProps.icon));
-    const eyebrowNodes = renderSlotToArray(slots, "eyebrow", ctx, rawProps.eyebrow ?? rawProps.kicker);
-    const titleNodes = renderSlotToArray(slots, "title", ctx, titleFallback);
-    const subtitleNodes = renderSlotToArray(slots, "subtitle", ctx, subtitleFallback);
-    const metaNodes = renderSlotToArray(slots, "meta", ctx, rawProps.meta);
-    const contentNodes = renderSlotToArray(slots, "content", ctx, contentFallback);
+    const iconNodes = renderPropNodes("icon", rawProps.icon, renderIconValue);
+    const eyebrowNodes = renderPropNodes("eyebrow", rawProps.eyebrow ?? rawProps.kicker);
+    const titleNodes = renderPropNodes("title", titleFallback);
+    const subtitleNodes = renderPropNodes("subtitle", subtitleFallback);
+    const metaNodes = renderPropNodes("meta", rawProps.meta);
+    const contentNodes = (() => {
+      const explicit = renderPropNodes("content", null);
+      return explicit.length ? explicit : renderPropNodes("default", contentFallback);
+    })();
     const customCenterNodes = [
-      ...renderSlotToArray(slots, "center", ctx, null),
-      ...renderSlotToArray(slots, "body", ctx, null)
+      ...renderPropNodes("center", null),
+      ...renderPropNodes("body", null)
     ];
     const rightNodes = [
-      ...renderSlotToArray(slots, "right", ctx, rightFallback),
-      ...renderSlotToArray(slots, "end", ctx, null)
+      ...renderPropNodes("right", rightFallback),
+      ...renderPropNodes("end", null)
     ];
-    const actionNodes = renderSlotToArray(slots, "actions", ctx, rawProps.actions);
+    const actionNodes = renderPropNodes("actions", rawProps.actions);
 
     const structuredCenter = _.div(
       { class: uiClass(["cms-header-body", rawProps.bodyClass, rawProps.centerClass]) },
