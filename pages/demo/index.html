@@ -209,12 +209,6 @@
   </script>
   <script type="module">
     import { ColorTokensDemoPage } from "../tutorial/color.cms.js";
-    import { btn } from "../tutorial/btn.cms.js";
-
-    import { tabs } from "../tutorial/tabs.cms.js";
-    import { drawer } from "../tutorial/drawer.cms.js";
-
-    import { icon } from "../tutorial/icon.cms.js";
 
     // Layout & Structure
     import { tapPanel } from "../tutorial/tap-panel.cms.js";
@@ -242,6 +236,18 @@
     import { loadingBar } from "../tutorial/loading-bar.cms.js";
     import { badge } from "../tutorial/badge.cms.js";
     import { chip } from "../tutorial/chip.cms.js";
+
+    // Navigation & Actions
+
+    import { toolbar } from "../tutorial/toolbar.cms.js";
+    import { tabs } from "../tutorial/tabs.cms.js";
+    //import { routetab } from "../tutorial/routetab.cms.js";
+    import { menu } from "../tutorial/menu.cms.js";
+    //import { contextmenu } from "../tutorial/contextmenu.cms.js";
+    import { breadcrumbs } from "../tutorial/breadcrumbs.cms.js";
+    import { drawer } from "../tutorial/drawer.cms.js";
+    import { btn } from "../tutorial/btn.cms.js";
+    import { icon } from "../tutorial/icon.cms.js";
 
     // from e inputs
     import { form } from "../tutorial/form.cms.js";
@@ -480,6 +486,14 @@
     _.router.add("/demo/component/loadingbar", () => loadingBar);
     _.router.add("/demo/component/badge", () => badge);
     _.router.add("/demo/component/chip", () => chip);
+
+    // Navigation & Actions
+    //_.router.add("/demo/component/breadcrumbs", () => breadcrumbs);
+    // _.router.add("/demo/component/breadcrumbitem", () => breadcrumbItem);
+    _.router.add("/demo/component/toolbar", () => toolbar);
+    _.router.add("/demo/component/tabs", () => tabs);
+
+    //_.router.add("/demo/component/stepper", () => stepper);
 
     // from e inputs
     _.router.add("/demo/component/form", () => form);
