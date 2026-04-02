@@ -10819,64 +10819,215 @@
   }
 
   UI.Parallax = function Parallax(...args) {
-    const { props, children } = CMSwift.uiNormalizeArgs(args);
-    const slots = props.slots || {};
-    const height = uiUnwrap(props.height) || "220px";
-    const speed = uiUnwrap(props.speed) ?? 0.3;
-    const startTop = uiUnwrap(props.startTop) ?? 0;
-    const image = uiUnwrap(props.image) || uiUnwrap(props.src) || "";
-    const bgImage = props.background || (image ? `url(${image})` : "");
-    const style = Object.assign({}, props.style || {}, {
-      "--cms-parallax-height": height,
-    });
+    const { props: rawProps, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = rawProps.slots || {};
+    const props = { ...rawProps };
 
-    if (bgImage) style["--cms-parallax-image"] = bgImage;
-    const overlay = uiUnwrap(props.overlay);
-    if (overlay) style["--cms-parallax-overlay"] = overlay;
-    const color = uiUnwrap(props.color);
-    if (color) style["--cms-parallax-color"] = color;
-    const bgPosition = uiUnwrap(props.bgPosition);
-    if (bgPosition) style["--cms-parallax-position"] = bgPosition;
-    const bgSize = uiUnwrap(props.bgSize);
-    if (bgSize) style["--cms-parallax-size"] = bgSize;
+    if (props.color != null && props.textColor == null) props.textColor = props.color;
+    delete props.color;
+    applyCommonProps(props);
 
-    const bg = _.div({
-      class: uiClass(["cms-parallax-bg", props.bgClass]),
+    const stateClass = uiComputed(rawProps.state, () => {
+      const state = normalizeState(uiUnwrap(rawProps.state));
+      return state ? `cms-state-${state}` : "";
     });
-    const contentNodes = children.length
-      ? renderSlotToArray(slots, "default", {}, children)
-      : renderSlotToArray(slots, "content", {}, props.content);
-    const content = _.div(
-      { class: uiClass(["cms-parallax-content", props.contentClass]) },
-      ...contentNodes
-    );
+    const mapColorValue = (value) => {
+      if (value == null || value === false || value === "") return "";
+      const text = String(value);
+      return isTokenCSS(text) ? `var(--cms-${text})` : text;
+    };
+    const getBackgroundImage = () => {
+      const background = uiUnwrap(rawProps.background);
+      if (background) return String(background);
+      const source = uiUnwrap(rawProps.image) || uiUnwrap(rawProps.src) || "";
+      if (!source) return "linear-gradient(120deg, #1b2c5a, #2f6d8f, #2a8f5c)";
+      const text = String(source);
+      if (/^url\(/i.test(text) || /gradient\(/i.test(text) || /^var\(/i.test(text)) return text;
+      return `url(${text})`;
+    };
+    const getNumericValue = (value, fallback) => {
+      const num = Number(uiUnwrap(value));
+      return Number.isFinite(num) ? num : fallback;
+    };
+
+    const ctx = {
+      speed: () => uiUnwrap(rawProps.speed) ?? 0.18,
+      state: () => uiUnwrap(rawProps.state) || "",
+      disabled: () => !!uiUnwrap(rawProps.disabled)
+    };
+
+    const badgeNodes = renderSlotToArray(slots, "badge", ctx, rawProps.badge);
+    const backgroundNodes = renderSlotToArray(slots, "background", ctx, rawProps.backgroundContent);
+    const eyebrowNodes = renderSlotToArray(slots, "eyebrow", ctx, rawProps.eyebrow ?? rawProps.kicker);
+    const titleNodes = renderSlotToArray(slots, "title", ctx, rawProps.title);
+    const subtitleNodes = renderSlotToArray(slots, "subtitle", ctx, rawProps.subtitle);
+    const headerNodes = renderSlotToArray(slots, "header", ctx, rawProps.header);
+    const asideNodes = renderSlotToArray(slots, "aside", ctx, rawProps.aside);
+    const mediaNodes = renderSlotToArray(slots, "media", ctx, rawProps.media);
+    const contentNodes = renderSlotToArray(slots, "content", ctx, rawProps.content ?? rawProps.body);
+    const defaultNodes = renderSlotToArray(slots, "default", ctx, children?.length ? children : []);
+    const footerNodes = renderSlotToArray(slots, "footer", ctx, rawProps.footer);
+    const actionsNodes = renderSlotToArray(slots, "actions", ctx, rawProps.actions);
+    const mergedBodyNodes = [...contentNodes, ...defaultNodes];
+
+    const generatedBadge = badgeNodes.length
+      ? _.div({ class: uiClass(["cms-parallax-badge", rawProps.badgeClass]) }, ...badgeNodes)
+      : null;
+    const hasStructuredHeader = eyebrowNodes.length || titleNodes.length || subtitleNodes.length || headerNodes.length || asideNodes.length;
+    const generatedHeader = hasStructuredHeader
+      ? _.div(
+        { class: uiClass(["cms-parallax-header", rawProps.headerClass]) },
+        _.div(
+          { class: "cms-parallax-head" },
+          _.div(
+            { class: "cms-parallax-head-main" },
+            eyebrowNodes.length ? _.div({ class: uiClass(["cms-parallax-eyebrow", rawProps.eyebrowClass]) }, ...eyebrowNodes) : null,
+            titleNodes.length ? _.div({ class: uiClass(["cms-parallax-title", rawProps.titleClass]) }, ...titleNodes) : null,
+            subtitleNodes.length ? _.div({ class: uiClass(["cms-parallax-subtitle", rawProps.subtitleClass]) }, ...subtitleNodes) : null,
+            headerNodes.length ? _.div({ class: uiClass(["cms-parallax-header-content", rawProps.headerContentClass]) }, ...headerNodes) : null
+          ),
+          asideNodes.length ? _.div({ class: uiClass(["cms-parallax-aside", rawProps.asideClass]) }, ...asideNodes) : null
+        )
+      )
+      : null;
+    const generatedMedia = mediaNodes.length
+      ? _.div({ class: uiClass(["cms-parallax-media", rawProps.mediaClass]) }, ...mediaNodes)
+      : null;
+    const generatedBody = mergedBodyNodes.length
+      ? _.div({ class: uiClass(["cms-parallax-body", rawProps.bodyClass]) }, ...mergedBodyNodes)
+      : null;
+    const generatedFooter = (footerNodes.length || actionsNodes.length)
+      ? _.div(
+        { class: uiClass(["cms-parallax-footer", rawProps.footerClass]) },
+        footerNodes.length ? _.div({ class: "cms-parallax-footer-content" }, ...footerNodes) : null,
+        actionsNodes.length ? _.div({ class: "cms-parallax-actions" }, ...actionsNodes) : null
+      )
+      : null;
+
     const wrapProps = CMSwift.omit(props, [
-      "height", "speed", "startTop", "image", "src", "background",
-      "overlay", "color", "bgPosition", "bgSize",
-      "bgClass", "contentClass", "content", "class", "style", "slots"
+      "actions", "align", "aside", "asideClass", "background", "backgroundContent", "backgroundContentClass",
+      "badge", "badgeClass", "bgClass", "bgPosition", "bgRepeat", "bgSize", "body", "bodyClass", "color",
+      "content", "contentClass", "contentMaxWidth", "disabled", "eyebrow", "eyebrowClass", "footer",
+      "footerClass", "gap", "header", "headerClass", "headerContentClass", "height", "image", "imageAlt",
+      "imageClass", "innerClass", "justify", "kicker", "maxOffset", "media", "mediaClass", "minHeight",
+      "overlay", "padding", "slots", "speed", "src", "startTop", "state", "subtitle", "subtitleClass",
+      "textColor", "title", "titleClass"
     ]);
-    wrapProps.class = uiClass(["cms-parallax", props.class]);
+    wrapProps.class = uiClass([
+      "cms-parallax",
+      "cms-singularity",
+      stateClass,
+      uiWhen(rawProps.disabled, "cms-parallax-static"),
+      uiWhen(generatedBadge, "cms-parallax-has-badge"),
+      uiWhen(hasStructuredHeader, "cms-parallax-has-header"),
+      props.class
+    ]);
+    wrapProps.style = { ...(props.style || {}) };
+    if (rawProps.height != null) wrapProps.style["--cms-parallax-height"] = uiStyleValue(rawProps.height, toCssSize);
+    if (rawProps.minHeight != null) wrapProps.style["--cms-parallax-min-height"] = uiStyleValue(rawProps.minHeight, toCssSize);
+    if (rawProps.padding != null) wrapProps.style["--cms-parallax-padding"] = uiStyleValue(rawProps.padding, toCssSize);
+    if (rawProps.gap != null) wrapProps.style["--cms-parallax-gap"] = uiStyleValue(rawProps.gap, toCssSize);
+    if (rawProps.contentMaxWidth != null) wrapProps.style["--cms-parallax-content-max-width"] = uiStyleValue(rawProps.contentMaxWidth, toCssSize);
+    if (rawProps.justify != null) wrapProps.style["--cms-parallax-justify"] = uiStyleValue(rawProps.justify);
+    if (rawProps.align != null) wrapProps.style["--cms-parallax-align"] = uiStyleValue(rawProps.align);
+    if (rawProps.color != null) wrapProps.style["--cms-parallax-color"] = uiStyleValue(rawProps.color, mapColorValue);
+    if (rawProps.overlay != null) wrapProps.style["--cms-parallax-overlay"] = uiStyleValue(rawProps.overlay);
+    if (rawProps.bgPosition != null) wrapProps.style["--cms-parallax-position"] = uiStyleValue(rawProps.bgPosition);
+    if (rawProps.bgSize != null) wrapProps.style["--cms-parallax-size"] = uiStyleValue(rawProps.bgSize);
+    if (rawProps.bgRepeat != null) wrapProps.style["--cms-parallax-repeat"] = uiStyleValue(rawProps.bgRepeat);
+    wrapProps.style["--cms-parallax-image"] = (uiIsReactive(rawProps.background) || uiIsReactive(rawProps.image) || uiIsReactive(rawProps.src))
+      ? () => getBackgroundImage()
+      : getBackgroundImage();
+
+    const bg = _.div(
+      { class: uiClass(["cms-parallax-bg", rawProps.bgClass]) },
+      backgroundNodes.length
+        ? _.div({ class: uiClass(["cms-parallax-bg-content", rawProps.backgroundContentClass]) }, ...backgroundNodes)
+        : null
+    );
+    const content = _.div(
+      { class: uiClass(["cms-parallax-content", rawProps.contentClass, rawProps.innerClass]) },
+      generatedBadge,
+      generatedHeader,
+      generatedMedia,
+      generatedBody,
+      generatedFooter
+    );
+
     const wrap = _.div(wrapProps, bg, content);
-    Object.entries(style).forEach((v) => { wrap.style.setProperty(v[0], v[1]); });
+
+    let disposed = false;
     let ticking = false;
-    function update() {
+    let resizeObserver = null;
+
+    const cleanup = () => {
+      if (disposed) return;
+      disposed = true;
+      if (typeof window !== "undefined") {
+        window.removeEventListener("scroll", scheduleUpdate);
+        window.removeEventListener("resize", scheduleUpdate);
+      }
+      resizeObserver?.disconnect?.();
+      resizeObserver = null;
+    };
+
+    const update = () => {
+      if (disposed) return;
+      if (!wrap.isConnected) {
+        cleanup();
+        return;
+      }
+      if (uiUnwrap(rawProps.disabled)) {
+        bg.style.transform = "translate3d(0, 0, 0)";
+        wrap.style.setProperty("--cms-parallax-offset", "0px");
+        return;
+      }
       const rect = wrap.getBoundingClientRect();
-      const offset = (rect.top - startTop) * speed;
-      bg.style.transform = `translateY(${offset}px)`;
-    }
-    function onScroll() {
-      if (ticking) return;
+      const speed = getNumericValue(rawProps.speed, 0.18);
+      const maxOffset = Math.abs(getNumericValue(rawProps.maxOffset, 96));
+      const explicitStartTop = uiUnwrap(rawProps.startTop);
+      const rawOffset = explicitStartTop != null && explicitStartTop !== ""
+        ? (rect.top - getNumericValue(rawProps.startTop, 0)) * speed
+        : (((typeof window !== "undefined" ? window.innerHeight || document.documentElement.clientHeight || 0 : 0) / 2) - (rect.top + (rect.height / 2))) * speed;
+      const offset = maxOffset > 0 ? Math.max(-maxOffset, Math.min(maxOffset, rawOffset)) : rawOffset;
+      const cssOffset = `${offset.toFixed(2)}px`;
+      bg.style.transform = `translate3d(0, ${cssOffset}, 0)`;
+      wrap.style.setProperty("--cms-parallax-offset", cssOffset);
+    };
+
+    function scheduleUpdate() {
+      if (disposed || ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        update();
         ticking = false;
+        update();
       });
     }
 
-    //update();
-    setTimeout(update, 100);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    if (typeof window !== "undefined") {
+      window.addEventListener("scroll", scheduleUpdate, { passive: true });
+      window.addEventListener("resize", scheduleUpdate);
+      if (typeof ResizeObserver !== "undefined") {
+        resizeObserver = new ResizeObserver(() => { scheduleUpdate(); });
+        resizeObserver.observe(wrap);
+      }
+      requestAnimationFrame(() => { scheduleUpdate(); });
+      setTimeout(() => { scheduleUpdate(); }, 90);
+    }
+
+    wrap.refresh = () => {
+      scheduleUpdate();
+      return wrap;
+    };
+    wrap.update = wrap.refresh;
+    wrap.destroy = () => {
+      cleanup();
+      wrap.remove();
+      return null;
+    };
+    wrap._dispose = cleanup;
+
+    setPropertyProps(wrap, rawProps);
     return wrap;
   };
   if (CMSwift.isDev?.()) {
@@ -10885,25 +11036,62 @@
       signature: "UI.Parallax(...children) | UI.Parallax(props, ...children)",
       props: {
         src: "string",
+        image: "string",
+        background: "string",
+        backgroundContent: "Node|Function|Array",
         height: "string|number",
+        minHeight: "string|number",
         speed: "number",
+        maxOffset: "number",
         startTop: "number",
+        state: "success|warning|danger|info|primary|secondary|dark|light|string",
         overlay: "string",
         color: "string",
         bgPosition: "string",
         bgSize: "string",
+        bgRepeat: "string",
+        padding: "string|number",
+        gap: "string|number",
+        justify: "string",
+        align: "string",
+        contentMaxWidth: "string|number",
+        disabled: "boolean",
+        badge: "Node|Function|Array",
+        eyebrow: "String|Node|Function|Array",
+        title: "String|Node|Function|Array",
+        subtitle: "String|Node|Function|Array",
+        header: "Node|Function|Array",
+        aside: "Node|Function|Array",
+        media: "Node|Function|Array",
+        content: "Node|Function|Array",
+        footer: "Node|Function|Array",
+        actions: "Node|Function|Array",
         bgClass: "string",
+        badgeClass: "string",
+        headerClass: "string",
+        bodyClass: "string",
+        footerClass: "string",
         contentClass: "string",
-        slots: "{ content?, default? }",
+        slots: "{ background?, badge?, eyebrow?, title?, subtitle?, header?, aside?, media?, content?, footer?, actions?, default? }",
         class: "string",
         style: "object"
       },
       slots: {
-        content: "Parallax content",
-        default: "Fallback content"
+        background: "Contenuto decorativo dentro il layer di sfondo",
+        badge: "Meta badge/chip sopra il contenuto principale",
+        eyebrow: "Eyebrow/kicker",
+        title: "Titolo principale",
+        subtitle: "Sottotitolo o testo di supporto",
+        header: "Contenuto aggiuntivo in header",
+        aside: "Area laterale header",
+        media: "Contenuto multimediale o card in foreground",
+        content: "Body principale",
+        footer: "Footer informativo",
+        actions: "Area azioni",
+        default: "Fallback body content"
       },
-      returns: "HTMLDivElement",
-      description: "Parallax container con background e contenuti."
+      returns: "HTMLDivElement con methods refresh/update/destroy",
+      description: "Hero/section parallax standardizzato con header strutturato, body, actions, slots e API minima di refresh."
     };
   }
 
