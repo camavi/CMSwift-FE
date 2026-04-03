@@ -231,8 +231,16 @@
 
       ["/demo/component/tap-panel", "../tutorial/tap-panel.cms.js", "tapPanel"],
       ["/demo/component/appshell", "../tutorial/app-shell.cms.js", "appShell"],
-      ["/demo/component/cms-lifecycle", "../tutorial/cms-lifecycle.cms.js", "cmsLifecycle"],
-      ["/demo/component/cms-platform", "../tutorial/cms-platform.cms.js", "cmsPlatform"],
+      [
+        "/demo/component/cms-lifecycle",
+        "../tutorial/cms-lifecycle.cms.js",
+        "cmsLifecycle",
+      ],
+      [
+        "/demo/component/cms-platform",
+        "../tutorial/cms-platform.cms.js",
+        "cmsPlatform",
+      ],
       [
         "/demo/component/cms-reactive",
         "../tutorial/cms-reactive.cms.js",
@@ -416,16 +424,22 @@
 
     const componentItems = [
       {
-        label: "Layout & Structure",
-        icon: "mobile_layout",
+        label: "CMS Tests tools",
+        icon: "bug_report",
         items: [
-          createComponentItem("tapPanel", "/demo/component/tap-panel"),
-          createComponentItem("appShell", "/demo/component/appshell"),
           createComponentItem("CMS Lifecycle", "/demo/component/cms-lifecycle"),
           createComponentItem("CMS Platform", "/demo/component/cms-platform"),
           createComponentItem("CMS Reactive", "/demo/component/cms-reactive"),
           createComponentItem("CMS Rod", "/demo/component/cms-rod"),
           createComponentItem("CMS Renderer", "/demo/component/cms-renderer"),
+        ],
+      },
+      {
+        label: "Layout & Structure",
+        icon: "mobile_layout",
+        items: [
+          createComponentItem("tapPanel", "/demo/component/tap-panel"),
+          createComponentItem("appShell", "/demo/component/appshell"),
           createComponentItem("Layout", "/demo/component/layout"),
           createComponentItem("Page", "/demo/component/page"),
           createComponentItem("Header", "/demo/component/header"),
@@ -603,3 +617,4 @@
     hljs.highlightAll();
   </script>
 </html>
+
