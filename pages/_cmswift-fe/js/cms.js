@@ -46,28 +46,30 @@
       render: {
         description: "Bridge props -> DOM per hyperscript _, attributi, class, style, eventi e children reattivi.",
         entrypoints: ["createElement", "setProp", "bindProp"],
-        status: "priority-1",
+        status: "milestone-1-closed",
         knownLimits: [
           "Mancano test sistematici sugli edge case del renderer.",
-          "Le regole su attributi DOM/property/eventi vanno rese piu esplicite e coperte."
+          "Le regole su attributi DOM/property/eventi vanno rese piu esplicite e coperte.",
+          "Gli eventi non hanno ancora delegation o composizione/diff avanzato di listener multipli."
         ]
       },
       reactive: {
         description: "Core minimale signal/effect usato come base della reattivita.",
-        entrypoints: ["CMSwift.reactive.signal", "CMSwift.reactive.effect"],
-        status: "priority-2",
+        entrypoints: ["CMSwift.reactive.signal", "CMSwift.reactive.effect", "CMSwift.reactive.computed", "CMSwift.reactive.untracked"],
+        status: "priority-2-in-progress",
         knownLimits: [
-          "Manca dispose nativo degli effect.",
-          "Scheduling e protection da loop non sono ancora formalizzati."
+          "La protezione loop copre i loop sincroni per singolo effect, non ancora i cicli complessi tra effect multipli.",
+          "Mancano batching e primitive avanzate per controllare scheduling e transazioni."
         ]
       },
       rod: {
         description: "Layer reattivo di alto livello per binding DOM, model e interpolazioni.",
         entrypoints: ["_.rod", "CMSwift.rodBind", "CMSwift.rodModel"],
-        status: "priority-3",
+        status: "milestone-1-closed",
         knownLimits: [
           "Va chiarito meglio il rapporto con CMSwift.reactive.",
-          "Serve una superficie API piu coerente tra bind, model e inspect."
+          "rodApplyBinding mantiene ancora una logica DOM dedicata separata dal renderer.",
+          "Manca una suite di test automatica dedicata."
         ]
       },
       mount: {
@@ -105,6 +107,13 @@
   // Cleanup registry (DOM -> disposers)
   // ===============================
   CMSwift._cleanupRegistry = new WeakMap();
+  CMSwift._registerCleanup = function (node, disposer) {
+    if (!node || typeof disposer !== "function") return disposer;
+    const list = CMSwift._cleanupRegistry.get(node) || [];
+    list.push(disposer);
+    CMSwift._cleanupRegistry.set(node, list);
+    return disposer;
+  };
 
 
   CMSwift.dom = {
@@ -151,10 +160,99 @@
   // REACTIVE core
   CMSwift.reactive = (() => {
     let CURRENT_EFFECT = null;
+    const EFFECT_STACK = [];
+    const MAX_SYNC_EFFECT_RERUNS = 100;
+
+    function cleanupEffect(record) {
+      if (!record) return;
+
+      if (record._deps.size) {
+        record._deps.forEach((dep) => dep.delete(record._runner));
+        record._deps.clear();
+      }
+
+      if (typeof record._cleanup === "function") {
+        const cleanup = record._cleanup;
+        record._cleanup = null;
+        try { cleanup(); } catch (e) { console.error("[CMSwift.reactive.effect] cleanup error:", e); }
+      }
+    }
+
+    function runEffect(record) {
+      if (!record || !record.active) return;
+
+      cleanupEffect(record);
+
+      EFFECT_STACK.push(record);
+      CURRENT_EFFECT = record;
+
+      try {
+        const onCleanup = (fn) => {
+          record._cleanup = typeof fn === "function" ? fn : null;
+        };
+
+        const out = record.fn.length > 0 ? record.fn(onCleanup) : record.fn();
+        if (typeof out === "function") {
+          record._cleanup = out;
+        }
+      } finally {
+        EFFECT_STACK.pop();
+        CURRENT_EFFECT = EFFECT_STACK[EFFECT_STACK.length - 1] || null;
+      }
+    }
 
     function effect(fn) {
-      CURRENT_EFFECT = fn;
-      try { fn(); } finally { CURRENT_EFFECT = null; }
+      if (typeof fn !== "function") return () => { };
+
+      const record = {
+        fn,
+        active: true,
+        _deps: new Set(),
+        _cleanup: null,
+        _runner: null,
+        _running: false,
+        _queued: false
+      };
+
+      const runner = () => {
+        if (!record.active) return;
+
+        if (record._running) {
+          record._queued = true;
+          return;
+        }
+
+        record._running = true;
+        let reruns = 0;
+
+        try {
+          do {
+            record._queued = false;
+            runEffect(record);
+            reruns++;
+
+            if (reruns >= MAX_SYNC_EFFECT_RERUNS) {
+              record._queued = false;
+              console.warn("[CMSwift.reactive.effect] loop guard triggered: too many synchronous reruns", {
+                max: MAX_SYNC_EFFECT_RERUNS,
+                effect: fn.name || "anonymous"
+              });
+              break;
+            }
+          } while (record.active && record._queued);
+        } finally {
+          record._running = false;
+        }
+      };
+      record._runner = runner;
+
+      runner();
+
+      return () => {
+        if (!record.active) return;
+        record.active = false;
+        cleanupEffect(record);
+      };
     }
 
     function signal(initial) {
@@ -162,19 +260,57 @@
       const subs = new Set();
 
       function get() {
-        if (CURRENT_EFFECT) subs.add(CURRENT_EFFECT);
+        if (CURRENT_EFFECT && CURRENT_EFFECT.active) {
+          subs.add(CURRENT_EFFECT._runner);
+          CURRENT_EFFECT._deps.add(subs);
+        }
         return value;
       }
 
       function set(v) {
         value = v;
-        subs.forEach(fn => fn());
+        Array.from(subs).forEach(fn => fn());
       }
 
-      return [get, set];
+      function dispose() {
+        subs.clear();
+      }
+
+      return [get, set, dispose];
     }
 
-    return { signal, effect };
+    function computed(fn) {
+      if (typeof fn !== "function") throw new Error("CMSwift.reactive.computed: fn must be a function");
+
+      const [get, set, disposeSignal] = signal(undefined);
+      const disposeEffect = effect(() => {
+        set(fn());
+      });
+
+      const getter = () => get();
+      getter.dispose = () => {
+        disposeEffect();
+        disposeSignal();
+      };
+      getter.peek = () => get();
+      getter.type = "computed";
+
+      return getter;
+    }
+
+    function untracked(fn) {
+      if (typeof fn !== "function") throw new Error("CMSwift.reactive.untracked: fn must be a function");
+
+      const prevEffect = CURRENT_EFFECT;
+      CURRENT_EFFECT = null;
+      try {
+        return fn();
+      } finally {
+        CURRENT_EFFECT = prevEffect;
+      }
+    }
+
+    return { signal, effect, computed, untracked };
   })();
 
   CMSwift.overlay = (() => {
@@ -440,8 +576,48 @@
   ]);
 
   function normalizeClass(v) {
-    if (Array.isArray(v)) return v.join(" ");
-    return v;
+    const tokens = [];
+    const add = (value) => {
+      if (value == null || value === false) return;
+      if (typeof value === "function") {
+        add(value());
+        return;
+      }
+      if (value && value.type === "rod") {
+        add(value.value);
+        return;
+      }
+      if (Array.isArray(value)) {
+        value.forEach(add);
+        return;
+      }
+      if (typeof value === "object") {
+        Object.entries(value).forEach(([className, enabled]) => {
+          add(enabled ? className : null);
+        });
+        return;
+      }
+      if (value === true) return;
+      String(value).split(/\s+/).forEach((token) => {
+        if (token) tokens.push(token);
+      });
+    };
+
+    add(v);
+    return tokens.length ? Array.from(new Set(tokens)).join(" ") : "";
+  }
+
+  function hasDynamicClassValue(value) {
+    if (value == null || value === false) return false;
+    if (typeof value === "function") return true;
+    if (value && value.type === "rod") return true;
+    if (Array.isArray(value)) return value.some(hasDynamicClassValue);
+    if (typeof value === "object") return Object.values(value).some(hasDynamicClassValue);
+    return false;
+  }
+
+  function isEventProp(key) {
+    return typeof key === "string" && (key.startsWith("on:") || (key.startsWith("on") && key.length > 2));
   }
 
   const ROD_INTERPOLATION_BUFFER_LIMIT = 128;
@@ -506,7 +682,7 @@
 
   function createElement(tag, ...args) {
     const isSVG = SVG_TAGS.has(tag);
-    const el = tag === "text"
+    const el = tag === "text" && !isSVG
       ? document.createTextNode("")
       : isSVG
         ? document.createElementNS(SVG_NS, tag)
@@ -514,6 +690,211 @@
 
     const isRod = (v) => !!v && v.type === "rod";
     const interpolationCursor = createRodInterpolationCursor();
+
+    function isBooleanDomProp(name) {
+      if (isSVG || !(name in el)) return false;
+      try {
+        return typeof el[name] === "boolean";
+      } catch {
+        return false;
+      }
+    }
+
+    function isAttributeOnlyProp(name) {
+      return isSVG || name.startsWith("data-") || name.startsWith("aria-") || !(name in el);
+    }
+
+    function getEventName(key) {
+      if (key.startsWith("on:")) return key.slice(3);
+      const raw = key.slice(2);
+      if (!raw) return "";
+      if (raw === "DoubleClick") return "dblclick";
+      return raw.toLowerCase();
+    }
+
+    function normalizeEventOptions(options) {
+      if (options == null || options === false) return false;
+      if (options === true) return { capture: true };
+      if (typeof options === "boolean") return options;
+      if (typeof options === "object") {
+        return {
+          capture: !!options.capture,
+          passive: !!options.passive,
+          once: !!options.once
+        };
+      }
+      return false;
+    }
+
+    function eventOptionsEqual(a, b) {
+      const left = normalizeEventOptions(a);
+      const right = normalizeEventOptions(b);
+      if (typeof left === "boolean" || typeof right === "boolean") return left === right;
+      return !!left && !!right
+        && left.capture === right.capture
+        && left.passive === right.passive
+        && left.once === right.once;
+    }
+
+    function hasDynamicEventValue(value) {
+      if (isRod(value)) return true;
+      if (!value || typeof value !== "object" || Array.isArray(value) || value.nodeType) return false;
+      return isRod(value.handler)
+        || isRod(value.listener)
+        || isRod(value.fn)
+        || isRod(value.options)
+        || typeof value.options === "function";
+    }
+
+    function normalizeEventValue(value) {
+      if (value == null || value === false) {
+        return { handler: null, options: false };
+      }
+      if (typeof value === "function") {
+        return { handler: value, options: false };
+      }
+      if (isRod(value)) {
+        return normalizeEventValue(value.value);
+      }
+      if (typeof value === "object" && !Array.isArray(value) && !value.nodeType) {
+        let handler = value.handler ?? value.listener ?? value.fn ?? null;
+        let options = value.options ?? false;
+        if (isRod(handler)) handler = handler.value;
+        if (isRod(options)) options = options.value;
+        if (typeof options === "function") options = options();
+        return {
+          handler: typeof handler === "function" ? handler : null,
+          options: normalizeEventOptions(options)
+        };
+      }
+      return { handler: null, options: false };
+    }
+
+    function bindEventProp(key, value) {
+      const eventName = getEventName(key);
+      if (!eventName) return;
+
+      const state = {
+        attached: false,
+        handler: null,
+        options: false
+      };
+
+      const dispatch = (event) => {
+        if (typeof state.handler === "function") {
+          const result = state.handler.call(el, event);
+          if (state.options && typeof state.options === "object" && state.options.once) {
+            state.attached = false;
+            state.handler = null;
+          }
+          return result;
+        }
+      };
+
+      const detach = () => {
+        if (state.attached) {
+          el.removeEventListener(eventName, dispatch, state.options);
+          state.attached = false;
+        }
+        state.handler = null;
+      };
+
+      const apply = (nextValue) => {
+        const next = normalizeEventValue(nextValue);
+        const nextHandler = typeof next.handler === "function" ? next.handler : null;
+        const nextOptions = next.options;
+        const optionsChanged = !eventOptionsEqual(state.options, nextOptions);
+
+        if (!nextHandler) {
+          detach();
+          state.options = nextOptions;
+          return;
+        }
+
+        state.handler = nextHandler;
+
+        if (!state.attached || optionsChanged) {
+          if (state.attached) {
+            el.removeEventListener(eventName, dispatch, state.options);
+          }
+          el.addEventListener(eventName, dispatch, nextOptions);
+          state.attached = true;
+          state.options = nextOptions;
+        }
+      };
+
+      CMSwift._registerCleanup(el, detach);
+
+      if (isRod(value)) {
+        CMSwift.reactive.effect(() => {
+          apply(value.value);
+        });
+        return;
+      }
+
+      if (hasDynamicEventValue(value)) {
+        CMSwift.reactive.effect(() => {
+          apply(value);
+        });
+        return;
+      }
+
+      apply(value);
+    }
+
+    function removeProp(key) {
+      if (isContentProp(key)) {
+        el[key] = "";
+        return;
+      }
+      if (key === "class") {
+        el.removeAttribute("class");
+        return;
+      }
+      if (key === "style") {
+        el.removeAttribute("style");
+        return;
+      }
+      if (isBooleanDomProp(key)) {
+        try { el[key] = false; } catch { }
+        el.removeAttribute(key);
+        return;
+      }
+      el.removeAttribute(key);
+      if (!isAttributeOnlyProp(key)) {
+        try {
+          if (typeof el[key] === "string") el[key] = "";
+        } catch { }
+      }
+    }
+
+    function setClassValue(value) {
+      const normalized = normalizeClass(value);
+      if (normalized == null || normalized === false || normalized === "") {
+        el.removeAttribute("class");
+        return;
+      }
+      el.setAttribute("class", String(normalized));
+    }
+
+    function setBooleanProp(key, value) {
+      const next = !!value;
+      el[key] = next;
+      if (next) el.setAttribute(key, "");
+      else el.removeAttribute(key);
+    }
+
+    function setAttributeValue(key, value) {
+      if (value == null || value === false) {
+        el.removeAttribute(key);
+        return;
+      }
+      if (value === true && !isSVG && !key.startsWith("aria-") && !key.startsWith("data-")) {
+        el.setAttribute(key, "");
+        return;
+      }
+      el.setAttribute(key, String(value));
+    }
 
     function setStyleEntry(name, value) {
       if (name == null) return;
@@ -552,22 +933,49 @@
         return;
       }
       if (key === "class") {
-        el.setAttribute("class", normalizeClass(value));
+        setClassValue(value);
         return;
       }
-      if (key === "style" && typeof value === "object") {
-        applyStyleObject(value);
+      if (key === "style") {
+        if (value == null || value === false) {
+          removeProp(key);
+          return;
+        }
+        if (typeof value === "object") {
+          applyStyleObject(value);
+          return;
+        }
+      }
+      if (isBooleanDomProp(key)) {
+        setBooleanProp(key, value);
         return;
       }
-      if (isSVG) {
-        el.setAttribute(key, value);
+      if (value == null || value === false) {
+        removeProp(key);
         return;
       }
-      if (key in el) el[key] = value;
-      else el.setAttribute(key, value);
+      if (isAttributeOnlyProp(key)) {
+        setAttributeValue(key, value);
+        return;
+      }
+      el[key] = value;
     }
 
     function bindProp(key, value) {
+      if (isEventProp(key)) {
+        bindEventProp(key, value);
+        return;
+      }
+      if (key === "class") {
+        if (hasDynamicClassValue(value)) {
+          CMSwift.reactive.effect(() => {
+            setClassValue(normalizeClass(value));
+          });
+          return;
+        }
+        setClassValue(normalizeClass(value));
+        return;
+      }
       if (key === "style" && value && typeof value === "object") {
         Object.entries(value).forEach(([styleName, styleValue]) => {
           if (typeof styleValue === "function") {
@@ -630,6 +1038,61 @@
       });
     }
 
+    function normalizeDynamicChildNodes(value) {
+      const out = [];
+      const add = (item) => {
+        if (item == null || item === false) return;
+        if (Array.isArray(item)) {
+          item.forEach(add);
+          return;
+        }
+        if (typeof item === "string") {
+          out.push(document.createTextNode(item));
+          return;
+        }
+        if (typeof item === "number") {
+          out.push(document.createTextNode(String(item)));
+          return;
+        }
+        if (typeof item === "boolean") return;
+        if (isRod(item)) {
+          out.push(document.createTextNode(String(item.value ?? "")));
+          return;
+        }
+        if (item?.nodeType) {
+          out.push(item);
+          return;
+        }
+        out.push(document.createTextNode(String(item)));
+      };
+      add(value);
+      return out;
+    }
+
+    function appendDynamicChild(renderFn) {
+      const anchor = document.createComment("dyn");
+      el.appendChild(anchor);
+      let currentNodes = [];
+
+      CMSwift.reactive.effect(() => {
+        currentNodes.forEach((node) => {
+          if (node.parentNode) node.parentNode.removeChild(node);
+        });
+        currentNodes = [];
+
+        const parent = anchor.parentNode;
+        if (!parent) return;
+
+        const nextNodes = normalizeDynamicChildNodes(renderFn());
+        if (!nextNodes.length) return;
+
+        const frag = document.createDocumentFragment();
+        nextNodes.forEach((node) => frag.appendChild(node));
+        parent.insertBefore(frag, anchor.nextSibling);
+        currentNodes = nextNodes;
+      });
+    }
+
     function appendChildValue(value) {
       if (value == null) return;
 
@@ -651,9 +1114,7 @@
       }
 
       if (typeof value === "function") {
-        const t = document.createTextNode("");
-        el.appendChild(t);
-        CMSwift.reactive.effect(() => { t.textContent = value(); });
+        appendDynamicChild(value);
         return;
       }
 
@@ -688,12 +1149,7 @@
       }
 
       if (typeof arg === "function") {
-        const t = document.createTextNode("");
-        el.appendChild(t);
-
-        CMSwift.reactive.effect(() => {
-          t.textContent = arg();
-        });
+        appendDynamicChild(arg);
         continue;
       }
 
@@ -709,10 +1165,6 @@
 
       if (typeof arg === "object") {
         for (const [key, value] of Object.entries(arg)) {
-          if (key.startsWith("on") && typeof value === "function") {
-            el.addEventListener(key.slice(2).toLowerCase(), value);
-            continue;
-          }
           if (typeof value === "string") {
             const segments = takeInterpolatedSegments(value, interpolationCursor);
             if (segments) {
@@ -994,13 +1446,77 @@
       return;
     }
 
+    const isSvgEl = el.namespaceURI === SVG_NS;
+
+    const isBooleanDomProp = (name) => {
+      if (isSvgEl || !(name in el)) return false;
+      try {
+        return typeof el[name] === "boolean";
+      } catch {
+        return false;
+      }
+    };
+
+    const isAttributeOnlyProp = (name) => isSvgEl || name.startsWith("data-") || name.startsWith("aria-") || !(name in el);
+
+    const setAttributeValue = (name, next) => {
+      if (next == null || next === false) {
+        el.removeAttribute(name);
+        return;
+      }
+      if (next === true && !isSvgEl && !name.startsWith("aria-") && !name.startsWith("data-")) {
+        el.setAttribute(name, "");
+        return;
+      }
+      el.setAttribute(name, String(next));
+    };
+
+    const setStyleValue = (name, next) => {
+      const styleName = String(name);
+      const isCssProperty = styleName.startsWith("--") || styleName.includes("-");
+      if (next == null || next === false || next === "") {
+        if (isCssProperty) el.style.removeProperty(styleName);
+        else el.style[styleName] = "";
+        return;
+      }
+      if (isCssProperty) {
+        el.style.setProperty(styleName, String(next));
+        return;
+      }
+      el.style[styleName] = next;
+    };
+
+    const removeProp = (name) => {
+      if (isContentProp(name)) {
+        el[name] = "";
+        return;
+      }
+      if (name === "class") {
+        el.removeAttribute("class");
+        return;
+      }
+      if (isBooleanDomProp(name)) {
+        try { el[name] = false; } catch { }
+        el.removeAttribute(name);
+        return;
+      }
+      el.removeAttribute(name);
+      if (!isAttributeOnlyProp(name)) {
+        try {
+          if (typeof el[name] === "string") el[name] = "";
+        } catch { }
+      }
+    };
+
     if (isContentProp(key)) {
       el[key] = value ?? "";
       return;
     }
 
     if (key === "class") {
-      el.setAttribute("class", normalizeClass(value));
+      const normalized = normalizeClass(value);
+      if (!normalized) el.removeAttribute("class");
+      else el.setAttribute("class", normalized);
       return;
     }
 
@@ -1017,16 +1533,16 @@
     }
 
     if (key.startsWith("attr:")) {
-      CMSwift.dom.attr(el, key.slice(5), value);
+      setAttributeValue(key.slice(5), value);
       return;
     }
     if (key.startsWith("@")) {
-      CMSwift.dom.attr(el, key.slice(1), value);
+      setAttributeValue(key.slice(1), value);
       return;
     }
 
     if (key.startsWith("style.")) {
-      el.style[key.slice(6)] = value ?? "";
+      setStyleValue(key.slice(6), value);
       return;
     }
 
@@ -1041,12 +1557,25 @@
       return;
     }
 
+    if (isBooleanDomProp(key)) {
+      const next = !!value;
+      el[key] = next;
+      if (next) el.setAttribute(key, "");
+      else el.removeAttribute(key);
+      return;
+    }
+
+    if (value == null || value === false) {
+      removeProp(key);
+      return;
+    }
+
     if (key in el) {
       el[key] = value;
       return;
     }
 
-    CMSwift.dom.attr(el, key, value);
+    setAttributeValue(key, value);
   }
 
   function rodCreateComponent(initialValue) {
@@ -1154,9 +1683,13 @@
     let _val = obj[key];
     let _get = null;
     let _set = null;
+    let _disposeSignal = null;
 
     if (CMSwift?.reactive?.signal) {
-      [_get, _set] = CMSwift.reactive.signal(_val);
+      [_get, _set, _disposeSignal] = CMSwift.reactive.signal(_val);
+      if (_disposeSignal && typeof obj.onDispose === "function") {
+        obj.onDispose(_disposeSignal);
+      }
     }
 
     Object.defineProperty(obj, key, {
@@ -1247,19 +1780,27 @@
     const r = _.rod(get());
     let syncing = false;
 
-    r.action((v) => {
+    const stopRodToSignal = CMSwift.reactive.effect(() => {
+      const v = r.value;
+      const currentSignal = CMSwift.reactive.untracked(() => get());
       if (syncing) return;
-      if (get() === v) return;
+      if (currentSignal === v) return;
       syncing = true;
       try { set(v); } finally { syncing = false; }
     });
 
-    CMSwift.reactive.effect(() => {
+    const stopEffect = CMSwift.reactive.effect(() => {
       const v = get();
-      if (r.value === v) return;
+      const currentRod = CMSwift.reactive.untracked(() => r.value);
+      if (currentRod === v) return;
       syncing = true;
       try { r._setSilent(v); } finally { syncing = false; }
     });
+
+    if (typeof r.onDispose === "function") {
+      r.onDispose(stopRodToSignal);
+      r.onDispose(stopEffect);
+    }
 
     return r;
   };
@@ -1774,10 +2315,10 @@
 
       CMSwift.reactive.effect = function (fn, meta) {
         // meta opzionale (string/object) per identificare
-        const wrapped = () => {
+        const wrapped = (...args) => {
           const t0 = now();
           inc("effectsRun");
-          try { return fn(); }
+          try { return fn(...args); }
           finally {
             const dt = now() - t0;
             if (dt >= cfg.slowEffectMs) {
@@ -2051,11 +2592,7 @@
   // ===============================
   CMSwift.store.computed = function (fn) {
     if (typeof fn !== "function") throw new Error("store.computed: fn must be a function");
-    const [get, set] = CMSwift.reactive.signal(undefined);
-    CMSwift.reactive.effect(() => {
-      set(fn());
-    });
-    return get; // getter
+    return CMSwift.reactive.computed(fn);
   };
 
 
@@ -3849,4 +4386,6 @@
   // alias per compatibilità
   CMSwift.signal = CMSwift.reactive.signal;
   CMSwift.effect = CMSwift.reactive.effect;
+  CMSwift.computed = CMSwift.reactive.computed;
+  CMSwift.untracked = CMSwift.reactive.untracked;
 })();

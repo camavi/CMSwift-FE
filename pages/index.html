@@ -21,6 +21,18 @@
     <!-- and it's easy to individually load additional languages -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
     <style>
+      .color-primary {
+        background-color: #2688f8;
+        color: white;
+      }
+      .color-success {
+        background-color: #4bb543;
+        color: white;
+      }
+      [data-state="ready"] {
+        background-color: #144a87;
+        color: white;
+      }
       body {
         margin: 0;
         background: var(--cms-bg);
@@ -219,6 +231,17 @@
 
       ["/demo/component/tap-panel", "../tutorial/tap-panel.cms.js", "tapPanel"],
       ["/demo/component/appshell", "../tutorial/app-shell.cms.js", "appShell"],
+      [
+        "/demo/component/cms-reactive",
+        "../tutorial/cms-reactive.cms.js",
+        "cmsReactive",
+      ],
+      ["/demo/component/cms-rod", "../tutorial/cms-rod.cms.js", "cmsRod"],
+      [
+        "/demo/component/cms-renderer",
+        "../tutorial/cms-renderer.cms.js",
+        "cmsRenderer",
+      ],
       ["/demo/component/layout", "../tutorial/layout.cms.js", "layout"],
       ["/demo/component/page", "../tutorial/page.cms.js", "page"],
       ["/demo/component/header", "../tutorial/header.cms.js", "header"],
@@ -396,6 +419,9 @@
         items: [
           createComponentItem("tapPanel", "/demo/component/tap-panel"),
           createComponentItem("appShell", "/demo/component/appshell"),
+          createComponentItem("CMS Reactive", "/demo/component/cms-reactive"),
+          createComponentItem("CMS Rod", "/demo/component/cms-rod"),
+          createComponentItem("CMS Renderer", "/demo/component/cms-renderer"),
           createComponentItem("Layout", "/demo/component/layout"),
           createComponentItem("Page", "/demo/component/page"),
           createComponentItem("Header", "/demo/component/header"),
