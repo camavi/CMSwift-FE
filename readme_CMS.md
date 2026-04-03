@@ -18,7 +18,7 @@ Stato generale oggi:
 - reactive core: milestone 1 chiusa
 - rod: milestone 1 chiusa
 - lifecycle / mount / cleanup: milestone 1 chiusa
-- moduli platform: in apertura strutturata, focus iniziale `store`
+- moduli platform: milestone 1 chiusa
 
 1. Renderer DOM e bridge props
 - file: `pages/_cmswift-fe/js/cms.js`
@@ -49,7 +49,7 @@ Stato generale oggi:
 - area: overlay, store, auth, http, router, `CMSwift.ui.meta`
 - motivo: sono utili, ma oggi vivono tutti nello stesso file con responsabilita molto ampie
 - obiettivo: modularita interna migliore, documentazione per modulo e confini piu chiari
-- stato: in progress, primo modulo in lavorazione `store`
+- stato: milestone 1 chiusa, primo giro documentato e corretto modulo per modulo
 
 ## Stato iniziale
 
@@ -481,7 +481,7 @@ Cleanup:
 - `store` non ha ancora una suite di test automatica dedicata
 
 Stato:
-- platform: `priority-5-in-progress`
+- platform: milestone 1 chiusa
 - store: primo modulo aperto e corretto a livello strutturale
 
 ## Platform / Router: contratto iniziale
@@ -521,7 +521,7 @@ Stato route:
 
 Stato:
 - router: primo step strutturale chiuso
-- platform: ancora in progress
+- platform: milestone 1 chiusa
 
 ## Platform / HTTP: contratto iniziale
 
@@ -560,7 +560,7 @@ Auth bridge:
 
 Stato:
 - http: primo step strutturale chiuso
-- platform: ancora in progress
+- platform: milestone 1 chiusa
 
 ## Platform / Overlay: contratto iniziale
 
@@ -594,7 +594,74 @@ Cleanup:
 
 Stato:
 - overlay: primo step strutturale chiuso
-- platform: ancora in progress
+- platform: milestone 1 chiusa
+
+## Platform / Auth: contratto iniziale
+
+Area:
+- `CMSwift.plugins.auth`
+- `CMSwift.auth.user/isAuth`
+- `CMSwift.auth.hasRole/can/canAny/canAll`
+- `CMSwift.auth.loginAsync/logoutAsync/fetch`
+
+### Cosa supporta ora
+
+- stato auth persistito via `store.signal(...)`
+- ruoli e permessi letti da `user.roles` e `user.permissions`
+- login, logout e refresh token asincroni
+- guard router per route protette
+- fetch autenticata con header token
+- devtools base con `status`, `inspect`, `trace`
+
+### Correzione fatta in questo step
+
+Auth fetch:
+- `auth.fetch(...)` non ritenta piu all'infinito sui `401`
+- dopo un refresh riuscito il retry autenticato viene tentato una sola volta per request
+
+Devtools / stato:
+- il plugin espone ora `_getState`, cosi `status()` e `inspect()` possono leggere davvero token, `expiresAt` e stato auth completo
+
+### Limiti attuali del blocco auth
+
+- il modulo non ha ancora una demo browser dedicata
+- `loginAsync`, `logoutAsync` e `doRefresh()` usano ancora `fetch` diretto e non una superficie HTTP unificata del core
+- la semantica dei redirect auth dipende ancora da un solo `beforeEach` nel router
+
+Stato:
+- auth: primo step strutturale chiuso
+- platform: milestone 1 chiusa
+
+## Platform / UI Meta: contratto iniziale
+
+Area:
+- `CMSwift.ui.meta`
+- `CMSwift.docTable`
+- `CMSwift.ui.inspect`
+
+### Cosa supporta ora
+
+- registry centrale della documentazione macchina dei componenti UI
+- viewer dev `CMSwift.docTable(name)` per props, slots, events, signature e returns
+- inspect raw del meta con `CMSwift.ui.inspect(name)`
+
+### Correzione fatta in questo step
+
+Doc viewer:
+- `CMSwift.docTable(...)` non dipende piu in modo rigido da `_.TabPanel`
+- se `TabPanel` non e disponibile, il viewer usa un fallback statico leggibile
+- quando un meta non ha props ma ha solo `slots/events`, il titolo non resta forzato su `Props`
+- quando non c'e documentazione strutturata, il viewer rende un messaggio esplicito invece di una shell vuota
+
+### Limiti attuali del blocco ui meta
+
+- il registry non ha ancora una validazione formale dello shape dei meta
+- manca una demo browser dedicata al viewer/documentation system
+- `docTable` resta accoppiato a componenti UI come `Card`, `Chip`, `TabPanel`
+
+Stato:
+- ui meta: primo step strutturale chiuso
+- platform: primo giro completato
 
 Fase 5: Meta e modularita
 - mantenere `CMSwift.meta` corto e strutturato
@@ -628,3 +695,5 @@ Campi consigliati per ogni modulo:
 - corretto il blocco `router` per unmount affidabile, tracing e stato `404`
 - corretto il blocco `http` per bridge auth e API pubblica `request/state`
 - corretto il blocco `overlay` per cleanup reale dei listener e dell'entry stack
+- corretto il blocco `auth` per retry `401` non infinito e stato devtools completo
+- corretto il blocco `ui.meta` per robustezza del doc viewer e fallback senza `TabPanel`

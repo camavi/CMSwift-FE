@@ -84,11 +84,12 @@
       platform: {
         description: "Moduli applicativi nel core: overlay, store, auth, http, router, UI meta.",
         entrypoints: ["CMSwift.overlay", "CMSwift.store", "CMSwift.plugins.auth", "CMSwift.http", "CMSwift.router", "CMSwift.ui.meta"],
-        status: "priority-5-in-progress",
+        status: "milestone-1-closed",
         knownLimits: [
           "Il file e molto concentrato e va reso piu modulare.",
-          "Store, overlay, router, http e auth vanno documentati e blindati modulo per modulo.",
-          "Il blocco platform non ha ancora demo browser dedicate per i casi core."
+          "I moduli platform vanno ancora coperti con demo browser o test automatici dedicati.",
+          "Mancano configurazione pubblica piu coerente e confini piu netti tra auth, http e router.",
+          "Il registry UI meta non ha ancora validazione formale del suo shape."
         ]
       }
     }
@@ -3126,9 +3127,9 @@
 
         const r = await fetch(url, { ...options.fetchOptions, ...opts, headers });
 
-        if (r.status === 401 && getAuth()?.refreshToken) {
+        if (r.status === 401 && getAuth()?.refreshToken && !opts._authRetried) {
           await doRefresh();
-          return authFetch(url, opts);
+          return authFetch(url, { ...opts, _authRetried: true });
         }
 
         return r;
@@ -3161,7 +3162,8 @@
         canAll,
         loginAsync,
         logoutAsync,
-        fetch: authFetch
+        fetch: authFetch,
+        _getState: getAuth
       };
 
       // ---------- HOOK ----------
@@ -3795,12 +3797,33 @@
 
     const meta = CMSwift.ui.meta?.[name];
     if (!meta) return _.div({ class: "cms-muted" }, `Meta non trovata: ${name}`);
+    const hasTabPanel = typeof _.TabPanel === "function";
 
     const formatValues = (values) => {
       if (!values) return "—";
       if (Array.isArray(values)) return values.join(" | ");
       return String(values);
     };
+
+    const renderMetaItem = (item) => _.div({ class: "cms-p-md" },
+      _.p(
+        _.h3("Name: " + item.name),
+        _.div(_.b("Type: "), item.type ? String(item.type).split("|").map((token) => _.Chip({ color: "secondary", dense: true }, token)) : "—")
+      ),
+      _.p(_.b("Default: "), _.span(item.default == null ? "—" : String(item.default))),
+      _.p(
+        _.h3("Values: "),
+        _.div({ class: "cms-p-l-md" }, _.span(formatValues(item.values)))
+      ),
+      _.p(
+        _.h3("Description: "),
+        _.div({ class: "cms-p-l-md" }, item.description || "—")
+      )
+    );
+
+    const renderTabGroupFallback = (rows) => _.div({ class: "cms-p-md" },
+      rows.map((row) => _.div({ class: "cms-m-b-lg" }, _.h4(row.label || row.name), row.content))
+    );
 
     const list = {};
     Object.entries(meta.props || {}).forEach(([k, v]) => {
@@ -3812,34 +3835,21 @@
       });
     });
     const propsTab = Object.keys(list).map((v) => {
+      const rows = list[v].map((p) => {
+        return {
+          name: p.name,
+          wrap: true,
+          label: p.name,
+          content: renderMetaItem(p)
+        };
+      });
       return {
-        name: v, wrap: true, label: v, content: _.TabPanel({
+        name: v, wrap: true, label: v, content: hasTabPanel ? _.TabPanel({
           orientation: "vertical",
           animated: true,
           radius: "0 0 0 var(--cms-r-default)",
-          tabs: list[v].map((p) => {
-            return {
-              name: p.name,
-              wrap: true,
-              label: p.name,
-              content: _.div({ class: "cms-p-md" },
-                _.p(
-                  _.h3("Name: " + p.name),
-                  _.div(_.b("Type: "), p.type ? p.type.split("|").map((v) => _.Chip({ color: "secondary", dense: true }, v)) : "—")
-                ),
-                _.p(_.b("Default: "), _.span(p.default == null ? "—" : String(p.default))),
-                _.p(
-                  _.h3("Values: "),
-                  _.div({ class: "cms-p-l-md" }, _.span(formatValues(p.values)))
-                ),
-                _.p(
-                  _.h3("Description: "),
-                  _.div({ class: "cms-p-l-md" }, p.description || "—")
-                )
-              )
-            }
-          })
-        })
+          tabs: rows
+        }) : renderTabGroupFallback(rows)
       };
     });
 
@@ -3888,24 +3898,24 @@
       name: "Slots",
       wrap: true,
       label: "Slots",
-      content: _.TabPanel({
+      content: hasTabPanel ? _.TabPanel({
         animated: true,
         radius: "0 0 0 var(--cms-r-default)",
         orientation: "vertical",
         tabs: slotsRows
-      })
+      }) : renderTabGroupFallback(slotsRows)
     });
     if (propsTab.length) taps.push(...propsTab);
     if (eventsRows.length) taps.push({
       name: "Events",
       wrap: true,
       label: "Events",
-      content: _.TabPanel({
+      content: hasTabPanel ? _.TabPanel({
         animated: true,
         radius: "0 0 0 var(--cms-r-default)",
         orientation: "vertical",
         tabs: eventsRows
-      })
+      }) : renderTabGroupFallback(eventsRows)
     });
     const first = "general";
     taps.sort((a, b) => {
@@ -3916,13 +3926,17 @@
     return _.Card(
       _.h3(`_.${name}`),
       meta.signature ? _.p({ class: "cms-muted" }, String(meta.signature).replaceAll("UI.", "_.")) : null,
-      _.h4("Props"),
-      _.TabPanel({
-        border: true,
-        animated: true,
-        orientation: "horizontal",
-        tabs: taps, model: tabPanelModel
-      }),
+      taps.length
+        ? _.h4(propsTab.length ? "Props" : "Documentation")
+        : _.p({ class: "cms-muted" }, "Nessuna documentazione strutturata disponibile."),
+      taps.length
+        ? (hasTabPanel ? _.TabPanel({
+          border: true,
+          animated: true,
+          orientation: "horizontal",
+          tabs: taps, model: tabPanelModel
+        }) : renderTabGroupFallback(taps))
+        : null,
       meta.returns ? _.p({ class: "cms-muted", style: { marginTop: "14px" } }, `Returns: ${meta.returns}`) : null
     );
   };
