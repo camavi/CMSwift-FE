@@ -12494,7 +12494,7 @@
     };
     const closeOnSelect = rawProps.closeOnSelect ?? true;
     const shouldClose = (it) => !!closeOnSelect && uiUnwrap(it.keepOpen) !== true;
-    const itemIconSize = rawProps.itemIconSize ?? rawProps.size ?? "sm";
+    const itemIconSize = rawProps.itemIconSize ?? rawProps.size ?? "md";
     const groupOpenIcon = rawProps.groupOpenIcon ?? "arrow_drop_up";
     const groupCloseIcon = rawProps.groupCloseIcon ?? "arrow_drop_down";
 
