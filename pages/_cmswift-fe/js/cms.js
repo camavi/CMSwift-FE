@@ -461,6 +461,37 @@
     const isRod = (v) => !!v && v.type === "rod";
     const interpolationCursor = createRodInterpolationCursor();
 
+    function setStyleEntry(name, value) {
+      if (name == null) return;
+      const styleName = String(name);
+      const isCssProperty = styleName.startsWith("--") || styleName.includes("-");
+      if (value == null || value === false || value === "") {
+        if (isCssProperty) el.style.removeProperty(styleName);
+        else el.style[styleName] = "";
+        return;
+      }
+      if (isCssProperty) {
+        el.style.setProperty(styleName, String(value));
+        return;
+      }
+      el.style[styleName] = value;
+    }
+
+    function applyStyleObject(styleObj) {
+      if (!styleObj || typeof styleObj !== "object") return;
+      Object.entries(styleObj).forEach(([styleName, styleValue]) => {
+        if (typeof styleValue === "function") {
+          setStyleEntry(styleName, styleValue());
+          return;
+        }
+        if (isRod(styleValue)) {
+          setStyleEntry(styleName, styleValue.value);
+          return;
+        }
+        setStyleEntry(styleName, styleValue);
+      });
+    }
+
     function setProp(key, value) {
       if (isContentProp(key)) {
         el[key] = value ?? "";
@@ -471,7 +502,7 @@
         return;
       }
       if (key === "style" && typeof value === "object") {
-        Object.assign(el.style, value);
+        applyStyleObject(value);
         return;
       }
       if (isSVG) {
@@ -483,6 +514,24 @@
     }
 
     function bindProp(key, value) {
+      if (key === "style" && value && typeof value === "object") {
+        Object.entries(value).forEach(([styleName, styleValue]) => {
+          if (typeof styleValue === "function") {
+            CMSwift.reactive.effect(() => {
+              setStyleEntry(styleName, styleValue());
+            });
+            return;
+          }
+          if (isRod(styleValue)) {
+            CMSwift.reactive.effect(() => {
+              setStyleEntry(styleName, styleValue.value);
+            });
+            return;
+          }
+          setStyleEntry(styleName, styleValue);
+        });
+        return;
+      }
       if (typeof value === "function") {
         CMSwift.reactive.effect(() => {
           setProp(key, value());
@@ -622,19 +671,7 @@
             continue;
           }
           if (key === "style" && typeof value === "object" && value !== null && !isRod(value)) {
-            for (const [styleKey, styleVal] of Object.entries(value)) {
-              if (typeof styleVal === "function") {
-                CMSwift.reactive.effect(() => {
-                  el.style[styleKey] = styleVal() ?? "";
-                });
-                continue;
-              }
-              if (isRod(styleVal)) {
-                CMSwift.rodBind(el, styleVal, { key: `style.${styleKey}` });
-                continue;
-              }
-              el.style[styleKey] = styleVal;
-            }
+            bindProp(key, value);
             continue;
           }
           bindProp(key, value);

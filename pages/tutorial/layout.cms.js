@@ -108,6 +108,21 @@ const buildRuntimeFooter = () => _.Footer({ align: "right" },
   _.Chip({ color: runtimeDrawerLabel.value.includes("aperto") ? "success" : "secondary", outline: true, size: "sm" }, runtimeDrawerLabel)
 );
 
+const buildInspectorNav = () => _.Card({
+  title: "Inspector",
+  subtitle: "Rail destro per note e controlli rapidi",
+  footer: _.div({ style: { display: "flex", gap: "8px", flexWrap: "wrap" } },
+    _.Chip({ color: "info", outline: true, size: "sm" }, "peek live"),
+    _.Chip({ color: "secondary", outline: true, size: "sm" }, "drag enabled")
+  )
+},
+  activityList([
+    { title: "QA backlog: 4 task aperti", tone: "warning", meta: "today" },
+    { title: "Release note pronta per review", tone: "info", meta: "draft" },
+    { title: "Sync ERP completato", tone: "success", meta: "ok" }
+  ])
+);
+
 const runtimeLayout = _.Layout({
   minHeight: 560,
   drawerWidth: 300,
@@ -299,6 +314,65 @@ const listSample = {
       '});'
     ]
   },
+  resizable: {
+    code: [
+      _.Layout({
+        minHeight: 560,
+        drawerWidth: 260,
+        navWidth: 300,
+        drawerResizable: true,
+        drawerMinWidth: 180,
+        drawerMaxWidth: 420,
+        navEnabled: true,
+        navResizable: true,
+        navMinWidth: 220,
+        navMaxWidth: 460,
+        stickyHeader: true,
+        stickyAside: true,
+        stickyNav: true,
+        header: _.Header({
+          left: false,
+          title: "Workspace con rail ridimensionabili",
+          subtitle: "Drag separato su drawer sinistro e nav destro",
+          right: _.div({ style: { display: "flex", gap: "8px", flexWrap: "wrap" } },
+            _.Chip({ color: "success", outline: true, size: "sm" }, "drawer 180-420"),
+            _.Chip({ color: "info", outline: true, size: "sm" }, "nav 220-460")
+          )
+        }),
+        aside: _.Drawer({
+          items: shellItems,
+          header: _.Card({
+            title: "Planning",
+            subtitle: "Rail sinistro con width regolabile"
+          },
+            _.Chip({ color: "primary", outline: true }, "resizable")
+          )
+        }),
+        nav: buildInspectorNav(),
+        page: buildOpsPage("overview"),
+        footer: _.Footer({ align: "right" },
+          _.Chip({ color: "secondary", outline: true, size: "sm" }, "desktop inline only"),
+          _.Chip({ color: "warning", outline: true, size: "sm" }, "floating escluso")
+        )
+      })
+    ],
+    sample: [
+      '_.Layout({',
+      '  drawerWidth: 260,',
+      '  navWidth: 300,',
+      '  drawerResizable: true,',
+      '  drawerMinWidth: 180,',
+      '  drawerMaxWidth: 420,',
+      '  navEnabled: true,',
+      '  navResizable: true,',
+      '  navMinWidth: 220,',
+      '  navMaxWidth: 460,',
+      '  aside: _.Drawer({ items: shellItems }),',
+      '  nav: _.Card({ title: "Inspector" }, "..."),',
+      '  page: buildOpsPage("overview")',
+      '});'
+    ]
+  },
   contentFallback: {
     code: [
       _.Layout({
@@ -344,14 +418,16 @@ const listSample = {
 
 const layout = _.div({ class: "cms-panel cms-page" },
   _.h1("Layout"),
-  _.p("Layout composabile per shell applicative con header, drawer, page e footer. Supporta alias per le sezioni, fallback dei children come pagina, drawer responsive e update runtime delle aree."),
+  _.p("Layout composabile per shell applicative con header, drawer, nav destro, page e footer. Il drawer e attivo di default quando presente, il nav destro resta opt-in, e la shell supporta alias, fallback dei children, responsive e update runtime delle aree."),
   _.h2("Props principali"),
   _.List(
-    _.Item("header, aside|drawer|nav, page|main|content e footer per comporre le quattro sezioni base"),
+    _.Item("header, aside|drawer, nav|asideRight|drawerRight, page|main|content e footer per comporre le aree"),
     _.Item("slots.header, slots.drawer, slots.page, slots.footer e slots.default per costruzioni dinamiche"),
-    _.Item("drawerOpen, drawerBreakpoint, drawerWidth, overlayClose, escClose per controllare il drawer"),
-    _.Item("stickyHeader, stickyAside, stickyFooter, gap, minHeight e classi dedicate alle singole aree"),
-    _.Item("API runtime: openAside(), closeAside(), toggleAside(), pageUpdate(), asideUpdate(), footerUpdate()")
+    _.Item("drawerEnabled controlla il rail sinistro ma di default e true, navEnabled abilita il rail destro"),
+    _.Item("drawerOpen, navOpen, drawerBreakpoint, navBreakpoint, drawerWidth, navWidth, overlayClose, escClose per controllare i rail"),
+    _.Item("drawerResizable, drawerMinWidth, drawerMaxWidth e navResizable, navMinWidth, navMaxWidth per il drag desktop dei rail inline"),
+    _.Item("stickyHeader, stickyAside, stickyNav, stickyFooter, gap, minHeight e classi dedicate alle singole aree"),
+    _.Item("API runtime: openAside(), closeAside(), toggleAside(), openNav(), closeNav(), toggleNav(), pageUpdate(), asideUpdate(), navUpdate(), footerUpdate()")
   ),
   _.h2("Documentazione API"),
   _.docTable("Layout"),
@@ -359,6 +435,7 @@ const layout = _.div({ class: "cms-panel cms-page" },
   boxCode("Dashboard shell completa", listSample.basic, 24),
   boxCode("Drawer e page controllati via API", listSample.runtime, 24),
   boxCode("Slots e alias", listSample.slots, 24),
+  boxCode("Rail ridimensionabili", listSample.resizable, 24),
   boxCode("Children come fallback della pagina", listSample.contentFallback, 24)
 );
 

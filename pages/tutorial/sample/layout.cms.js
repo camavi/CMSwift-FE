@@ -5,6 +5,7 @@ const layoutSample = _.div({ class: "cms-panel cms-page" },
     _.Layout({
       minHeight: 420,
       stickyHeader: true,
+      drawerEnabled: true,
       drawerWidth: 260,
       header: _.Header({ left: false, title: "CMSwift", subtitle: "Layout sample" }),
       drawer: _.Drawer({ items: [{ label: "Home", to: "#" }, { label: "Orders", to: "#" }] }),

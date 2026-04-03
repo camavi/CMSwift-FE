@@ -64,6 +64,7 @@ Snippet canonico:
 ```js
 _.Layout({
   minHeight: 560,
+  drawerEnabled: true,
   drawerWidth: 290,
   stickyHeader: true,
   stickyAside: true,
@@ -570,9 +571,15 @@ UI.meta.Container = {
 
 - Alias: `UI.Layout`, `_.Layout`
 - Signature: `UI.Layout(...children) | UI.Layout(props, ...children)`
-- Descrizione: Shell layout composabile con slot alias, drawer responsivo e update runtime delle sezioni.
+- Descrizione: Shell layout composabile con drawer sinistro e nav destro indipendenti, width configurabili, floating opzionale e update runtime delle sezioni.
 - Runtime source: `pages/_cmswift-fe/js/ui.js`
 - Tutorial / sample source: `pages/tutorial/layout.cms.js`
+
+Note rapide:
+- `drawer` e attivo di default quando passi contenuto; `nav` resta opt-in e va attivato con `navEnabled`.
+- `nav` non è più alias del drawer sinistro: rappresenta il pannello destro e accetta anche gli alias `asideRight` e `drawerRight`.
+- Con `drawerFloating` e `navFloating` i pannelli diventano fixed e, quando chiusi, lasciano un peek configurabile con `drawerPeek` e `navPeek` (default `20px`).
+- `drawerResizable` e `navResizable` abilitano il resize via drag solo in desktop e solo per i rail inline; puoi limitare il drag con `drawerMinWidth` / `drawerMaxWidth` e `navMinWidth` / `navMaxWidth`.
 
 ```js
 UI.meta.Layout = {
@@ -583,6 +590,8 @@ UI.meta.Layout = {
         aside: "Node|Function|Array|false",
         drawer: "Node|Function|Array|false",
         nav: "Node|Function|Array|false",
+        asideRight: "Node|Function|Array|false",
+        drawerRight: "Node|Function|Array|false",
         page: "Node|Function|Array",
         main: "Node|Function|Array",
         content: "Node|Function|Array",
@@ -590,14 +599,36 @@ UI.meta.Layout = {
         footer: "Node|Function|Array",
         footerContent: "Node|Function|Array",
         noDrawer: "boolean",
+        drawerEnabled: "boolean",
+        asideEnabled: "boolean",
+        noNav: "boolean",
+        navEnabled: "boolean",
+        asideRightEnabled: "boolean",
         drawerOpen: "rod | [get,set] signal | boolean",
+        navOpen: "rod | [get,set] signal | boolean",
+        layoutBreakpoint: "number(px)",
         drawerBreakpoint: "number(px)",
+        navBreakpoint: "number(px)",
         drawerWidth: "number|string",
+        drawerResizable: "boolean",
+        drawerMinWidth: "number|string",
+        drawerMaxWidth: "number|string",
+        navWidth: "number|string",
+        navResizable: "boolean",
+        navMinWidth: "number|string",
+        navMaxWidth: "number|string",
+        asideRightWidth: "number|string",
+        drawerPeek: "number|string",
+        navPeek: "number|string",
+        asideRightPeek: "number|string",
+        drawerFloating: "boolean",
+        navFloating: "boolean",
         overlayClose: "boolean",
         escClose: "boolean",
         stickyHeader: "boolean",
         stickyFooter: "boolean",
         stickyAside: "boolean",
+        stickyNav: "boolean",
         tagPage: "boolean",
         gap: "number|string",
         headerOffset: "number|string",
@@ -605,10 +636,11 @@ UI.meta.Layout = {
         shellClass: "string",
         headerClass: "string",
         asideClass: "string",
+        navClass: "string",
         pageClass: "string",
         footerClass: "string",
         overlayClass: "string",
-        slots: "{ header?, aside?, drawer?, nav?, page?, main?, footer?, default? }",
+        slots: "{ header?, aside?, drawer?, nav?, asideRight?, drawerRight?, page?, main?, footer?, default? }",
         class: "string",
         style: "object"
       },
@@ -616,15 +648,18 @@ UI.meta.Layout = {
         header: "Header content",
         aside: "Aside / drawer content",
         drawer: "Alias di aside",
-        nav: "Alias di aside",
+        nav: "Right-side panel content",
+        asideRight: "Alias di nav",
+        drawerRight: "Alias di nav",
         page: "Page content",
         main: "Alias di page",
         footer: "Footer content",
         default: "Fallback page content"
       },
-      returns: "HTMLDivElement con methods openAside/closeAside/toggleAside/isDrawerOpen/isMobile/reflow, " +
-        "header()/aside()/page()/footer(), headerUpdate/asideUpdate/pageUpdate/mainUpdate/footerUpdate e _dispose()",
-      description: "Shell layout composabile con slot alias, drawer responsivo e update runtime delle sezioni."
+      returns: "HTMLDivElement con methods openAside/closeAside/toggleAside/openNav/closeNav/toggleNav, " +
+        "isDrawerOpen/isNavOpen/isMobile/reflow, header()/aside()/nav()/page()/footer(), " +
+        "headerUpdate/asideUpdate/navUpdate/pageUpdate/mainUpdate/footerUpdate e _dispose()",
+      description: "Shell layout composabile con drawer sinistro e nav destro indipendenti, width configurabili, resize opzionale con min/max, modalita floating opzionale e update runtime delle sezioni."
     };
 ```
 

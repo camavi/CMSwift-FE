@@ -3584,11 +3584,49 @@
       if (value == null || value === false || value === "") return fallback;
       return typeof value === "number" ? `${value}px` : String(value);
     };
+    const toLayoutPx = (value, fallback = null) => {
+      if (value == null || value === false || value === "") return fallback;
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+      const parsed = Number.parseFloat(String(value));
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
+    const clampLayoutWidth = (value, min = null, max = null) => {
+      let next = Number.isFinite(value) ? value : 0;
+      if (Number.isFinite(min)) next = Math.max(min, next);
+      if (Number.isFinite(max)) next = Math.min(max, next);
+      return next;
+    };
 
     const headerSource = resolveProp("header", "headerContent");
-    const drawerSource = resolveProp("aside", "drawer", "nav");
+    const drawerSource = resolveProp("aside", "drawer");
+    const navSource = resolveProp("nav", "asideRight", "drawerRight");
     const pageSource = resolveProp("page", "main", "content", "body");
     const footerSource = resolveProp("footer", "footerContent");
+
+    const drawerEnabledProp = resolveProp("drawerEnabled", "asideEnabled");
+    const navEnabledProp = resolveProp("navEnabled", "asideRightEnabled", "rightAsideEnabled");
+    const drawerEnabledValue = uiUnwrap(drawerEnabledProp);
+    const navEnabledValue = uiUnwrap(navEnabledProp);
+    const drawerRequested = drawerEnabledValue !== false;
+    const navRequested = navEnabledValue === true || uiUnwrap(props.noNav) === false;
+    const drawerDisabled = uiUnwrap(props.noDrawer) === true || drawerEnabledValue === false || drawerSource === false;
+    const navDisabled = uiUnwrap(props.noNav) === true || navEnabledValue === false || navSource === false;
+    const getDrawerFloating = () => uiUnwrap(props.drawerFloating) === true;
+    const getNavFloating = () => uiUnwrap(props.navFloating) === true;
+    const getDrawerResizable = () => uiUnwrap(props.drawerResizable) === true;
+    const getNavResizable = () => uiUnwrap(props.navResizable) === true;
+    const getDrawerMinWidth = () => toLayoutPx(uiUnwrap(props.drawerMinWidth), 180);
+    const getDrawerMaxWidth = () => toLayoutPx(uiUnwrap(props.drawerMaxWidth), null);
+    const getNavMinWidth = () => toLayoutPx(uiUnwrap(props.navMinWidth), 180);
+    const getNavMaxWidth = () => toLayoutPx(uiUnwrap(props.navMaxWidth), null);
+    const initialDrawerWidthPx = toLayoutPx(uiUnwrap(props.drawerWidth), 280);
+    const initialNavWidthPx = toLayoutPx(uiUnwrap(props.navWidth) ?? uiUnwrap(props.asideRightWidth), 280);
+    const [getDrawerWidthPx, setDrawerWidthPx] = CMSwift.reactive.signal(
+      clampLayoutWidth(initialDrawerWidthPx, getDrawerMinWidth(), getDrawerMaxWidth())
+    );
+    const [getNavWidthPx, setNavWidthPx] = CMSwift.reactive.signal(
+      clampLayoutWidth(initialNavWidthPx, getNavMinWidth(), getNavMaxWidth())
+    );
 
     const controlledDrawer = resolveModel(props.drawerOpen, "UI.Layout:drawerOpen");
     const initialOpen = controlledDrawer
@@ -3605,11 +3643,29 @@
       if (getOpen() !== next) syncOpen(next);
     });
 
-    const drawerBreakpoint = Number(uiUnwrap(props.drawerBreakpoint) ?? 1024);
+    const controlledNav = resolveModel(props.navOpen, "UI.Layout:navOpen");
+    const initialNavOpen = controlledNav
+      ? !!controlledNav.get()
+      : (typeof props.navOpen === "boolean" ? !!props.navOpen : true);
+    const [getNavOpen, syncNavOpen] = CMSwift.reactive.signal(initialNavOpen);
+    const setNavOpen = (value) => {
+      const next = !!value;
+      if (getNavOpen() !== next) syncNavOpen(next);
+      controlledNav?.set(next);
+    };
+    controlledNav?.watch?.(() => {
+      const next = !!controlledNav.get();
+      if (getNavOpen() !== next) syncNavOpen(next);
+    });
+
+    const layoutBreakpoint = Number(uiUnwrap(props.layoutBreakpoint) ?? 0);
+    const drawerBreakpoint = Number(uiUnwrap(props.drawerBreakpoint) ?? (layoutBreakpoint || 1024));
+    const navBreakpoint = Number(uiUnwrap(props.navBreakpoint) ?? (layoutBreakpoint || drawerBreakpoint));
+    const responsiveBreakpoint = Math.max(drawerBreakpoint, navBreakpoint, 0);
     const [getMobile, setMobile] = CMSwift.reactive.signal(false);
     const checkMobile = () => {
       if (typeof window === "undefined") return;
-      setMobile(window.innerWidth < drawerBreakpoint);
+      setMobile(window.innerWidth < responsiveBreakpoint);
     };
     if (typeof window !== "undefined") {
       checkMobile();
@@ -3621,8 +3677,14 @@
       openAside: () => setOpen(true),
       closeAside: () => setOpen(false),
       toggleAside: () => setOpen(!getOpen()),
+      openNav: () => setNavOpen(true),
+      closeNav: () => setNavOpen(false),
+      toggleNav: () => setNavOpen(!getNavOpen()),
       isDrawerOpen: () => !!getOpen(),
-      isMobile: () => !!getMobile()
+      isNavOpen: () => !!getNavOpen(),
+      isMobile: () => !!getMobile(),
+      isDrawerFloating: () => getDrawerFloating(),
+      isNavFloating: () => getNavFloating()
     });
     const renderAliasSlot = (names, fallback) => {
       const ctx = createCtx();
@@ -3635,26 +3697,37 @@
       return renderSlotToArray(null, "default", ctx, raw);
     };
 
-    const explicitNoDrawer = uiUnwrap(props.noDrawer) === true || drawerSource === false;
     const pageFallback = pageSource !== undefined ? pageSource : children;
 
     const cls = uiClass(["cms-app", "cms-layout", props.class]);
     const p = CMSwift.omit(props, [
       "header", "headerContent",
-      "aside", "drawer", "nav",
+      "aside", "drawer",
+      "nav", "asideRight", "drawerRight",
       "page", "main", "content", "body",
       "footer", "footerContent",
-      "noDrawer", "drawerOpen", "drawerBreakpoint", "drawerWidth",
+      "noDrawer", "drawerEnabled", "asideEnabled",
+      "noNav", "navEnabled", "asideRightEnabled", "rightAsideEnabled",
+      "drawerOpen", "navOpen",
+      "layoutBreakpoint", "drawerBreakpoint", "navBreakpoint",
+      "drawerWidth", "navWidth", "asideRightWidth",
+      "drawerResizable", "drawerMinWidth", "drawerMaxWidth",
+      "navResizable", "navMinWidth", "navMaxWidth",
+      "drawerPeek", "navPeek", "asideRightPeek",
+      "drawerFloating", "navFloating",
       "overlayClose", "escClose",
-      "stickyHeader", "stickyFooter", "stickyAside",
+      "stickyHeader", "stickyFooter", "stickyAside", "stickyNav",
       "tagPage",
-      "shellClass", "headerClass", "asideClass", "pageClass", "footerClass", "overlayClass",
+      "shellClass", "headerClass", "asideClass", "navClass", "pageClass", "footerClass", "overlayClass",
       "gap", "headerOffset", "minHeight",
       "slots"
     ]);
     p.class = cls;
     p.style = { ...(props.style || {}) };
     p.style["--cms-layout-drawer-width"] = toLayoutCssSize(uiUnwrap(props.drawerWidth) ?? 280, "280px");
+    p.style["--cms-layout-nav-width"] = toLayoutCssSize(uiUnwrap(props.navWidth) ?? uiUnwrap(props.asideRightWidth) ?? 280, "280px");
+    p.style["--cms-layout-drawer-peek"] = toLayoutCssSize(uiUnwrap(props.drawerPeek) ?? 20, "20px");
+    p.style["--cms-layout-nav-peek"] = toLayoutCssSize(uiUnwrap(props.navPeek) ?? uiUnwrap(props.asideRightPeek) ?? 20, "20px");
     const layoutGap = toLayoutCssSize(uiUnwrap(props.gap), null);
     if (layoutGap != null) p.style["--cms-layout-gap"] = layoutGap;
     const headerOffset = toLayoutCssSize(uiUnwrap(props.headerOffset), null);
@@ -3665,8 +3738,8 @@
     const root = _.div(p);
     const tagPage = uiUnwrap(props.tagPage) === true;
     const tags = tagPage
-      ? { header: "header", aside: "aside", page: "main", footer: "footer" }
-      : { header: "div", aside: "div", page: "div", footer: "div" };
+      ? { header: "header", aside: "aside", nav: "nav", page: "main", footer: "footer" }
+      : { header: "div", aside: "div", nav: "div", page: "div", footer: "div" };
 
     const shell = _.div({ class: uiClass(["cms-layout-shell-grid", props.shellClass]) });
     const headerWrap = _[tags.header]({
@@ -3677,6 +3750,25 @@
       role: "navigation",
       "aria-hidden": "true"
     });
+    const asideContentWrap = _.div({ class: "cms-layout-panel-body cms-layout-aside-body" });
+    const asideResizeHandle = _.div({
+      class: "cms-layout-resize-handle cms-layout-resize-handle-drawer",
+      "aria-hidden": "true"
+    });
+    asideWrap.appendChild(asideContentWrap);
+    asideWrap.appendChild(asideResizeHandle);
+    const navWrap = _[tags.nav]({
+      class: uiClass(["cms-layout-section", "cms-layout-nav", "nav", uiWhen(props.stickyNav, "sticky"), props.navClass]),
+      role: tags.nav === "nav" ? null : "complementary",
+      "aria-hidden": "true"
+    });
+    const navContentWrap = _.div({ class: "cms-layout-panel-body cms-layout-nav-body" });
+    const navResizeHandle = _.div({
+      class: "cms-layout-resize-handle cms-layout-resize-handle-nav",
+      "aria-hidden": "true"
+    });
+    navWrap.appendChild(navContentWrap);
+    navWrap.appendChild(navResizeHandle);
     const mainWrap = _[tags.page]({
       class: uiClass(["cms-layout-section", "cms-layout-main", "main", props.pageClass]),
       role: tags.page === "main" ? null : "main"
@@ -3688,6 +3780,7 @@
     shell.appendChild(headerWrap);
     shell.appendChild(asideWrap);
     shell.appendChild(mainWrap);
+    shell.appendChild(navWrap);
     shell.appendChild(footerWrap);
     root.appendChild(shell);
 
@@ -3695,16 +3788,19 @@
       class: uiClass(["cms-aside-overlay", props.overlayClass]),
       onClick: () => {
         if (uiUnwrap(props.overlayClose) === false) return;
-        setOpen(false);
+        if (getOpen()) setOpen(false);
+        if (getNavOpen()) setNavOpen(false);
       }
     });
     root.appendChild(overlay);
 
     let hasHeaderContent = false;
     let hasDrawerContent = false;
+    let hasNavContent = false;
     let hasPageContent = false;
     let hasFooterContent = false;
     let headerObserver = null;
+    let disposeResizeSession = null;
 
     const disposeTree = (node) => {
       if (!node || typeof node !== "object") return;
@@ -3737,56 +3833,114 @@
       nodes.forEach((node) => wrap.appendChild(node));
       return nodes.length > 0;
     };
+    const syncPanelWidths = () => {
+      if (getDrawerResizable()) {
+        const nextDrawerWidth = clampLayoutWidth(getDrawerWidthPx(), getDrawerMinWidth(), getDrawerMaxWidth());
+        if (nextDrawerWidth !== getDrawerWidthPx()) setDrawerWidthPx(nextDrawerWidth);
+        root.style.setProperty("--cms-layout-drawer-width", `${nextDrawerWidth}px`);
+      }
+      if (getNavResizable()) {
+        const nextNavWidth = clampLayoutWidth(getNavWidthPx(), getNavMinWidth(), getNavMaxWidth());
+        if (nextNavWidth !== getNavWidthPx()) setNavWidthPx(nextNavWidth);
+        root.style.setProperty("--cms-layout-nav-width", `${nextNavWidth}px`);
+      }
+    };
+    const startResize = (side, event) => {
+      if (event.button !== 0) return;
+      const panel = side === "drawer" ? asideWrap : navWrap;
+      if (panel.hidden) return;
+      const getCurrentWidth = side === "drawer" ? getDrawerWidthPx : getNavWidthPx;
+      const setCurrentWidth = side === "drawer" ? setDrawerWidthPx : setNavWidthPx;
+      const getMinWidth = side === "drawer" ? getDrawerMinWidth : getNavMinWidth;
+      const getMaxWidth = side === "drawer" ? getDrawerMaxWidth : getNavMaxWidth;
+      const rect = panel.getBoundingClientRect();
+      const initialWidth = rect.width || getCurrentWidth();
+      const onMove = (moveEvent) => {
+        const nextWidth = side === "drawer"
+          ? (moveEvent.clientX - rect.left)
+          : (rect.right - moveEvent.clientX);
+        setCurrentWidth(clampLayoutWidth(nextWidth || initialWidth, getMinWidth(), getMaxWidth()));
+        syncPanelWidths();
+        syncLayoutState();
+      };
+      const onUp = () => {
+        root.classList.remove("is-resizing-layout");
+        document.removeEventListener("pointermove", onMove, true);
+        document.removeEventListener("pointerup", onUp, true);
+        disposeResizeSession = null;
+      };
+      root.classList.add("is-resizing-layout");
+      document.addEventListener("pointermove", onMove, true);
+      document.addEventListener("pointerup", onUp, true);
+      disposeResizeSession = onUp;
+      event.preventDefault();
+    };
+    const onDrawerResizePointerDown = (event) => startResize("drawer", event);
+    const onNavResizePointerDown = (event) => startResize("nav", event);
+    asideResizeHandle.addEventListener("pointerdown", onDrawerResizePointerDown);
+    navResizeHandle.addEventListener("pointerdown", onNavResizePointerDown);
 
     const syncLayoutState = () => {
       const mobile = !!getMobile();
-      const open = !!getOpen();
-      const drawerEnabled = !explicitNoDrawer && hasDrawerContent;
-      const drawerVisible = drawerEnabled && open;
+      const asideOpen = !!getOpen();
+      const navOpen = !!getNavOpen();
+      const drawerEnabled = !drawerDisabled && drawerRequested && hasDrawerContent;
+      const navEnabled = !navDisabled && navRequested && hasNavContent;
+      const drawerFloating = drawerEnabled && (mobile || getDrawerFloating());
+      const navFloating = navEnabled && (mobile || getNavFloating());
+      const drawerVisible = drawerEnabled && asideOpen;
+      const navVisible = navEnabled && navOpen;
+      const inlineDrawerVisible = drawerVisible && !drawerFloating;
+      const inlineNavVisible = navVisible && !navFloating;
+      const inlineDrawerResizable = inlineDrawerVisible && getDrawerResizable();
+      const inlineNavResizable = inlineNavVisible && getNavResizable();
+      const overlayVisible = (drawerVisible && drawerFloating) || (navVisible && navFloating);
+
+      syncPanelWidths();
 
       root.classList.toggle("is-mobile", mobile);
       root.classList.toggle("drawer-open", drawerVisible);
+      root.classList.toggle("nav-open", navVisible);
       root.classList.toggle("no-drawer", !drawerEnabled);
+      root.classList.toggle("no-nav", !navEnabled);
       root.classList.toggle("has-header", hasHeaderContent);
       root.classList.toggle("has-drawer", drawerEnabled);
+      root.classList.toggle("has-nav", navEnabled);
       root.classList.toggle("has-footer", hasFooterContent);
+      root.classList.toggle("drawer-floating", drawerFloating);
+      root.classList.toggle("nav-floating", navFloating);
 
       headerWrap.hidden = !hasHeaderContent;
       footerWrap.hidden = !hasFooterContent;
       mainWrap.hidden = !hasPageContent;
 
-      overlay.hidden = !drawerEnabled;
-      overlay.classList.toggle("show", mobile && drawerVisible);
+      overlay.hidden = !(drawerFloating || navFloating);
+      overlay.classList.toggle("show", overlayVisible);
 
-      if (!drawerEnabled) {
-        asideWrap.hidden = true;
-        asideWrap.classList.remove("open");
-        asideWrap.setAttribute("aria-hidden", "true");
-        shell.style.gridTemplateColumns = "minmax(0, 1fr)";
-        shell.style.gridTemplateAreas = "\"header\" \"main\" \"footer\"";
-        return;
-      }
-
-      asideWrap.hidden = false;
-      asideWrap.classList.toggle("open", open);
+      asideWrap.hidden = !drawerEnabled || (!drawerVisible && !drawerFloating);
+      asideWrap.classList.toggle("open", drawerVisible);
+      asideWrap.classList.toggle("is-floating", drawerFloating);
+      asideWrap.classList.toggle("is-resizable", inlineDrawerResizable);
       asideWrap.setAttribute("aria-hidden", drawerVisible ? "false" : "true");
+      asideResizeHandle.hidden = !inlineDrawerResizable;
 
-      if (mobile) {
-        asideWrap.style.removeProperty("display");
-        shell.style.gridTemplateColumns = "minmax(0, 1fr)";
-        shell.style.gridTemplateAreas = "\"header\" \"main\" \"footer\"";
-        return;
-      }
+      navWrap.hidden = !navEnabled || (!navVisible && !navFloating);
+      navWrap.classList.toggle("open", navVisible);
+      navWrap.classList.toggle("is-floating", navFloating);
+      navWrap.classList.toggle("is-resizable", inlineNavResizable);
+      navWrap.setAttribute("aria-hidden", navVisible ? "false" : "true");
+      navResizeHandle.hidden = !inlineNavResizable;
 
-      if (drawerVisible) {
-        asideWrap.style.removeProperty("display");
-        shell.style.removeProperty("grid-template-columns");
-        shell.style.removeProperty("grid-template-areas");
-      } else {
-        asideWrap.style.display = "none";
-        shell.style.gridTemplateColumns = "minmax(0, 1fr)";
-        shell.style.gridTemplateAreas = "\"header\" \"main\" \"footer\"";
-      }
+      shell.style.gridTemplateColumns = [
+        inlineDrawerVisible ? "minmax(0, var(--cms-layout-drawer-width))" : "0px",
+        "minmax(0, 1fr)",
+        inlineNavVisible ? "minmax(0, var(--cms-layout-nav-width))" : "0px"
+      ].join(" ");
+      shell.style.gridTemplateAreas = [
+        "\"header header header\"",
+        `"${inlineDrawerVisible ? "aside" : "."} main ${inlineNavVisible ? "nav" : "."}"`,
+        "\"footer footer footer\""
+      ].join(" ");
     };
 
     const headerUpdate = (value, newUrl) => {
@@ -3797,11 +3951,18 @@
       return headerWrap;
     };
     const asideUpdate = (value, newUrl) => {
-      hasDrawerContent = fillWrap(asideWrap, normalizeUpdateNodes(value));
+      hasDrawerContent = fillWrap(asideContentWrap, normalizeUpdateNodes(value));
       if (!hasDrawerContent) setOpen(false);
       syncLayoutState();
       if (newUrl) CMSwift.router.setURLOnly(newUrl);
       return asideWrap;
+    };
+    const navUpdate = (value, newUrl) => {
+      hasNavContent = fillWrap(navContentWrap, normalizeUpdateNodes(value));
+      if (!hasNavContent) setNavOpen(false);
+      syncLayoutState();
+      if (newUrl) CMSwift.router.setURLOnly(newUrl);
+      return navWrap;
     };
     const pageUpdate = (value, newUrl) => {
       hasPageContent = fillWrap(mainWrap, normalizeUpdateNodes(value));
@@ -3817,7 +3978,8 @@
     };
 
     hasHeaderContent = fillWrap(headerWrap, renderAliasSlot(["header"], headerSource));
-    hasDrawerContent = fillWrap(asideWrap, explicitNoDrawer ? [] : renderAliasSlot(["aside", "drawer", "nav"], drawerSource));
+    hasDrawerContent = fillWrap(asideContentWrap, drawerDisabled ? [] : renderAliasSlot(["aside", "drawer"], drawerSource));
+    hasNavContent = fillWrap(navContentWrap, navDisabled ? [] : renderAliasSlot(["nav", "asideRight", "drawerRight"], navSource));
     hasPageContent = fillWrap(mainWrap, renderAliasSlot(["page", "main", "default"], pageFallback));
     hasFooterContent = fillWrap(footerWrap, renderAliasSlot(["footer"], footerSource));
 
@@ -3830,15 +3992,17 @@
     CMSwift.reactive.effect(() => {
       getMobile();
       getOpen();
+      getNavOpen();
       syncLayoutState();
     }, "UI.Layout:state");
 
     const onKeyDown = (e) => {
       if (uiUnwrap(props.escClose) === false) return;
-      if (!getMobile() || !getOpen()) return;
+      if ((!getMobile() && !getDrawerFloating() && !getNavFloating()) || (!getOpen() && !getNavOpen())) return;
       if (e.key !== "Escape") return;
       e.preventDefault();
-      setOpen(false);
+      if (getOpen()) setOpen(false);
+      if (getNavOpen()) setNavOpen(false);
     };
     if (typeof document !== "undefined") {
       document.addEventListener("keydown", onKeyDown, true);
@@ -3847,15 +4011,23 @@
     root.openAside = () => setOpen(true);
     root.closeAside = () => setOpen(false);
     root.toggleAside = () => setOpen(!getOpen());
+    root.openNav = () => setNavOpen(true);
+    root.closeNav = () => setNavOpen(false);
+    root.toggleNav = () => setNavOpen(!getNavOpen());
     root.isDrawerOpen = () => !!getOpen();
+    root.isNavOpen = () => !!getNavOpen();
     root.isMobile = () => !!getMobile();
     root.header = () => headerWrap;
     root.aside = () => asideWrap;
+    root.drawer = () => asideWrap;
+    root.nav = () => navWrap;
     root.page = () => mainWrap;
     root.main = () => mainWrap;
     root.footer = () => footerWrap;
     root.headerUpdate = headerUpdate;
     root.asideUpdate = asideUpdate;
+    root.drawerUpdate = asideUpdate;
+    root.navUpdate = navUpdate;
     root.pageUpdate = pageUpdate;
     root.mainUpdate = pageUpdate;
     root.footerUpdate = footerUpdate;
@@ -3863,6 +4035,9 @@
     root._dispose = () => {
       if (typeof window !== "undefined") window.removeEventListener("resize", checkMobile);
       if (typeof document !== "undefined") document.removeEventListener("keydown", onKeyDown, true);
+      asideResizeHandle.removeEventListener("pointerdown", onDrawerResizePointerDown);
+      navResizeHandle.removeEventListener("pointerdown", onNavResizePointerDown);
+      disposeResizeSession?.();
       headerObserver?.disconnect?.();
     };
 
@@ -3880,6 +4055,8 @@
         aside: "Node|Function|Array|false",
         drawer: "Node|Function|Array|false",
         nav: "Node|Function|Array|false",
+        asideRight: "Node|Function|Array|false",
+        drawerRight: "Node|Function|Array|false",
         page: "Node|Function|Array",
         main: "Node|Function|Array",
         content: "Node|Function|Array",
@@ -3887,14 +4064,36 @@
         footer: "Node|Function|Array",
         footerContent: "Node|Function|Array",
         noDrawer: "boolean",
+        drawerEnabled: "boolean",
+        asideEnabled: "boolean",
+        noNav: "boolean",
+        navEnabled: "boolean",
+        asideRightEnabled: "boolean",
         drawerOpen: "rod | [get,set] signal | boolean",
+        navOpen: "rod | [get,set] signal | boolean",
+        layoutBreakpoint: "number(px)",
         drawerBreakpoint: "number(px)",
+        navBreakpoint: "number(px)",
         drawerWidth: "number|string",
+        drawerResizable: "boolean",
+        drawerMinWidth: "number|string",
+        drawerMaxWidth: "number|string",
+        navWidth: "number|string",
+        navResizable: "boolean",
+        navMinWidth: "number|string",
+        navMaxWidth: "number|string",
+        asideRightWidth: "number|string",
+        drawerPeek: "number|string",
+        navPeek: "number|string",
+        asideRightPeek: "number|string",
+        drawerFloating: "boolean",
+        navFloating: "boolean",
         overlayClose: "boolean",
         escClose: "boolean",
         stickyHeader: "boolean",
         stickyFooter: "boolean",
         stickyAside: "boolean",
+        stickyNav: "boolean",
         tagPage: "boolean",
         gap: "number|string",
         headerOffset: "number|string",
@@ -3902,10 +4101,11 @@
         shellClass: "string",
         headerClass: "string",
         asideClass: "string",
+        navClass: "string",
         pageClass: "string",
         footerClass: "string",
         overlayClass: "string",
-        slots: "{ header?, aside?, drawer?, nav?, page?, main?, footer?, default? }",
+        slots: "{ header?, aside?, drawer?, nav?, asideRight?, drawerRight?, page?, main?, footer?, default? }",
         class: "string",
         style: "object"
       },
@@ -3913,15 +4113,18 @@
         header: "Header content",
         aside: "Aside / drawer content",
         drawer: "Alias di aside",
-        nav: "Alias di aside",
+        nav: "Right-side panel content",
+        asideRight: "Alias di nav",
+        drawerRight: "Alias di nav",
         page: "Page content",
         main: "Alias di page",
         footer: "Footer content",
         default: "Fallback page content"
       },
-      returns: "HTMLDivElement con methods openAside/closeAside/toggleAside/isDrawerOpen/isMobile/reflow, " +
-        "header()/aside()/page()/footer(), headerUpdate/asideUpdate/pageUpdate/mainUpdate/footerUpdate e _dispose()",
-      description: "Shell layout composabile con slot alias, drawer responsivo e update runtime delle sezioni."
+      returns: "HTMLDivElement con methods openAside/closeAside/toggleAside/openNav/closeNav/toggleNav, " +
+        "isDrawerOpen/isNavOpen/isMobile/reflow, header()/aside()/nav()/page()/footer(), " +
+        "headerUpdate/asideUpdate/navUpdate/pageUpdate/mainUpdate/footerUpdate e _dispose()",
+      description: "Shell layout composabile con drawer sinistro e nav destro indipendenti, width configurabili, resize opzionale con min/max, modalita floating opzionale e update runtime delle sezioni."
     };
   }
   // Esempio: CMSwift.ui.Layout({ header, aside, page, footer })
@@ -5387,7 +5590,7 @@
     if (!topRightNodes.length && badgeNodes.length) topRightNodes = badgeNodes;
     if (!bottomRightNodes.length && statusNodes.length) bottomRightNodes = statusNodes;
 
-    return _.div(
+    const wrap = _.div(
       p,
       body,
       avatarRenderAnchor("cms-avatar-anchor-top-left", topLeftNodes),
@@ -5395,6 +5598,7 @@
       avatarRenderAnchor("cms-avatar-anchor-bottom-left", bottomLeftNodes),
       avatarRenderAnchor("cms-avatar-anchor-bottom-right", bottomRightNodes)
     );
+    return wrap;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
@@ -6009,7 +6213,8 @@
       p.style.listStyleType = String(marker);
     }
 
-    return _[ordered ? "ol" : "ul"](p, ...content);
+    const list = _[ordered ? "ol" : "ul"](p, ...content);
+    return list;
   };
   if (CMSwift.isDev?.()) {
     UI.meta = UI.meta || {};
