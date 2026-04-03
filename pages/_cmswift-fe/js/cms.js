@@ -36,6 +36,60 @@
   }
   CMSwift.uiSizes = ["xxs", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl"];
   CMSwift.uiColors = ["primary", "secondary", "success", "warning", "danger", "info", "light", "dark"];
+  CMSwift.meta = CMSwift.meta || {
+    version: "core-draft",
+    policy: {
+      sourceOfTruth: "readme_CMS.md",
+      syncRule: "Quando cambia un modulo core, aggiornare sia questo meta sia readme_CMS.md."
+    },
+    modules: {
+      render: {
+        description: "Bridge props -> DOM per hyperscript _, attributi, class, style, eventi e children reattivi.",
+        entrypoints: ["createElement", "setProp", "bindProp"],
+        status: "priority-1",
+        knownLimits: [
+          "Mancano test sistematici sugli edge case del renderer.",
+          "Le regole su attributi DOM/property/eventi vanno rese piu esplicite e coperte."
+        ]
+      },
+      reactive: {
+        description: "Core minimale signal/effect usato come base della reattivita.",
+        entrypoints: ["CMSwift.reactive.signal", "CMSwift.reactive.effect"],
+        status: "priority-2",
+        knownLimits: [
+          "Manca dispose nativo degli effect.",
+          "Scheduling e protection da loop non sono ancora formalizzati."
+        ]
+      },
+      rod: {
+        description: "Layer reattivo di alto livello per binding DOM, model e interpolazioni.",
+        entrypoints: ["_.rod", "CMSwift.rodBind", "CMSwift.rodModel"],
+        status: "priority-3",
+        knownLimits: [
+          "Va chiarito meglio il rapporto con CMSwift.reactive.",
+          "Serve una superficie API piu coerente tra bind, model e inspect."
+        ]
+      },
+      mount: {
+        description: "Mount, component instances e cleanup automatico del tree DOM.",
+        entrypoints: ["CMSwift.mount", "CMSwift.component", "CMSwift.enableAutoCleanup"],
+        status: "priority-4",
+        knownLimits: [
+          "Il lifecycle va documentato meglio.",
+          "Da blindare i casi di cleanup e multi-mount."
+        ]
+      },
+      platform: {
+        description: "Moduli applicativi nel core: overlay, store, auth, http, router, UI meta.",
+        entrypoints: ["CMSwift.overlay", "CMSwift.store", "CMSwift.http", "CMSwift.router", "CMSwift.ui.meta"],
+        status: "priority-5",
+        knownLimits: [
+          "Il file e molto concentrato e va reso piu modulare.",
+          "Ogni modulo deve dichiarare invarianti e responsabilita."
+        ]
+      }
+    }
+  };
 
   CMSwift.omit = (obj, keys) => {
     const out = {};
