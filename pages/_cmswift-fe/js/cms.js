@@ -3474,7 +3474,9 @@
 
   async function coreFetch(req) {
     // Auth integration: se esiste auth.fetch usa quello
-    const f = (app.auth && typeof app.auth.fetch === "function") ? app.auth.fetch : fetch;
+    const f = (CMSwift.auth && typeof CMSwift.auth.fetch === "function")
+      ? CMSwift.auth.fetch.bind(CMSwift.auth)
+      : fetch;
     const init = {
       method: req.method,
       headers: req.headers,
@@ -3638,8 +3640,8 @@
   }
 
   CMSwift.http = {};
-  CMSwift.http.request = () => request;
-  CMSwift.http.state = () => httpState;
+  CMSwift.http.request = request;
+  CMSwift.http.state = () => httpState.state;
   CMSwift.http.get = (url, init) => request(url, { ...init, method: "GET" });
   CMSwift.http.del = (url, init) => request(url, { ...init, method: "DELETE" });
   CMSwift.http.post = (url, body, init) => withJSON("POST", url, body, init);
@@ -4146,15 +4148,15 @@
     }
 
     async function render(urlLike, { replace = false } = {}) {
-      if (_tracing) {
-        console.log("[router.navigate]", url.toString());
-      }
       if (!outlet) {
         console.warn("[router] outlet non impostato. Usa CMSwift.router.setOutlet('#app').");
         return;
       }
 
       const url = typeof urlLike === "string" ? new URL(urlLike, window.location.origin) : urlLike;
+      if (_tracing) {
+        console.log("[router.navigate]", url.toString());
+      }
       const fullPath = url.pathname + url.search + url.hash;
 
       // aggiorna address bar
@@ -4197,6 +4199,16 @@
         } else {
           unmountCurrent = CMSwift.mount(outlet, _.div("404"), { clear: true });
         }
+        notifyRoute(ctx);
+        _currentCtx = ctx;
+        _history.push({
+          at: Date.now(),
+          path: ctx.path,
+          params: ctx.params,
+          query: ctx.query,
+          hash: ctx.hash
+        });
+        if (_history.length > 50) _history.shift();
         return;
       }
 
@@ -4236,11 +4248,11 @@
         };
 
         // mount layout sul root outlet
-        CMSwift.mount(outlet, () => parent.view(ctx), { clear: true });
+        unmountCurrent = CMSwift.mount(outlet, () => parent.view(ctx), { clear: true });
       } else {
         // non nested
         ctx._child = null;
-        CMSwift.mount(outlet, () => view(ctx), { clear: true });
+        unmountCurrent = CMSwift.mount(outlet, () => view(ctx), { clear: true });
       }
 
       notifyRoute(ctx);

@@ -484,6 +484,84 @@ Stato:
 - platform: `priority-5-in-progress`
 - store: primo modulo aperto e corretto a livello strutturale
 
+## Platform / Router: contratto iniziale
+
+Area:
+- `CMSwift.router.add`
+- `CMSwift.router.navigate`
+- `CMSwift.router.start`
+- `CMSwift.router.beforeEach`
+- `CMSwift.router.subscribe`
+
+### Cosa supporta ora
+
+- mode `history`, `hash` e `auto`
+- route semplici e nested
+- params dinamici via `:id`
+- query string e hash nel route context
+- `beforeEach(...)` per blocco o redirect
+- subscription reattiva al cambio route
+- devtools base con `status`, `inspect`, `trace`, `history`
+
+### Correzione fatta in questo step
+
+Mount / cleanup:
+- il router conserva ora davvero l'`unmount` della view corrente anche nei casi normali e nested
+- questo rende affidabile la pulizia della view precedente a ogni navigazione, non solo nel ramo `404`
+
+Stato route:
+- il ramo `404` aggiorna ora anche `_currentCtx`, listeners e history interna
+- `trace()` non prova piu a loggare `url` prima che venga normalizzato
+
+### Limiti attuali del blocco router
+
+- il router non ha ancora una demo browser dedicata
+- `start()` registra listener globali senza una semantica di dispose esplicita
+- il supporto nested e ancora minimale e va blindato meglio nei casi complessi
+
+Stato:
+- router: primo step strutturale chiuso
+- platform: ancora in progress
+
+## Platform / HTTP: contratto iniziale
+
+Area:
+- `CMSwift.http.request`
+- `CMSwift.http.get/post/put/patch/del`
+- `CMSwift.http.getJSON/postJSON/putJSON/patchJSON/delJSON`
+- `CMSwift.http.onBefore`
+- `CMSwift.http.onAfter`
+- `CMSwift.http.onError`
+- `CMSwift.http.state`
+
+### Cosa supporta ora
+
+- wrapper fetch con `baseURL`, `timeout`, `retry`, `headers`, `credentials`
+- hook `beforeRequest`, `afterResponse`, `onError`
+- integrazione opzionale con `auth.fetch`
+- stato reattivo ultimo request/response/error e contatore `inFlight`
+- helper strict per `json` e `text`
+
+### Correzione fatta in questo step
+
+Public API:
+- `CMSwift.http.request` espone ora direttamente la funzione di request pubblica, non una function che la restituisce
+- `CMSwift.http.state()` restituisce ora la superficie di stato pubblica, non l'oggetto interno con `markStart/markEnd`
+
+Auth bridge:
+- `coreFetch(...)` non usa piu un riferimento `app.auth` fuori scope
+- il modulo usa ora `CMSwift.auth.fetch` quando disponibile, con `bind` corretto
+
+### Limiti attuali del blocco http
+
+- il modulo non ha ancora una demo browser dedicata
+- mancano metodi di configurazione pubblici per aggiornare `configHTTP`
+- la semantica di retry e timeout va documentata meglio
+
+Stato:
+- http: primo step strutturale chiuso
+- platform: ancora in progress
+
 Fase 5: Meta e modularita
 - mantenere `CMSwift.meta` corto e strutturato
 - usare questo file come documento esteso
@@ -513,3 +591,5 @@ Campi consigliati per ogni modulo:
 - implementata la prima semantica eventi del renderer con handler dinamici e custom event
 - aperto il blocco `platform` con focus iniziale su `store`
 - corretto `store.signal(...)` per scope `storage/prefix`, cleanup completo e cache/watcher namespaced
+- corretto il blocco `router` per unmount affidabile, tracing e stato `404`
+- corretto il blocco `http` per bridge auth e API pubblica `request/state`
