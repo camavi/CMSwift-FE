@@ -56,7 +56,7 @@
       reactive: {
         description: "Core minimale signal/effect usato come base della reattivita.",
         entrypoints: ["CMSwift.reactive.signal", "CMSwift.reactive.effect", "CMSwift.reactive.computed", "CMSwift.reactive.untracked"],
-        status: "priority-2-in-progress",
+        status: "milestone-1-closed",
         knownLimits: [
           "La protezione loop copre i loop sincroni per singolo effect, non ancora i cicli complessi tra effect multipli.",
           "Mancano batching e primitive avanzate per controllare scheduling e transazioni."
@@ -75,7 +75,7 @@
       mount: {
         description: "Mount, component instances e cleanup automatico del tree DOM.",
         entrypoints: ["CMSwift.mount", "CMSwift.component", "CMSwift.enableAutoCleanup"],
-        status: "priority-4",
+        status: "milestone-1-closed",
         knownLimits: [
           "Il lifecycle va documentato meglio.",
           "Da blindare i casi di cleanup e multi-mount."
@@ -1982,10 +1982,6 @@
     const clear = opts.clear ?? true;
     const isMulti = targets.length > 1;
 
-    if (isMulti && typeof content !== "function" && disposers.length) {
-      CMSwift.debug?.warn("mount multi-target con dispose: usa content come function per istanze separate.");
-    }
-
     if (targets.length === 0) {
       console.warn("[CMSwift.mount] nessun target valido:", target);
       return () => { };
@@ -2039,9 +2035,23 @@
 
     const mounted = []; // [{ root, nodes, disposers }]
 
+    const createOnceDisposer = (disposers = []) => {
+      let done = false;
+      return () => {
+        if (done) return;
+        done = true;
+        for (const d of disposers) {
+          try { d(); } catch (e) { console.error("[CMSwift.mount] dispose error:", e); }
+        }
+      };
+    };
+
     for (const root of targets) {
       if (clear) {
-        while (root.firstChild) root.removeChild(root.firstChild);
+        while (root.firstChild) {
+          cleanupNodeTree(root.firstChild);
+          root.removeChild(root.firstChild);
+        }
       }
 
       // per multi-target: se non passi una function, cloneremo i nodi (ma NON possiamo clonare cleanup)
@@ -2057,17 +2067,16 @@
         }
       }
 
+      const disposeMounted = createOnceDisposer(disposers);
+
       for (const n of nodes) root.appendChild(n);
 
-      mounted.push({ root, nodes, disposers });
+      mounted.push({ root, nodes, dispose: disposeMounted });
 
       // registra cleanup automatico per ogni nodo root montato
       for (const n of nodes) {
         if (!n || !n.nodeType) continue;
-
-        const list = CMSwift._cleanupRegistry.get(n) || [];
-        for (const d of disposers) list.push(d);
-        CMSwift._cleanupRegistry.set(n, list);
+        CMSwift._registerCleanup(n, disposeMounted);
       }
     }
 
@@ -2076,12 +2085,11 @@
       for (const m of mounted) {
         // remove nodes
         for (const n of m.nodes) {
-          if (n && n.parentNode === m.root) m.root.removeChild(n);
+          if (!n) continue;
+          cleanupNodeTree(n);
+          if (n.parentNode === m.root) m.root.removeChild(n);
         }
-        // cleanup (solo per la relativa istanza)
-        for (const d of m.disposers) {
-          try { d(); } catch (e) { console.error("[CMSwift.mount] dispose error:", e); }
-        }
+        m.dispose?.();
       }
     };
 

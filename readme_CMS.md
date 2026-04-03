@@ -13,6 +13,13 @@ Regola di aggiornamento:
 
 ## Priorita attuali
 
+Stato generale oggi:
+- renderer: milestone 1 chiusa
+- reactive core: milestone 1 chiusa
+- rod: milestone 1 chiusa
+- lifecycle / mount / cleanup: milestone 1 chiusa
+- moduli platform: ancora da aprire in modo strutturato
+
 1. Renderer DOM e bridge props
 - file: `pages/_cmswift-fe/js/cms.js`
 - area: `createElement`, `setProp`, `bindProp`, gestione `style`, attributi, eventi, children
@@ -24,7 +31,7 @@ Regola di aggiornamento:
 - area: `CMSwift.reactive.signal` e `CMSwift.reactive.effect`
 - motivo: oggi il core e minimale e manca una semantica forte su dispose, scheduling e loop safety
 - obiettivo: definire invarianti chiare del modello reattivo
-- stato: in lavorazione
+- stato: milestone 1 chiusa, da consolidare con test e un secondo giro su scheduling
 
 3. Rod
 - area: `_.rod`, `CMSwift.rodBind`, `CMSwift.rodModel`, interpolation buffer
@@ -36,6 +43,7 @@ Regola di aggiornamento:
 - area: `CMSwift.mount`, `CMSwift.component`, cleanup registry, auto cleanup
 - motivo: e la zona dove possono nascere leak, listener duplicati e componenti non smontati bene
 - obiettivo: definire il lifecycle e rendere affidabile unmount/cleanup
+- stato: milestone 1 chiusa, da consolidare con test e documentazione piu profonda
 
 5. Moduli platform nel core
 - area: overlay, store, auth, http, router, `CMSwift.ui.meta`
@@ -368,6 +376,49 @@ Fase 3: Rod
 Fase 4: Lifecycle
 - formalizzare mount/unmount
 - documentare cleanup automatico e responsabilita dei componenti
+
+## Lifecycle / Mount / Cleanup: contratto iniziale
+
+Area:
+- `CMSwift.mount`
+- `CMSwift.component`
+- `CMSwift.enableAutoCleanup`
+- cleanup registry
+
+### Cosa supporta ora
+
+- `CMSwift.mount(target, content, opts)` monta node, array, stringhe o component instance
+- `CMSwift.component(renderFn)` crea istanze con `ctx.onDispose(...)`
+- cleanup registry per associare disposer ai nodi DOM
+- `enableAutoCleanup()` osserva rimozioni dal DOM e chiama `cleanupNodeTree(...)`
+
+### Correzione fatta in questo step
+
+Mount / cleanup:
+- rimosso un bug reale in `CMSwift.mount(...)` dove veniva letto `disposers` fuori scope
+- quando `mount(..., { clear: true })` svuota il target, passa ora da `cleanupNodeTree(...)` prima di rimuovere i nodi
+- gli stessi disposer di mount vengono ora wrapped in una dispose idempotente, cosi non scattano piu piu volte se registrati su nodi diversi
+- `unmount()` passa ora da `cleanupNodeTree(...)` prima di rimuovere i nodi dal parent
+
+### Limiti attuali del blocco lifecycle
+
+- il lifecycle dei componenti non e ancora documentato con esempi completi di mount/unmount
+- manca una suite di test automatica dedicata
+
+Stato:
+- milestone 1 chiusa a livello funzionale
+- demo browser dedicata aggiunta e verificata
+
+## Verifica browser lifecycle / mount / cleanup
+
+Pagina demo:
+- route: `/demo/component/cms-lifecycle`
+- file: `pages/tutorial/cms-lifecycle.cms.js`
+
+Checklist manuale:
+- `_.mount(...)`: mount, replace e unmount rilasciano correttamente le istanze montate
+- `_.component(...)`: `ctx.onDispose(...)` viene chiamato quando l'istanza viene smontata
+- `_.enableAutoCleanup()`: la rimozione manuale di nodi dal DOM libera anche i disposer associati
 
 Fase 5: Meta e modularita
 - mantenere `CMSwift.meta` corto e strutturato
