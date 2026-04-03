@@ -3503,30 +3503,50 @@
 
 .cms-toast {
   --cms-toast-accent: var(--cms-info);
+  --cms-toast-bg: color-mix(in srgb, var(--cms-panel) 90%, var(--cms-toast-accent) 10%);
+  --cms-toast-border: color-mix(in srgb, var(--cms-toast-accent) 34%, var(--cms-border-color));
+  --cms-toast-title-color: var(--cms-text);
+  --cms-toast-message-color: var(--cms-text-2);
+  --cms-toast-meta-color: var(--cms-text-3);
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
-  padding: 14px;
+  padding: 16px;
   border-radius: var(--cms-r-lg);
-  border: 1px solid color-mix(in srgb, var(--cms-toast-accent) 32%, var(--cms-border-color));
-  background: color-mix(in srgb, var(--cms-toast-accent) 10%, rgba(18, 26, 43, 0.96));
+  border: 1px solid var(--cms-toast-border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, white 3%, transparent), transparent 28%),
+    var(--cms-toast-bg);
   box-shadow: var(--cms-shadow-md);
   backdrop-filter: blur(12px);
   pointer-events: auto;
+  color: var(--cms-toast-title-color);
+  overflow: hidden;
+}
+
+.cms-toast::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, color-mix(in srgb, white 12%, var(--cms-toast-accent)), var(--cms-toast-accent));
 }
 
 .cms-toast-soft {
-  background: color-mix(in srgb, var(--cms-toast-accent) 10%, rgba(18, 26, 43, 0.96));
+  --cms-toast-bg: color-mix(in srgb, var(--cms-panel) 90%, var(--cms-toast-accent) 10%);
 }
 
 .cms-toast-outline {
-  background: rgba(18, 26, 43, 0.92);
+  --cms-toast-bg: color-mix(in srgb, var(--cms-panel) 96%, var(--cms-toast-accent) 4%);
+  --cms-toast-border: color-mix(in srgb, var(--cms-toast-accent) 48%, var(--cms-border-color));
 }
 
 .cms-toast-solid {
-  background: color-mix(in srgb, var(--cms-toast-accent) 26%, rgba(18, 26, 43, 0.97));
+  --cms-toast-bg: color-mix(in srgb, var(--cms-panel) 70%, var(--cms-toast-accent) 30%);
+  --cms-toast-border: color-mix(in srgb, var(--cms-toast-accent) 64%, var(--cms-border-color));
+  --cms-toast-message-color: color-mix(in srgb, var(--cms-text) 82%, var(--cms-toast-accent));
 }
 
 .cms-toast-success {
@@ -3566,11 +3586,21 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .cms-toast-icon {
   color: color-mix(in srgb, var(--cms-toast-accent) 75%, white);
-  padding-top: 1px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cms-toast-accent) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cms-toast-accent) 32%, transparent);
+  align-items: center;
+  justify-content: center;
+  padding-top: 0;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
 }
 
 .cms-toast-main,
@@ -3583,38 +3613,111 @@
 
 .cms-toast-main,
 .cms-toast-copy {
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .cms-toast-title {
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--cms-toast-title-color);
 }
 
 .cms-toast-message,
 .cms-toast-description,
 .cms-toast-body {
   line-height: 1.45;
+  color: var(--cms-toast-message-color);
+}
+
+.cms-toast-message {
+  font-size: 0.98rem;
 }
 
 .cms-toast-description {
-  color: var(--cms-muted);
+  color: var(--cms-toast-meta-color);
   font-size: 0.95em;
 }
 
 .cms-toast-meta {
-  gap: 6px;
+  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  color: var(--cms-toast-meta-color);
 }
 
 .cms-toast-actions {
-  gap: 8px;
-  margin-top: 2px;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cms-toast-actions .cms-btn {
+  width: 100%;
+  justify-content: center;
 }
 
 .cms-toast-close {
   min-width: auto;
-  padding-inline: 8px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 10px;
+  opacity: 0.88;
+}
+
+.cms-toast-close:hover {
+  opacity: 1;
+}
+
+.cms-toast-body > :first-child,
+.cms-toast-meta > :first-child,
+.cms-toast-actions > :first-child {
+  margin-top: 0;
+}
+
+.cms-toast-body > :last-child,
+.cms-toast-meta > :last-child,
+.cms-toast-actions > :last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  .cms-toast-wrap {
+    width: calc(100vw - 18px);
+  }
+
+  .cms-toast-wrap.is-top-left,
+  .cms-toast-wrap.is-top-center,
+  .cms-toast-wrap.is-top-right {
+    top: 9px;
+    left: 9px;
+    right: 9px;
+    transform: none;
+  }
+
+  .cms-toast-wrap.is-bottom-left,
+  .cms-toast-wrap.is-bottom-center,
+  .cms-toast-wrap.is-bottom-right {
+    bottom: 9px;
+    left: 9px;
+    right: 9px;
+    transform: none;
+  }
+
+  .cms-toast {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .cms-toast-icon {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .cms-table-card .cms-card-body {

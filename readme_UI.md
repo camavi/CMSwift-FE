@@ -233,6 +233,57 @@ Source pattern:
 - `pages/tutorial/menu.cms.js`
 - `pages/tutorial/popover.cms.js`
 
+## UX / Accessibility Contract
+
+Questa sezione non sostituisce il meta dei singoli componenti: serve come matrice minima trasversale per capire come CMSwift tratta focus, tastiera, ARIA e semantiche `disabled` / `readonly`.
+
+Regola pratica:
+- Se un componente renderizza un elemento HTML nativo (`button`, `input`, `select`, `textarea`, `a`), l'AI deve assumere prima di tutto la semantica nativa dell'elemento.
+- Se un componente e custom ma documenta `keyboard`, `trigger`, `trapFocus`, `autoFocus`, `closeOnEsc` o `closeOnOutside`, quelle opzioni fanno parte del contratto UX minimo e non sono “ornamenti”.
+- Se un dettaglio accessibility non e esplicitato nel meta del componente, l'AI deve evitarne l'invenzione e descrivere solo cio che il runtime mostra davvero.
+
+### Focus / Keyboard / ARIA Matrix
+
+| Famiglia | Focus | Keyboard | ARIA / semantics | Disabled / readonly |
+| --- | --- | --- | --- | --- |
+| `Btn` | Focus nativo del bottone, eventi `focus` e `blur` documentati | Attivazione nativa `Enter` / `Space` del browser | `aria-disabled` quando `disabled/loading`, `aria-busy` quando `loading` | `disabled` blocca click e interazione |
+| `InputRaw`, `Input`, `Date`, `Time`, `Slider`, `Rating` | Focus nativo del controllo; `Input` e wrapper field mantengono il focus sul controllo interno | Tastiera nativa del controllo; `Rating` e `Slider` documentano shortcut specifiche nel meta | Semantica del controllo nativo; `FormField` aggiunge contesto visuale ma non cambia il ruolo base | `disabled` blocca input; `readonly` mantiene focus ma impedisce modifica dove supportato |
+| `Checkbox`, `Radio`, `Toggle` | Focus nativo dell'input interno | Attivazione nativa `Space`; `Toggle` eredita semantica checkbox | Semantica nativa checkbox/radio | `disabled` non interagibile; `readonly` solo dove previsto dal runtime/meta |
+| `Select` | Focus gestito dal field custom e dall'area filtro interna | Meta runtime: `Enter/Space`, `ArrowUp`, `ArrowDown`, `Home`, `End`, `Escape` | Componente custom wrappato in `FormField`; l'AI deve trattarlo come widget composito, non come `<select>` puro | `disabled` supportato esplicitamente; `readonly` non fa parte del contratto standard del meta `Select` |
+| `Tabs` | Focus sulla nav/tab attiva | Meta runtime: `Enter/Space`, `ArrowLeft`, `ArrowRight`, `ArrowUp`, `ArrowDown`, `Home`, `End` | Nav accessibile a tab; selezione sincronizzata con `value/model` | `disabled` globale o per singola tab |
+| `Pagination` | Focus sui bottoni di pagina | Navigazione principalmente via pulsanti; l'AI deve assumere attivazione nativa del bottone | Semantica di controlli di paginazione, non di campo form | `disabled` su controlli non disponibili / pagine non cliccabili |
+| `Tooltip` | Focus puo essere trigger di apertura (`hover/focus/click/manual`) | Nessuna matrice keyboard dedicata oltre al focus trigger | Contenuto descrittivo ancorato, non primario per azioni complesse | `disabled` supportato nel meta |
+| `Dialog` | Focus management esplicito | Chiusura da tastiera via `closeOnEsc`; supporto `autoFocus` e `trapFocus` | Overlay modale con boundary dedicato | `persistent`, `closable`, `closeButton` e `closeOnOutside` definiscono la semantica di chiusura |
+| `Menu` | Focus gestito dal pannello overlay e da `autoFocus` | `closeOnEsc` documentato; trigger `click|hover|focus|manual` | Overlay azionale / contestuale, non modale | `disabled` per singoli item e comportamento `closeOnSelect` |
+| `Popover` | Focus gestito da `autoFocus` e `trapFocus` quando attivi | `closeOnEsc` documentato; trigger `click|hover|focus|manual` | Overlay ricco ancorato, con header/body/actions | `closable`, `closeButton`, `closeOnOutside`, `closeOnBackdrop` |
+| `Notify` | Non focalizza di default come un overlay modale | Nessuna keyboard matrix propria oltre ai pulsanti contenuti | `role="alert"` per `danger/warning`, `role="status"` per gli altri toni | `closable` controlla solo la dismiss action, non e una semantica `disabled` |
+
+### Overlay Contract
+
+Per `Dialog`, `Menu`, `Popover`, `Tooltip` e `ContextMenu` il contratto minimo da assumere e:
+
+- Esiste sempre una distinzione tra trigger declarativo (`trigger`, `open`, `anchorEl`) e API imperativa (`open`, `close`, `toggle`, `update`, `bind` quando disponibile).
+- `trapFocus` e `autoFocus` non sono dettagli visivi: cambiano il comportamento della tastiera e vanno considerati parte dell'UX.
+- `closeOnEsc`, `closeOnOutside`, `closeOnBackdrop`, `persistent` e `closable` definiscono la policy di uscita del componente. Un AI non dovrebbe descrivere un overlay come “modale” o “dismissable” senza verificare questi flag.
+- Se un contenuto slot/prop riceve `({ close }) => ...`, quella callback fa parte dell'ergonomia standard del kit e deve essere usata per CTA keyboard-safe invece di manipolare il DOM manualmente.
+
+### Disabled vs Readonly
+
+Regola pratica per generazione UI:
+
+- Usa `disabled` quando il controllo non deve ricevere input o attivazione.
+- Usa `readonly` quando il controllo deve restare focusabile/selezionabile ma il valore non deve essere modificato.
+- Se il meta del componente non documenta `readonly`, non assumerne il supporto solo per analogia.
+- Per componenti compositi come `Select`, `Tabs`, `Pagination`, `Menu` o `Popover`, il flag `disabled` ha semantica comportamentale piu che HTML nativa: blocca apertura, selezione o navigazione interna secondo il runtime.
+
+### Contract Gaps
+
+Stato attuale del README:
+
+- La composizione via `slots`, `children`, `model` e API overlay e documentata molto bene.
+- Il contratto keyboard/accessibility e presente a macchia di leopardo nei meta dei singoli componenti.
+- Per percezione da UI kit “serio”, i prossimi miglioramenti utili sarebbero: normalizzare un campo `keyboard` dove manca, esplicitare i ruoli/ARIA importanti nei meta, e distinguere in modo uniforme `disabled`, `readonly`, `loading`, `closable`, `persistent`.
+
 ## Inventory
 
 ### Layout e struttura
