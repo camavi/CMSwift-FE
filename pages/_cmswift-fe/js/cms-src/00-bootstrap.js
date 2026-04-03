@@ -55,30 +55,31 @@
       },
       reactive: {
         description: "Core minimale signal/effect usato come base della reattivita.",
-        entrypoints: ["CMSwift.reactive.signal", "CMSwift.reactive.effect", "CMSwift.reactive.computed", "CMSwift.reactive.untracked"],
-        status: "milestone-1-closed",
+        entrypoints: ["CMSwift.reactive.signal", "CMSwift.reactive.effect", "CMSwift.reactive.computed", "CMSwift.reactive.untracked", "CMSwift.reactive.batch"],
+        status: "milestone-2-closed",
         knownLimits: [
           "La protezione loop copre i loop sincroni per singolo effect, non ancora i cicli complessi tra effect multipli.",
-          "Mancano batching e primitive avanzate per controllare scheduling e transazioni."
+          "Il batching sincrono ora esiste, ma manca ancora scheduling configurabile oltre il flush immediato a fine batch.",
+          "Mancano primitive avanzate per controllare scheduling e transazioni asincrone."
         ]
       },
       rod: {
         description: "Layer reattivo di alto livello per binding DOM, model e interpolazioni.",
         entrypoints: ["_.rod", "CMSwift.rodBind", "CMSwift.rodModel"],
-        status: "milestone-1-closed",
+        status: "milestone-2-closed",
         knownLimits: [
-          "Va chiarito meglio il rapporto con CMSwift.reactive.",
-          "rodApplyBinding mantiene ancora una logica DOM dedicata separata dal renderer.",
-          "Manca una suite di test automatica dedicata."
+          "Va chiarito meglio il rapporto con CMSwift.reactive oltre al primo riallineamento strutturale.",
+          "Restano casi avanzati di model/binding da esplorare oltre al primo giro coperto dai test.",
+          "Il modulo e piu pulito internamente ma non e ancora il punto finale della convergenza con il renderer."
         ]
       },
       mount: {
         description: "Mount, component instances e cleanup automatico del tree DOM.",
         entrypoints: ["CMSwift.mount", "CMSwift.component", "CMSwift.enableAutoCleanup"],
-        status: "milestone-1-closed",
+        status: "milestone-2-closed",
         knownLimits: [
-          "Il lifecycle va documentato meglio.",
-          "Da blindare i casi di cleanup e multi-mount."
+          "Il lifecycle e piu pulito internamente ma resta da chiarire meglio la semantica su multi-mount e cloni.",
+          "Restano da esplorare edge case avanzati del cleanup automatico fuori dal primo giro gia coperto."
         ]
       },
       platform: {
@@ -164,6 +165,49 @@
     let CURRENT_EFFECT = null;
     const EFFECT_STACK = [];
     const MAX_SYNC_EFFECT_RERUNS = 100;
+    let BATCH_DEPTH = 0;
+    let BATCH_FLUSH_MODE = "sync";
+    let PENDING_FLUSH_MODE = "sync";
+    let MICROTASK_FLUSH_SCHEDULED = false;
+    const PENDING_RUNNERS = new Set();
+
+    function normalizeFlushMode(options) {
+      const mode = options?.flush;
+      if (mode == null || mode === "sync") return "sync";
+      if (mode === "microtask") return "microtask";
+      throw new Error("CMSwift.reactive.batch: options.flush must be 'sync' or 'microtask'");
+    }
+
+    function flushPendingRunners() {
+      while (PENDING_RUNNERS.size) {
+        const jobs = Array.from(PENDING_RUNNERS);
+        PENDING_RUNNERS.clear();
+        jobs.forEach((fn) => fn());
+      }
+    }
+
+    function scheduleMicrotaskFlush() {
+      if (MICROTASK_FLUSH_SCHEDULED) return;
+      MICROTASK_FLUSH_SCHEDULED = true;
+
+      queueMicrotask(() => {
+        MICROTASK_FLUSH_SCHEDULED = false;
+        PENDING_FLUSH_MODE = "sync";
+        flushPendingRunners();
+      });
+    }
+
+    function notifySubscribers(subs) {
+      const jobs = Array.from(subs);
+      if (BATCH_DEPTH > 0 || PENDING_FLUSH_MODE === "microtask") {
+        jobs.forEach((fn) => PENDING_RUNNERS.add(fn));
+        if (BATCH_DEPTH === 0 && PENDING_FLUSH_MODE === "microtask") {
+          scheduleMicrotaskFlush();
+        }
+        return;
+      }
+      jobs.forEach((fn) => fn());
+    }
 
     function cleanupEffect(record) {
       if (!record) return;
@@ -271,7 +315,7 @@
 
       function set(v) {
         value = v;
-        Array.from(subs).forEach(fn => fn());
+        notifySubscribers(subs);
       }
 
       function dispose() {
@@ -312,5 +356,34 @@
       }
     }
 
-    return { signal, effect, computed, untracked };
+    function batch(fn, options) {
+      if (typeof fn !== "function") throw new Error("CMSwift.reactive.batch: fn must be a function");
+      const flushMode = normalizeFlushMode(options);
+
+      if (BATCH_DEPTH === 0) {
+        BATCH_FLUSH_MODE = flushMode;
+      } else if (flushMode === "microtask") {
+        BATCH_FLUSH_MODE = "microtask";
+      }
+
+      BATCH_DEPTH += 1;
+      try {
+        return fn();
+      } finally {
+        BATCH_DEPTH -= 1;
+        if (BATCH_DEPTH === 0) {
+          const shouldUseMicrotask = BATCH_FLUSH_MODE === "microtask" || PENDING_FLUSH_MODE === "microtask";
+          BATCH_FLUSH_MODE = "sync";
+
+          if (shouldUseMicrotask) {
+            PENDING_FLUSH_MODE = "microtask";
+            scheduleMicrotaskFlush();
+          } else {
+            flushPendingRunners();
+          }
+        }
+      }
+    }
+
+    return { signal, effect, computed, untracked, batch };
   })();

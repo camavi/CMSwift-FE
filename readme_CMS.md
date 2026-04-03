@@ -15,9 +15,9 @@ Regola di aggiornamento:
 
 Stato generale oggi:
 - renderer: milestone 2 chiusa
-- reactive core: milestone 1 chiusa
-- rod: milestone 1 chiusa
-- lifecycle / mount / cleanup: milestone 1 chiusa
+- reactive core: milestone 2 chiusa
+- rod: milestone 2 chiusa
+- lifecycle / mount / cleanup: milestone 2 chiusa
 - moduli platform: milestone 1 chiusa
 - test automatici core: prima base attiva con `node:test`
 
@@ -32,19 +32,19 @@ Stato generale oggi:
 - area: `CMSwift.reactive.signal` e `CMSwift.reactive.effect`
 - motivo: oggi il core e minimale e manca una semantica forte su dispose, scheduling e loop safety
 - obiettivo: definire invarianti chiare del modello reattivo
-- stato: milestone 1 chiusa, da consolidare con test e un secondo giro su scheduling
+- stato: milestone 2 chiusa, con `batch(...)`, flush opzionale `microtask` e copertura automatica dedicata
 
 3. Rod
 - area: `_.rod`, `CMSwift.rodBind`, `CMSwift.rodModel`, interpolation buffer
 - motivo: e potente ma ha una superficie API ampia e in parte sovrapposta al reactive core
 - obiettivo: chiarire il ruolo di `rod` e allinearlo meglio al resto del sistema
-- stato: milestone 1 chiusa, da consolidare con test e ulteriore allineamento al renderer
+- stato: milestone 2 chiusa, con bridge DOM condiviso, key speciali riallineati e copertura automatica del primo giro
 
 4. Lifecycle, mount e cleanup
 - area: `CMSwift.mount`, `CMSwift.component`, cleanup registry, auto cleanup
 - motivo: e la zona dove possono nascere leak, listener duplicati e componenti non smontati bene
 - obiettivo: definire il lifecycle e rendere affidabile unmount/cleanup
-- stato: milestone 1 chiusa, da consolidare con test e documentazione piu profonda
+- stato: milestone 2 chiusa, con helper interni estratti e copertura automatica del primo giro
 
 5. Moduli platform nel core
 - area: overlay, store, auth, http, router, `CMSwift.ui.meta`
@@ -221,12 +221,14 @@ Area:
 - `CMSwift.reactive.effect`
 - `CMSwift.reactive.computed`
 - `CMSwift.reactive.untracked`
+- `CMSwift.reactive.batch`
 
 Alias pubblici:
 - `_.signal` / `CMSwift.signal`
 - `_.effect` / `CMSwift.effect`
 - `_.computed` / `CMSwift.computed`
 - `_.untracked` / `CMSwift.untracked`
+- `_.batch` / `CMSwift.batch`
 
 ### Cosa supporta ora
 
@@ -234,6 +236,7 @@ Alias pubblici:
 - `effect(fn)` esegue subito l'effetto e restituisce una funzione di dispose
 - `computed(fn)` restituisce un getter derivato con `dispose()`
 - `untracked(fn)` esegue una lettura senza registrare dipendenze reattive
+- `batch(fn, { flush })` raggruppa scritture sincrone e flush dei subscriber in sync o nel microtask successivo
 - dependency tracking tra `signal.get()` e `effect(...)`
 - cleanup delle dipendenze a ogni riesecuzione
 - cleanup esplicito dell'effect quando viene dismesso
@@ -283,6 +286,24 @@ Esempio:
 - `  const snapshot = _.untracked(() => expensiveDebugState());`
 - `});`
 
+### Semantica batch
+
+- `batch(fn)`:
+  - esegue `fn` subito
+  - accoda i rerun degli effect mentre il batch e aperto
+  - flush dei runner una sola volta quando termina il batch piu esterno
+  - supporta batch annidati
+  - `options.flush` supporta:
+    - `sync` default
+    - `microtask` per posticipare il flush al microtask successivo
+
+Esempio:
+- `_.batch(() => {`
+- `  setCount(2);`
+- `  setStep(4);`
+- `});`
+- `_.batch(() => { setCount(2); setStep(4); }, { flush: "microtask" });`
+
 ### Correzione fatta in questo step
 
 - prima il core reattivo usava un solo `CURRENT_EFFECT`
@@ -299,12 +320,15 @@ Adesso:
 - `untracked` e ora disponibile come primitive ufficiale del core e come alias pubblico `_.untracked`
 - se un effect si riattiva sincronicamente mentre e in esecuzione, il rerun viene accodato e non eseguito ricorsivamente nello stack corrente
 - se lo stesso effect supera la soglia di rerun sincroni consecutivi, il core interrompe il ciclo e logga un warning
+- `batch` e ora disponibile come primitive ufficiale del core e come alias pubblico `_.batch`
+- `signal.set(...)` durante un batch non flush-a subito tutti i subscriber: i runner vengono raccolti e scaricati a fine batch esterno
+- il flush del batch puo essere opzionalmente rimandato al microtask successivo con `flush: "microtask"`
 
 ### Limiti attuali del reactive core
 
-- manca scheduling configurabile
+ - manca scheduling configurabile oltre al flush `sync`/`microtask` del batch
 - la protezione loop e di primo livello: copre il loop sincrono di un effect, non ancora i cicli complessi tra effect multipli
-- manca una suite di test automatica dedicata
+- manca ancora una semantica piu ricca per transazioni asincrone o priorita di flush
 
 ## Rod: contratto iniziale
 
@@ -760,10 +784,14 @@ Campi consigliati per ogni modulo:
 - rifinita la separazione dei moduli `cms-src/*` con granularita piu stretta e manifest `modules.json`
 - iniziato il secondo giro di pulizia interna con un bridge DOM condiviso tra `renderer` e `rod`
 - esteso il bridge DOM condiviso anche ai key speciali del `rod`: `auto`, `attr:`, `style.*` e nested path
+- chiuso formalmente il secondo giro del `rod` con bridge DOM condiviso e blocco devtools separato
 - alleggerito il `renderer` estraendo helper condivise per classi, eventi e interpolazioni
 - separata anche la gestione dei dynamic children dal body di `createElement(...)`
 - separato anche il loop finale di parsing `args/props/children` dal body di `createElement(...)`
 - iniziato il secondo giro del lifecycle con helper interni estratti per mount, cleanup e component dispose
+- chiuso formalmente il secondo giro del lifecycle con helper interni estratti e modulo pubblico alleggerito
+- aperto il secondo giro del reactive core con `batch(...)`, alias pubblico `_.batch` e test automatico dedicato
+- esteso il reactive core con flush opzionale `microtask` sul `batch(...)` e chiuso formalmente il secondo giro
 
 ## Test automatici del core
 
@@ -777,6 +805,7 @@ File iniziali:
 Copertura iniziale:
 - `reactive.effect`: cleanup e dispose
 - `reactive.computed` + `untracked`
+- `reactive.batch`: flush unico dei subscriber a fine batch, anche con batch annidati
 - `store.signal`: isolamento per `prefix/storage`
 - `store.watch`: callback eseguiti in `untracked`, senza loop reattivi
 - `http.request`: hook `before/after/error` e state surface pubblica

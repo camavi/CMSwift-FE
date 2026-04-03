@@ -26,6 +26,10 @@ const cmsReactive = _.component((props, ctx) => {
   const [getEffectRuns, setEffectRuns] = _.signal(0);
   const [getCleanupRuns, setCleanupRuns] = _.signal(0);
   const [getEffectMessage, setEffectMessage] = _.signal("effect ready");
+  const [getBatchLeft, setBatchLeft] = _.signal(1);
+  const [getBatchRight, setBatchRight] = _.signal(10);
+  const [getBatchView, setBatchView] = _.signal("runs=0 snapshot=1:10");
+  const [getBatchStatus, setBatchStatus] = _.signal("idle");
 
   const product = _.computed(() => getCount() * getStep());
   const summary = _.computed(() => `count=${getCount()} step=${getStep()} product=${product()}`);
@@ -37,7 +41,13 @@ const cmsReactive = _.component((props, ctx) => {
 
   let effectRunCount = 0;
   let cleanupRunCount = 0;
+  let batchRunCount = 0;
   let stopMirrorEffect = null;
+  const stopBatchEffect = _.effect(() => {
+    const snapshot = `${getBatchLeft()}:${getBatchRight()}`;
+    batchRunCount += 1;
+    setBatchView(`runs=${batchRunCount} snapshot=${snapshot}`);
+  });
 
   const startMirrorEffect = () => {
     if (stopMirrorEffect) return;
@@ -67,10 +77,31 @@ const cmsReactive = _.component((props, ctx) => {
 
   ctx.onDispose(() => {
     stopMirrorEffect?.();
+    stopBatchEffect?.();
     product.dispose?.();
     summary.dispose?.();
     untrackedSummary.dispose?.();
   });
+
+  const runSyncBatch = () => {
+    _.batch(() => {
+      setBatchLeft(getBatchLeft() + 1);
+      setBatchRight(getBatchRight() + 10);
+    });
+    setBatchStatus(`sync batch closed -> ${getBatchView()}`);
+  };
+
+  const runMicrotaskBatch = () => {
+    _.batch(() => {
+      setBatchLeft(getBatchLeft() + 1);
+      setBatchRight(getBatchRight() + 10);
+    }, { flush: "microtask" });
+
+    setBatchStatus(`immediately after microtask batch -> ${getBatchView()}`);
+    queueMicrotask(() => {
+      setBatchStatus(`after microtask flush -> ${getBatchView()}`);
+    });
+  };
 
   const listSample = {
     signalComputed: {
@@ -149,6 +180,28 @@ const cmsReactive = _.component((props, ctx) => {
         '  return `count=${count}, debug snapshot=${debugSnapshot}`;',
         '});'
       ]
+    },
+    batch: {
+      code: [
+        _.Card({ title: "Batch sync vs microtask", subtitle: "Il batch puo flush-are subito o nel microtask successivo" },
+          stack(
+            actionRow(
+              _.Btn({ size: "sm", onClick: runSyncBatch }, "run sync batch"),
+              _.Btn({ size: "sm", color: "secondary", onClick: runMicrotaskBatch }, "run microtask batch")
+            ),
+            infoLine("batch signals", () => `${getBatchLeft()}:${getBatchRight()}`),
+            infoLine("batch effect view", () => getBatchView()),
+            infoLine("batch status", () => getBatchStatus()),
+            _.p({ class: "cms-muted" }, "Con `flush: \"microtask\"` il rerun dell effect non avviene subito alla chiusura del batch: lo vedi nel passaggio da `immediately after...` a `after microtask flush...`.")
+          )
+        )
+      ],
+      sample: [
+        '_.batch(() => {',
+        '  setLeft(2);',
+        '  setRight(20);',
+        '}, { flush: "microtask" });'
+      ]
     }
   };
 
@@ -160,12 +213,14 @@ const cmsReactive = _.component((props, ctx) => {
       _.Item("`_.signal(initial)` -> `[get, set, dispose]`"),
       _.Item("`_.effect(fn)` -> esegue subito l effect e restituisce `dispose()`"),
       _.Item("`_.computed(fn)` -> getter derivato con `dispose()`"),
-      _.Item("`_.untracked(fn)` -> legge senza registrare dipendenze")
+      _.Item("`_.untracked(fn)` -> legge senza registrare dipendenze"),
+      _.Item("`_.batch(fn, { flush })` -> raggruppa update e puo flush-are in sync o microtask")
     ),
     _.h2("Esempi"),
     boxCode("Signal + computed", listSample.signalComputed, 24),
     boxCode("Effect + cleanup + dispose", listSample.effectCleanup, 24),
-    boxCode("Untracked", listSample.untracked, 24)
+    boxCode("Untracked", listSample.untracked, 24),
+    boxCode("Batch", listSample.batch, 24)
   );
 });
 

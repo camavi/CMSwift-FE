@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { loadCMS } from "./helpers/load-cms.mjs";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+const nextMicrotask = () => new Promise((resolve) => queueMicrotask(resolve));
 const collectText = (node) => {
   if (!node) return "";
   if (node.nodeType === 3 || node.nodeType === 8) return String(node.textContent || "");
@@ -68,6 +69,57 @@ test("computed tracks only tracked dependencies and ignores untracked reads", as
   setCount(3);
   assert.equal(derived(), "3:11");
   assert.equal(computedRuns, 2);
+});
+
+test("batch flushes reactive subscribers once after grouped writes", async () => {
+  const CMS = await loadCMS();
+  const [getLeft, setLeft] = CMS.signal(1);
+  const [getRight, setRight] = CMS.signal(10);
+  const snapshots = [];
+
+  CMS.effect(() => {
+    snapshots.push(`${getLeft()}:${getRight()}`);
+  });
+
+  assert.deepEqual(snapshots, ["1:10"]);
+
+  CMS.batch(() => {
+    setLeft(2);
+    setRight(20);
+  });
+
+  assert.deepEqual(snapshots, ["1:10", "2:20"]);
+
+  CMS.batch(() => {
+    setLeft(3);
+    CMS.batch(() => {
+      setRight(30);
+    });
+  });
+
+  assert.deepEqual(snapshots, ["1:10", "2:20", "3:30"]);
+});
+
+test("batch supports optional microtask flush", async () => {
+  const CMS = await loadCMS();
+  const [getLeft, setLeft] = CMS.signal(1);
+  const [getRight, setRight] = CMS.signal(10);
+  const snapshots = [];
+
+  CMS.effect(() => {
+    snapshots.push(`${getLeft()}:${getRight()}`);
+  });
+
+  CMS.batch(() => {
+    setLeft(2);
+    setRight(20);
+  }, { flush: "microtask" });
+
+  assert.deepEqual(snapshots, ["1:10"]);
+
+  await nextMicrotask();
+
+  assert.deepEqual(snapshots, ["1:10", "2:20"]);
 });
 
 test("store.signal keeps scopes isolated across prefix and storage", async () => {
