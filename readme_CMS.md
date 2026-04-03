@@ -19,6 +19,7 @@ Stato generale oggi:
 - rod: milestone 1 chiusa
 - lifecycle / mount / cleanup: milestone 1 chiusa
 - moduli platform: milestone 1 chiusa
+- test automatici core: prima base attiva con `node:test`
 
 1. Renderer DOM e bridge props
 - file: `pages/_cmswift-fe/js/cms.js`
@@ -713,3 +714,35 @@ Campi consigliati per ogni modulo:
 - corretto il blocco `auth` per retry `401` non infinito e stato devtools completo
 - corretto il blocco `ui.meta` per robustezza del doc viewer e fallback senza `TabPanel`
 - aggiunta demo browser aggregata `cms-platform` per store, router, http, overlay, auth e ui.meta
+- aggiunta prima suite automatica `node:test` per `reactive` e `store`
+- estesa la suite automatica del core con copertura dedicata per `overlay` e `auth`
+
+## Test automatici del core
+
+Comando:
+- `npm test`
+
+File iniziali:
+- `tests/helpers/load-cms.mjs`
+- `tests/cms-core.test.mjs`
+
+Copertura iniziale:
+- `reactive.effect`: cleanup e dispose
+- `reactive.computed` + `untracked`
+- `store.signal`: isolamento per `prefix/storage`
+- `store.watch`: callback eseguiti in `untracked`, senza loop reattivi
+- `http.request`: hook `before/after/error` e state surface pubblica
+- `router`: `navigate`, `subscribe`, `isActive`, unmount view precedente e stato `404`
+- `renderer`: `class`, CSS custom properties, boolean props, event options, children dinamici, nodo SVG `text`
+- `lifecycle`: `mount`, `component`, `ctx.onDispose`, cleanup su `clear/unmount`
+- `overlay`: stack, scroll lock, z-index/root, cleanup listener documento/window
+- `auth`: login/logout, ruoli/permessi, `status()/inspect()`, retry `401` una sola volta dopo refresh
+
+Bug reali intercettati dai test:
+- `CMSwift.http.getJSON/delJSON/postJSON/putJSON/patchJSON` chiamavano `.jsonStrict()` sul `Promise` invece che sul response wrapper risolto
+- `CMSwift.router.compilePattern(...)` escapava anche `:param`, quindi i route params dinamici non venivano estratti
+- `normalizeClass(...)` non valutava `function` e `rod` dentro gli object-map delle classi
+
+Limiti attuali:
+- il test harness usa un DOM fake minimale, non un browser reale
+- `ui.meta` non ha ancora test automatici dedicati

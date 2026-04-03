@@ -603,7 +603,10 @@
       }
       if (typeof value === "object") {
         Object.entries(value).forEach(([className, enabled]) => {
-          add(enabled ? className : null);
+          let resolved = enabled;
+          if (typeof resolved === "function") resolved = resolved();
+          else if (resolved && resolved.type === "rod") resolved = resolved.value;
+          add(resolved ? className : null);
         });
         return;
       }
@@ -3669,11 +3672,11 @@
   CMSwift.http.put = (url, body, init) => withJSON("PUT", url, body, init);
   CMSwift.http.patch = (url, body, init) => withJSON("PATCH", url, body, init);
 
-  CMSwift.http.getJSON = (url, init) => request(url, { ...init, method: "GET" }).jsonStrict();
-  CMSwift.http.delJSON = (url, init) => request(url, { ...init, method: "DELETE" }).jsonStrict();
-  CMSwift.http.postJSON = (url, body, init) => withJSON("POST", url, body, init).jsonStrict();
-  CMSwift.http.putJSON = (url, body, init) => withJSON("PUT", url, body, init).jsonStrict();
-  CMSwift.http.patchJSON = (url, body, init) => withJSON("PATCH", url, body, init).jsonStrict();
+  CMSwift.http.getJSON = async (url, init) => (await request(url, { ...init, method: "GET" })).jsonStrict();
+  CMSwift.http.delJSON = async (url, init) => (await request(url, { ...init, method: "DELETE" })).jsonStrict();
+  CMSwift.http.postJSON = async (url, body, init) => (await withJSON("POST", url, body, init)).jsonStrict();
+  CMSwift.http.putJSON = async (url, body, init) => (await withJSON("PUT", url, body, init)).jsonStrict();
+  CMSwift.http.patchJSON = async (url, body, init) => (await withJSON("PATCH", url, body, init)).jsonStrict();
 
   CMSwift.http.onBefore = function (fn) { hooksHTTP.beforeRequest.add(fn); return () => hooksHTTP.beforeRequest.delete(fn); };
   CMSwift.http.onAfter = function (fn) { hooksHTTP.afterResponse.add(fn); return () => hooksHTTP.afterResponse.delete(fn); };
@@ -4114,7 +4117,7 @@
       pattern = normalizePath(pattern);
       const keys = [];
       const regexStr = pattern
-        .replace(/([.+*?=^!:${}()[\]|/\\])/g, "\\$1") // escape regex
+        .replace(/([.+*?=^!${}()[\]|/\\])/g, "\\$1") // escape regex, preserve :params
         .replace(/\\\/:([A-Za-z0-9_]+)/g, (_, k) => {
           keys.push(k);
           return "\\/([^\\/]+)";
