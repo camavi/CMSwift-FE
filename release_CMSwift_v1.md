@@ -35,8 +35,8 @@ Snapshot gate oggi:
 - changelog/release notes: presenti come draft
 - build runtime: verde
 - test automatici core: verdi
-- smoke browser release: ancora da eseguire
-- decisione finale `stable` vs `unstable` su alcune aree UI avanzate: ancora da chiudere
+- smoke browser release: passata
+- decisione finale `stable` vs `unstable` su aree UI avanzate: chiusa
 
 ## 1. Blocker
 
@@ -82,11 +82,11 @@ Serve prima di pubblicare:
 Aggiornamento:
 - policy iniziale definita in `policy_CMSwift_stability.md`
 - package allineato a `1.0.0`
-- da rifinire solo il confine finale `stable` vs `unstable` per alcuni componenti UI avanzati
+- confine `stable` vs `unstable` chiuso per `v1.0.0`
 
 ### 1.3 Smoke test browser di release
 
-Stato: `BLOCKER`
+Stato: `READY`
 
 Ci sono buoni test automatici sul core, ma manca una checklist release browser esplicita da eseguire sempre.
 
@@ -98,6 +98,9 @@ Serve prima di pubblicare:
 
 Aggiornamento:
 - checklist browser iniziale preparata in `smoke_CMSwift_v1.md`
+- preflight automatico via server locale non eseguibile in questo ambiente: `vite` richiede Node `20.19+` e il bind locale nel sandbox e bloccato
+- preflight HTTP locale eseguito fuori sandbox con `200 OK` su `pages/index.html`, `cms.js`, `min-cms.js`, `min-ui.js`
+- smoke browser manuale confermata come passata
 
 ### 1.4 Entry point di produzione
 

@@ -60,6 +60,11 @@ Oggi rientrano qui:
 - `Time`
 - aree dove il contratto pubblico non e ancora fissato completamente
 
+Decisione per `v1`:
+- `Tooltip`, `Dialog`, `Menu`, `Popover`, `ContextMenu` restano `unstable`
+- `Date` e `Time` restano `unstable`
+- non vengono promossi a `stable` nella `1.0.0`
+
 ### 2.3 Experimental
 
 Queste API sono da considerare prova tecnica o superficie in osservazione.
@@ -179,6 +184,13 @@ Unstable:
 - overlay avanzati
 - date/time
 - superfici con comportamento molto ricco e piu sensibile a edge case
+
+Decisione chiusa per `v1.0.0`:
+- overlay avanzati: `unstable`
+- `Date`: `unstable`
+- `Time`: `unstable`
+- `UI.meta` e dev helpers: `dev-only`
+- narrativa pubblica: `reactive` come core primitives, `rod` come model/binding layer
 
 Dev-only:
 - `UI.meta`

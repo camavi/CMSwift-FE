@@ -56,6 +56,12 @@ Per questa release, da considerare ancora non completamente stabilizzati:
 - `Time`
 - `UI.meta` e dev helpers come API pubblica stabile
 
+Decisione esplicita per `v1.0.0`:
+- overlay avanzati restano `unstable`
+- `Date` e `Time` restano `unstable`
+- `UI.meta` resta `dev-only`
+- `reactive` e il set di primitive core; `rod` e il layer di binding/model
+
 ## Distribution
 
 Debug:

@@ -103,6 +103,12 @@ Da considerare ancora `unstable` o `experimental` finche non chiudiamo la pre-re
 - `UI.meta` e dev helpers come API pubblica stabile
 - messaging pubblico finale su `rod` vs `reactive`
 
+Decisione attuale per `v1.0.0`:
+- overlay avanzati: `unstable`
+- `Date` e `Time`: `unstable`
+- `UI.meta` e dev helpers: `dev-only`
+- messaging pubblico: `reactive` come core primitives, `rod` come model/binding layer
+
 ## Stable API Surface
 
 Per la `v1`, la superficie da considerare piu stabile e questa:
