@@ -18,7 +18,7 @@ Stato generale oggi:
 - reactive core: milestone 2 chiusa
 - rod: milestone 2 chiusa
 - lifecycle / mount / cleanup: milestone 2 chiusa
-- moduli platform: milestone 2 in corso
+- moduli platform: milestone 2 chiusa
 - test automatici core: prima base attiva con `node:test`
 
 1. Renderer DOM e bridge props
@@ -50,7 +50,7 @@ Stato generale oggi:
 - area: overlay, store, auth, http, router, `CMSwift.ui.meta`
 - motivo: sono utili, ma oggi vivono tutti nello stesso file con responsabilita molto ampie
 - obiettivo: modularita interna migliore, documentazione per modulo e confini piu chiari
-- stato: milestone 2 aperta, con primo refactor interno partito da `store`
+- stato: milestone 2 chiusa, con helper interni estratti modulo per modulo e copertura automatica invariata
 
 ## Stato iniziale
 
@@ -508,8 +508,8 @@ Cleanup:
 - gli altri moduli platform non hanno ancora ricevuto lo stesso trattamento strutturale del `store`
 
 Stato:
-- platform: milestone 2 in corso
-- store: secondo giro aperto con helper interni condivisi per scope, chiavi e serializzazione
+- platform: milestone 2 chiusa
+- store: secondo giro chiuso con helper interni condivisi per scope, chiavi e serializzazione
 
 ## Platform / Router: contratto iniziale
 
@@ -547,8 +547,8 @@ Stato route:
 - il supporto nested e ancora minimale e va blindato meglio nei casi complessi
 
 Stato:
-- router: secondo giro aperto con helper interni estratti per path, query, matching e history
-- platform: milestone 2 in corso
+- router: secondo giro chiuso con helper interni estratti per path, query, matching e history
+- platform: milestone 2 chiusa
 
 ## Platform / HTTP: contratto iniziale
 
@@ -586,8 +586,8 @@ Auth bridge:
 - la semantica di retry e timeout va documentata meglio
 
 Stato:
-- http: secondo giro aperto con helper interni estratti per state, normalize request, retry/abort e response wrapper
-- platform: milestone 2 in corso
+- http: secondo giro chiuso con helper interni estratti per state, normalize request, retry/abort e response wrapper
+- platform: milestone 2 chiusa
 
 ## Platform / Overlay: contratto iniziale
 
@@ -620,8 +620,8 @@ Cleanup:
 - il positioning ancorato e ancora minimale
 
 Stato:
-- overlay: secondo giro aperto con helper interni estratti per root, focus e positioning ancorato
-- platform: milestone 2 in corso
+- overlay: secondo giro chiuso con helper interni estratti per root, focus e positioning ancorato
+- platform: milestone 2 chiusa
 
 ## Platform / Auth: contratto iniziale
 
@@ -656,8 +656,8 @@ Devtools / stato:
 - la semantica dei redirect auth dipende ancora da un solo `beforeEach` nel router
 
 Stato:
-- auth: primo step strutturale chiuso
-- platform: milestone 1 chiusa
+- auth: secondo giro chiuso con helper interni estratti per permessi, path protetti e devtools
+- platform: milestone 2 chiusa
 
 ## Platform / UI Meta: contratto iniziale
 
@@ -687,8 +687,8 @@ Doc viewer:
 - `docTable` resta accoppiato a componenti UI come `Card`, `Chip`, `TabPanel`
 
 Stato:
-- ui meta: primo step strutturale chiuso
-- platform: primo giro completato
+- ui meta: secondo giro chiuso con helper interni estratti per fallback component, rows e tab group
+- platform: milestone 2 chiusa
 
 ## Verifica browser blocco platform
 
@@ -796,6 +796,9 @@ Campi consigliati per ogni modulo:
 - continuato il secondo giro del blocco `platform` su `router`, con helper interni estratti per path, query, matching e history
 - continuato il secondo giro del blocco `platform` su `http`, con helper interni estratti per state, request normalize, retry/abort e response wrapper
 - continuato il secondo giro del blocco `platform` su `overlay`, con helper interni estratti per root, focus e positioning ancorato
+- continuato il secondo giro del blocco `platform` su `auth`, con helper interni estratti per permessi, path protetti e devtools
+- continuato il secondo giro del blocco `platform` su `ui.meta`, con helper interni estratti per fallback component, rows e tab group
+- chiuso formalmente il secondo giro del blocco `platform`
 
 ## Test automatici del core
 

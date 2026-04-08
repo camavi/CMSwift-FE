@@ -67,41 +67,16 @@
   CMSwift.docTable = (name) => {
     if (!CMSwift.isDev()) return _.div(); // non fa niente in prod
 
+    const {
+      resolveDocComponents,
+      renderMetaItem,
+      renderTabGroupFallback,
+      normalizeEventRows,
+      normalizeSlotRows
+    } = CMSwift._uiMetaShared;
     const meta = CMSwift.ui.meta?.[name];
     if (!meta) return _.div({ class: "cms-muted" }, `Meta non trovata: ${name}`);
-    const hasTabPanel = typeof _.TabPanel === "function";
-    const Card = typeof _.Card === "function"
-      ? _.Card
-      : (...children) => _.div({ class: "cms-doc-card" }, ...children);
-    const Chip = typeof _.Chip === "function"
-      ? _.Chip
-      : (_props, label) => _.span({ class: "cms-chip cms-chip-fallback" }, label);
-
-    const formatValues = (values) => {
-      if (!values) return "—";
-      if (Array.isArray(values)) return values.join(" | ");
-      return String(values);
-    };
-
-    const renderMetaItem = (item) => _.div({ class: "cms-p-md" },
-      _.p(
-        _.h3("Name: " + item.name),
-        _.div(_.b("Type: "), item.type ? String(item.type).split("|").map((token) => Chip({ color: "secondary", dense: true }, token)) : "—")
-      ),
-      _.p(_.b("Default: "), _.span(item.default == null ? "—" : String(item.default))),
-      _.p(
-        _.h3("Values: "),
-        _.div({ class: "cms-p-l-md" }, _.span(formatValues(item.values)))
-      ),
-      _.p(
-        _.h3("Description: "),
-        _.div({ class: "cms-p-l-md" }, item.description || "—")
-      )
-    );
-
-    const renderTabGroupFallback = (rows) => _.div({ class: "cms-p-md" },
-      rows.map((row) => _.div({ class: "cms-m-b-lg" }, _.h4(row.label || row.name), row.content))
-    );
+    const { hasTabPanel, Card, Chip } = resolveDocComponents(_);
 
     const list = {};
     Object.entries(meta.props || {}).forEach(([k, v]) => {
@@ -118,7 +93,7 @@
           name: p.name,
           wrap: true,
           label: p.name,
-          content: renderMetaItem(p)
+          content: renderMetaItem(_, p, Chip)
         };
       });
       return {
@@ -127,49 +102,12 @@
           animated: true,
           radius: "0 0 0 var(--cms-r-default)",
           tabs: rows
-        }) : renderTabGroupFallback(rows)
+        }) : renderTabGroupFallback(_, rows)
       };
     });
 
-    let eventsRows = [];
-    if (meta.events) {
-      if (Array.isArray(meta.events)) {
-        eventsRows = meta.events.map((ev) => {
-          return { name: ev.name, wrap: true, label: ev.name, content: _.div({ class: "cms-p-md" }, ev.description) }
-        }
-        );
-      } else {
-        eventsRows = Object.entries(meta.events || {}).map(([k, v]) => {
-          return { name: k, wrap: true, label: k, content: _.div({ class: "cms-p-md" }, v) }
-        }
-        );
-      }
-    }
-
-    let slotsRows = [];
-    if (meta.slots) {
-      if (Array.isArray(meta.slots)) {
-        slotsRows = meta.slots.map((slot) => {
-          return { name: slot.name, wrap: true, label: slot.type, content: slot.description };
-        }
-        );
-      } else {
-        slotsRows = Object.entries(meta.slots || {}).map(([k, v]) => {
-          return {
-            name: k, wrap: true, label: k, content:
-              _.div({ class: "cms-p-md", },
-                _.div(
-                  _.h3("Name: " + k),
-                  _.div({ class: "cms-p-l-md" }, v.type || "—")
-                ),
-                _.div(
-                  _.h3("Description:"),
-                  _.div({ class: "cms-p-l-md" }, v.description || "—"))
-              )
-          };
-        });
-      }
-    }
+    const eventsRows = normalizeEventRows(_, meta.events);
+    const slotsRows = normalizeSlotRows(_, meta.slots);
     const tabPanelModel = _.rod(null);
     const taps = [];
     if (slotsRows.length) taps.push({
@@ -181,7 +119,7 @@
         radius: "0 0 0 var(--cms-r-default)",
         orientation: "vertical",
         tabs: slotsRows
-      }) : renderTabGroupFallback(slotsRows)
+      }) : renderTabGroupFallback(_, slotsRows)
     });
     if (propsTab.length) taps.push(...propsTab);
     if (eventsRows.length) taps.push({
@@ -193,7 +131,7 @@
         radius: "0 0 0 var(--cms-r-default)",
         orientation: "vertical",
         tabs: eventsRows
-      }) : renderTabGroupFallback(eventsRows)
+      }) : renderTabGroupFallback(_, eventsRows)
     });
     const first = "general";
     taps.sort((a, b) => {
@@ -213,7 +151,7 @@
           animated: true,
           orientation: "horizontal",
           tabs: taps, model: tabPanelModel
-        }) : renderTabGroupFallback(taps))
+        }) : renderTabGroupFallback(_, taps))
         : null,
       meta.returns ? _.p({ class: "cms-muted", style: { marginTop: "14px" } }, `Returns: ${meta.returns}`) : null
     );

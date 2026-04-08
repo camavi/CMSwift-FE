@@ -85,9 +85,9 @@
       platform: {
         description: "Moduli applicativi nel core: overlay, store, auth, http, router, UI meta.",
         entrypoints: ["CMSwift.overlay", "CMSwift.store", "CMSwift.plugins.auth", "CMSwift.http", "CMSwift.router", "CMSwift.ui.meta"],
-        status: "milestone-2-in-progress",
+        status: "milestone-2-closed",
         knownLimits: [
-          "Il secondo giro e appena partito: store ha helper interni estratti, ma gli altri moduli platform vanno ancora trattati con lo stesso metodo.",
+          "Il secondo giro ha ripulito i moduli interni, ma mancano ancora demo separate per modulo e una validazione piu formale di alcune superfici pubbliche.",
           "Esiste una demo browser aggregata del blocco platform, ma non ancora demo separate per ogni modulo.",
           "Mancano configurazione pubblica piu coerente e confini piu netti tra auth, http e router.",
           "Il registry UI meta non ha ancora validazione formale del suo shape."
@@ -3119,12 +3119,165 @@
     }
   };
   // ===============================
+  // Auth shared helpers
+  // ===============================
+  CMSwift._authShared = (() => {
+    function createPermissionApi(getUser) {
+      const roles = () => getUser()?.roles || [];
+      const perms = () => getUser()?.permissions || [];
+
+      return {
+        roles,
+        perms,
+        hasRole: (role) => roles().includes(role),
+        can: (permission) => perms().includes(permission),
+        canAny: (list) => list.some((item) => roles().includes(item) || perms().includes(item)),
+        canAll: (list) => list.every((item) => roles().includes(item) || perms().includes(item))
+      };
+    }
+
+    function matchesProtectedPath(path, protectedList) {
+      return protectedList.some((entry) =>
+        typeof entry === "string"
+          ? path.startsWith(entry)
+          : entry instanceof RegExp
+            ? entry.test(path)
+            : false
+      );
+    }
+
+    function attachDevTools(app, auth) {
+      if (!app || !auth) return;
+
+      let tracing = false;
+
+      function safeNow() {
+        return Date.now();
+      }
+
+      function decodeJWT(token) {
+        if (!token || typeof token !== "string") return null;
+        const parts = token.split(".");
+        if (parts.length < 2) return null;
+        try {
+          const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+          const json = decodeURIComponent(
+            atob(b64).split("").map((char) => "%" + char.charCodeAt(0).toString(16).padStart(2, "0")).join("")
+          );
+          return JSON.parse(json);
+        } catch {
+          return null;
+        }
+      }
+
+      function getAuthState() {
+        if (typeof auth._getState === "function") {
+          const state = auth._getState();
+          return state && typeof state === "object"
+            ? state
+            : { user: auth.user?.() ?? null };
+        }
+        return { user: auth.user?.() ?? null };
+      }
+
+      function status() {
+        const state = getAuthState() || {};
+        const user = state.user ?? auth.user?.();
+        const name = user?.name || user?.email || user?.id || "anon";
+        const ok = !!auth.isAuth?.();
+        const expiresAt = state.expiresAt || null;
+        const left = expiresAt ? expiresAt - safeNow() : null;
+        return ok
+          ? `AUTH ✅ user=${name}${expiresAt ? ` expiresIn=${Math.round(left / 1000)}s` : ""}`
+          : `AUTH ❌ user=${name}`;
+      }
+
+      function inspect(label = "auth") {
+        const state = getAuthState() || {};
+        const user = state.user ?? auth.user?.();
+        const roles = user?.roles || [];
+        const perms = user?.permissions || [];
+        const accessToken = state.accessToken || null;
+        const refreshToken = state.refreshToken || null;
+        const jwt = accessToken ? decodeJWT(accessToken) : null;
+        const expiresAt = state.expiresAt || (jwt?.exp ? jwt.exp * 1000 : null);
+        const now = safeNow();
+        const expiresInMs = expiresAt ? (expiresAt - now) : null;
+
+        const info = {
+          label,
+          isAuth: !!auth.isAuth?.(),
+          user,
+          roles,
+          permissions: perms,
+          has: {
+            role: (role) => !!auth.hasRole?.(role),
+            can: (permission) => !!auth.can?.(permission)
+          },
+          token: {
+            hasAccess: !!accessToken,
+            hasRefresh: !!refreshToken,
+            expiresAt,
+            expiresInSec: expiresInMs == null ? null : Math.round(expiresInMs / 1000),
+            decodedJWT: jwt
+          }
+        };
+
+        console.groupCollapsed(`[CMSwift.auth.inspect] ${label}`);
+        console.log("status:", status());
+        console.log(info);
+        if (expiresInMs != null) {
+          if (expiresInMs <= 0) console.warn("⚠️ Access token scaduto.");
+          else if (expiresInMs < 60_000) console.warn("⚠️ Access token in scadenza (<60s).");
+        }
+        console.groupEnd();
+
+        return info;
+      }
+
+      function trace(on = true) {
+        tracing = !!on;
+        console.log("[CMSwift.auth.trace]", tracing ? "ON" : "OFF");
+      }
+
+      if (typeof auth.fetch === "function" && !auth._fetchWrapped) {
+        const originalFetch = auth.fetch.bind(auth);
+        auth.fetch = async (...args) => {
+          const res = await originalFetch(...args);
+          if (tracing) {
+            try {
+              console.log("[auth.fetch]", res.status, args[0]);
+            } catch { }
+          }
+          return res;
+        };
+        auth._fetchWrapped = true;
+      }
+
+      auth.decodeJWT = decodeJWT;
+      auth.status = status;
+      auth.inspect = inspect;
+      auth.trace = trace;
+    }
+
+    return {
+      createPermissionApi,
+      matchesProtectedPath,
+      attachDevTools
+    };
+  })();
+  // ===============================
   // Auth Plugin (store + router guard)
   // Auth Plugin + Roles / Permissions
   // Auth Plugin (async + refresh token)
   // ===============================
   CMSwift.plugins.auth = {
     install(app, opts = {}) {
+      const {
+        createPermissionApi,
+        matchesProtectedPath,
+        attachDevTools
+      } = CMSwift._authShared;
       const options = {
         key: opts.key || "auth",
         loginRoute: opts.loginRoute || "/login",
@@ -3152,13 +3305,12 @@
       const isAuth = () => !!getAuth()?.accessToken;
 
       // ---------- ROLES / PERMS ----------
-      const roles = () => getUser()?.roles || [];
-      const perms = () => getUser()?.permissions || [];
-
-      const hasRole = (r) => roles().includes(r);
-      const can = (p) => perms().includes(p);
-      const canAny = (list) => list.some(x => hasRole(x) || can(x));
-      const canAll = (list) => list.every(x => hasRole(x) || can(x));
+      const {
+        hasRole,
+        can,
+        canAny,
+        canAll
+      } = createPermissionApi(getUser);
 
       // ---------- INTERNAL STATE ----------
       let refreshing = false;
@@ -3251,13 +3403,7 @@
       // ---------- ROUTER GUARD ----------
       app.router.beforeEach((ctx) => {
         const path = ctx.path;
-        const protectedMatch = options.protected.some(p =>
-          typeof p === "string"
-            ? path.startsWith(p)
-            : p instanceof RegExp
-              ? p.test(path)
-              : false
-        );
+        const protectedMatch = matchesProtectedPath(path, options.protected);
 
         if (protectedMatch && !isAuth()) {
           return options.loginRoute;
@@ -3288,135 +3434,7 @@
         return app.auth;
       };
 
-      // ===============================
-      // Auth DevTools
-      // ===============================
-      (function attachAuthDevTools(app) {
-        if (!app || !app.auth) return;
-
-        const auth = app.auth;
-        let tracing = false;
-
-        function safeNow() { return Date.now(); }
-
-        function decodeJWT(token) {
-          if (!token || typeof token !== "string") return null;
-          const parts = token.split(".");
-          if (parts.length < 2) return null;
-          try {
-            const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-            const json = decodeURIComponent(
-              atob(b64).split("").map(c => "%" + c.charCodeAt(0).toString(16).padStart(2, "0")).join("")
-            );
-            return JSON.parse(json);
-          } catch {
-            return null;
-          }
-        }
-
-        function getAuthState() {
-          // nel plugin async, lo stato è in store sotto key; ma auth espone user/isAuth/fetch.
-          // Se hai accesso diretto a getAuth nel plugin, puoi agganciarlo qui.
-          // Qui facciamo best-effort: cerchiamo store key "auth" o "user" non possiamo sapere.
-          // Quindi: ci basiamo su auth.user() e (se esiste) auth._getState()
-          if (typeof auth._getState === "function") {
-            const state = auth._getState();
-            return state && typeof state === "object"
-              ? state
-              : { user: auth.user?.() ?? null };
-          }
-          return { user: auth.user?.() ?? null };
-        }
-
-        function status() {
-          const s = getAuthState() || {};
-          const user = s.user ?? auth.user?.();
-          const name = user?.name || user?.email || user?.id || "anon";
-          const ok = !!auth.isAuth?.();
-          let exp = s.expiresAt || null;
-          let left = null;
-          if (exp) left = exp - safeNow();
-          return ok
-            ? `AUTH ✅ user=${name}${exp ? ` expiresIn=${Math.round(left / 1000)}s` : ""}`
-            : `AUTH ❌ user=${name}`;
-        }
-
-        function inspect(label = "auth") {
-          const s = getAuthState() || {};
-          const user = s.user ?? auth.user?.();
-
-          const roles = user?.roles || [];
-          const perms = user?.permissions || [];
-
-          const accessToken = s.accessToken || null;
-          const refreshToken = s.refreshToken || null;
-
-          const jwt = accessToken ? decodeJWT(accessToken) : null;
-
-          const expiresAt = s.expiresAt || (jwt?.exp ? jwt.exp * 1000 : null);
-          const now = safeNow();
-          const expiresInMs = expiresAt ? (expiresAt - now) : null;
-
-          const info = {
-            label,
-            isAuth: !!auth.isAuth?.(),
-            user,
-            roles,
-            permissions: perms,
-            has: {
-              role: (r) => !!auth.hasRole?.(r),
-              can: (p) => !!auth.can?.(p)
-            },
-            token: {
-              hasAccess: !!accessToken,
-              hasRefresh: !!refreshToken,
-              expiresAt,
-              expiresInSec: expiresInMs == null ? null : Math.round(expiresInMs / 1000),
-              decodedJWT: jwt
-            }
-          };
-
-          console.groupCollapsed(`[CMSwift.auth.inspect] ${label}`);
-          console.log("status:", status());
-          console.log(info);
-          if (expiresInMs != null) {
-            if (expiresInMs <= 0) console.warn("⚠️ Access token scaduto.");
-            else if (expiresInMs < 60_000) console.warn("⚠️ Access token in scadenza (<60s).");
-          }
-          console.groupEnd();
-
-          return info;
-        }
-
-        // tracing: intercetta alcune funzioni se presenti
-        function trace(on = true) {
-          tracing = !!on;
-          console.log("[CMSwift.auth.trace]", tracing ? "ON" : "OFF");
-        }
-
-        // wrapper fetch (se esiste) per loggare 401/refresh
-        if (typeof auth.fetch === "function" && !auth._fetchWrapped) {
-          const orig = auth.fetch.bind(auth);
-          auth.fetch = async (...args) => {
-            const res = await orig(...args);
-            if (tracing) {
-              try {
-                const url = args[0];
-                console.log("[auth.fetch]", res.status, url);
-              } catch { }
-            }
-            return res;
-          };
-          auth._fetchWrapped = true;
-        }
-
-        // aggiungiamo metodi devtools
-        auth.decodeJWT = decodeJWT;
-        auth.status = status;
-        auth.inspect = inspect;
-        auth.trace = trace;
-
-      })(CMSwift);
+      attachDevTools(CMSwift, app.auth);
     }
   };
   // ===============================
@@ -3960,6 +3978,105 @@
       pushHistoryEntry
     };
   })();
+  // ===============================
+  // UI meta shared helpers
+  // ===============================
+  CMSwift._uiMetaShared = (() => {
+    function resolveDocComponents(_) {
+      return {
+        hasTabPanel: typeof _.TabPanel === "function",
+        Card: typeof _.Card === "function"
+          ? _.Card
+          : (...children) => _.div({ class: "cms-doc-card" }, ...children),
+        Chip: typeof _.Chip === "function"
+          ? _.Chip
+          : (_props, label) => _.span({ class: "cms-chip cms-chip-fallback" }, label)
+      };
+    }
+
+    function formatMetaValues(values) {
+      if (!values) return "—";
+      if (Array.isArray(values)) return values.join(" | ");
+      return String(values);
+    }
+
+    function renderMetaItem(_, item, Chip) {
+      return _.div({ class: "cms-p-md" },
+        _.p(
+          _.h3("Name: " + item.name),
+          _.div(_.b("Type: "), item.type ? String(item.type).split("|").map((token) => Chip({ color: "secondary", dense: true }, token)) : "—")
+        ),
+        _.p(_.b("Default: "), _.span(item.default == null ? "—" : String(item.default))),
+        _.p(
+          _.h3("Values: "),
+          _.div({ class: "cms-p-l-md" }, _.span(formatMetaValues(item.values)))
+        ),
+        _.p(
+          _.h3("Description: "),
+          _.div({ class: "cms-p-l-md" }, item.description || "—")
+        )
+      );
+    }
+
+    function renderTabGroupFallback(_, rows) {
+      return _.div({ class: "cms-p-md" },
+        rows.map((row) => _.div({ class: "cms-m-b-lg" }, _.h4(row.label || row.name), row.content))
+      );
+    }
+
+    function normalizeEventRows(_, events) {
+      if (!events) return [];
+      if (Array.isArray(events)) {
+        return events.map((eventItem) => ({
+          name: eventItem.name,
+          wrap: true,
+          label: eventItem.name,
+          content: _.div({ class: "cms-p-md" }, eventItem.description)
+        }));
+      }
+      return Object.entries(events).map(([key, value]) => ({
+        name: key,
+        wrap: true,
+        label: key,
+        content: _.div({ class: "cms-p-md" }, value)
+      }));
+    }
+
+    function normalizeSlotRows(_, slots) {
+      if (!slots) return [];
+      if (Array.isArray(slots)) {
+        return slots.map((slot) => ({
+          name: slot.name,
+          wrap: true,
+          label: slot.type,
+          content: slot.description
+        }));
+      }
+      return Object.entries(slots).map(([key, value]) => ({
+        name: key,
+        wrap: true,
+        label: key,
+        content: _.div({ class: "cms-p-md" },
+          _.div(
+            _.h3("Name: " + key),
+            _.div({ class: "cms-p-l-md" }, value.type || "—")
+          ),
+          _.div(
+            _.h3("Description:"),
+            _.div({ class: "cms-p-l-md" }, value.description || "—")
+          )
+        )
+      }));
+    }
+
+    return {
+      resolveDocComponents,
+      renderMetaItem,
+      renderTabGroupFallback,
+      normalizeEventRows,
+      normalizeSlotRows
+    };
+  })();
   CMSwift.ui = CMSwift.ui || {};
   CMSwift.ui.meta = CMSwift.ui.meta || {};
 
@@ -4029,41 +4146,16 @@
   CMSwift.docTable = (name) => {
     if (!CMSwift.isDev()) return _.div(); // non fa niente in prod
 
+    const {
+      resolveDocComponents,
+      renderMetaItem,
+      renderTabGroupFallback,
+      normalizeEventRows,
+      normalizeSlotRows
+    } = CMSwift._uiMetaShared;
     const meta = CMSwift.ui.meta?.[name];
     if (!meta) return _.div({ class: "cms-muted" }, `Meta non trovata: ${name}`);
-    const hasTabPanel = typeof _.TabPanel === "function";
-    const Card = typeof _.Card === "function"
-      ? _.Card
-      : (...children) => _.div({ class: "cms-doc-card" }, ...children);
-    const Chip = typeof _.Chip === "function"
-      ? _.Chip
-      : (_props, label) => _.span({ class: "cms-chip cms-chip-fallback" }, label);
-
-    const formatValues = (values) => {
-      if (!values) return "—";
-      if (Array.isArray(values)) return values.join(" | ");
-      return String(values);
-    };
-
-    const renderMetaItem = (item) => _.div({ class: "cms-p-md" },
-      _.p(
-        _.h3("Name: " + item.name),
-        _.div(_.b("Type: "), item.type ? String(item.type).split("|").map((token) => Chip({ color: "secondary", dense: true }, token)) : "—")
-      ),
-      _.p(_.b("Default: "), _.span(item.default == null ? "—" : String(item.default))),
-      _.p(
-        _.h3("Values: "),
-        _.div({ class: "cms-p-l-md" }, _.span(formatValues(item.values)))
-      ),
-      _.p(
-        _.h3("Description: "),
-        _.div({ class: "cms-p-l-md" }, item.description || "—")
-      )
-    );
-
-    const renderTabGroupFallback = (rows) => _.div({ class: "cms-p-md" },
-      rows.map((row) => _.div({ class: "cms-m-b-lg" }, _.h4(row.label || row.name), row.content))
-    );
+    const { hasTabPanel, Card, Chip } = resolveDocComponents(_);
 
     const list = {};
     Object.entries(meta.props || {}).forEach(([k, v]) => {
@@ -4080,7 +4172,7 @@
           name: p.name,
           wrap: true,
           label: p.name,
-          content: renderMetaItem(p)
+          content: renderMetaItem(_, p, Chip)
         };
       });
       return {
@@ -4089,49 +4181,12 @@
           animated: true,
           radius: "0 0 0 var(--cms-r-default)",
           tabs: rows
-        }) : renderTabGroupFallback(rows)
+        }) : renderTabGroupFallback(_, rows)
       };
     });
 
-    let eventsRows = [];
-    if (meta.events) {
-      if (Array.isArray(meta.events)) {
-        eventsRows = meta.events.map((ev) => {
-          return { name: ev.name, wrap: true, label: ev.name, content: _.div({ class: "cms-p-md" }, ev.description) }
-        }
-        );
-      } else {
-        eventsRows = Object.entries(meta.events || {}).map(([k, v]) => {
-          return { name: k, wrap: true, label: k, content: _.div({ class: "cms-p-md" }, v) }
-        }
-        );
-      }
-    }
-
-    let slotsRows = [];
-    if (meta.slots) {
-      if (Array.isArray(meta.slots)) {
-        slotsRows = meta.slots.map((slot) => {
-          return { name: slot.name, wrap: true, label: slot.type, content: slot.description };
-        }
-        );
-      } else {
-        slotsRows = Object.entries(meta.slots || {}).map(([k, v]) => {
-          return {
-            name: k, wrap: true, label: k, content:
-              _.div({ class: "cms-p-md", },
-                _.div(
-                  _.h3("Name: " + k),
-                  _.div({ class: "cms-p-l-md" }, v.type || "—")
-                ),
-                _.div(
-                  _.h3("Description:"),
-                  _.div({ class: "cms-p-l-md" }, v.description || "—"))
-              )
-          };
-        });
-      }
-    }
+    const eventsRows = normalizeEventRows(_, meta.events);
+    const slotsRows = normalizeSlotRows(_, meta.slots);
     const tabPanelModel = _.rod(null);
     const taps = [];
     if (slotsRows.length) taps.push({
@@ -4143,7 +4198,7 @@
         radius: "0 0 0 var(--cms-r-default)",
         orientation: "vertical",
         tabs: slotsRows
-      }) : renderTabGroupFallback(slotsRows)
+      }) : renderTabGroupFallback(_, slotsRows)
     });
     if (propsTab.length) taps.push(...propsTab);
     if (eventsRows.length) taps.push({
@@ -4155,7 +4210,7 @@
         radius: "0 0 0 var(--cms-r-default)",
         orientation: "vertical",
         tabs: eventsRows
-      }) : renderTabGroupFallback(eventsRows)
+      }) : renderTabGroupFallback(_, eventsRows)
     });
     const first = "general";
     taps.sort((a, b) => {
@@ -4175,7 +4230,7 @@
           animated: true,
           orientation: "horizontal",
           tabs: taps, model: tabPanelModel
-        }) : renderTabGroupFallback(taps))
+        }) : renderTabGroupFallback(_, taps))
         : null,
       meta.returns ? _.p({ class: "cms-muted", style: { marginTop: "14px" } }, `Returns: ${meta.returns}`) : null
     );
