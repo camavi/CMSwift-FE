@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark2">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -421,6 +421,39 @@
     });
 
     let currentLayout = null;
+    const quickMenu = _.Menu({
+      title: "Themes",
+      //state: "light",
+      width: 200,
+      items: [
+        {
+          label: "Light",
+          icon: "light_mode",
+          onClick: () => {
+            const h = _.dom.q("html");
+            h.setAttribute("data-theme", "light");
+          },
+        },
+        {
+          label: "Dark",
+          icon: "dark_mode",
+          onClick: () => {
+            const h = _.dom.q("html");
+            h.setAttribute("data-theme", "dark");
+          },
+        },
+        {
+          label: "Light Shadow",
+          icon: "light_mode",
+          onClick: () => {},
+        },
+        {
+          label: "Dark Light",
+          icon: "dark_mode",
+          onClick: () => {},
+        },
+      ],
+    });
 
     const componentItems = [
       {
@@ -554,6 +587,14 @@
                 },
               },
               "Nuovo",
+            ),
+            _.Btn(
+              {
+                onClick: (v) => {
+                  quickMenu.toggle(v);
+                },
+              },
+              "Themes",
             ),
           ),
           padding: "sm",

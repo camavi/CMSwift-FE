@@ -324,7 +324,7 @@ const parallax = _.div({ class: "cms-panel cms-page" },
   boxCode("Hero commerciale", listSample.basic),
   boxCode("Slots e composizione", listSample.slots),
   boxCode("Layout e varianti", listSample.layout),
-  boxCode("Playground live", listSample.live)
+  boxCode("Playground live", listSample.live, 24)
 );
 
 export { parallax };

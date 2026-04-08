@@ -79,6 +79,7 @@
 }
 
 .cms-menu-panel {
+  --set-background-color: var(--cms-bg-default);
   width: var(--cms-menu-width, auto);
   min-width: var(--cms-menu-min-width, 200px);
   max-width: var(--cms-menu-max-width, min(420px, calc(100vw - 16px)));
@@ -3773,15 +3774,15 @@
   opacity: 1;
 }
 
-.cms-toast-body > :first-child,
-.cms-toast-meta > :first-child,
-.cms-toast-actions > :first-child {
+.cms-toast-body> :first-child,
+.cms-toast-meta> :first-child,
+.cms-toast-actions> :first-child {
   margin-top: 0;
 }
 
-.cms-toast-body > :last-child,
-.cms-toast-meta > :last-child,
-.cms-toast-actions > :last-child {
+.cms-toast-body> :last-child,
+.cms-toast-meta> :last-child,
+.cms-toast-actions> :last-child {
   margin-bottom: 0;
 }
 
@@ -4567,6 +4568,7 @@
 .cms-grid>.cms-grid-col {
   min-width: 0;
   grid-column: var(--cms-grid-col-base, auto);
+  box-sizing: border-box;
 }
 
 .cms-grid-col-stack {
@@ -5299,13 +5301,23 @@
 /* CLEAR SET */
 .cms-clear-set,
 .cms-clear-field-set {
-  --set-border-color: none;
+  --set-border-color: transparent;
   --set-background-color: none;
   --set-glossy-active: none;
   --set-gradient-active: none;
   --set-shadow-active: 0 0 0 0;
   --set-glow-active: 0 0 0 0;
   --set-color: none;
+}
+
+.cms-menu-panel,
+.cms-card,
+.cms-card-body,
+.cms-tabpanel,
+.cms-layout-footer {
+  --set-background-color: var(--cms-bg-default);
+  --set-border-color: var(--cms-border-color);
+  --set-shadow-active: var(--cms-shadow-sm);
 }
 
 .cms-grid-col-surface {
@@ -5959,7 +5971,6 @@ a.cms-breadcrumb {
   border-style: solid;
   border-width: 0;
   border-radius: var(--cms-r-md);
-  --set-border-color: var(--cms-gray-300);
   --cms-tabpanel-accent: var(--cms-primary);
 }
 
@@ -5989,7 +6000,6 @@ a.cms-breadcrumb {
 }
 
 .cms-tabpanel.horizontal>.cms-tabpanel-nav {
-  border-bottom: 1px solid var(--cms-gray-300);
   background-color: color-mix(in srgb, var(--cms-gray-500), transparent 80%)
 }
 
@@ -7434,7 +7444,7 @@ a.cms-breadcrumb {
 }
 
 .cms-light-shadow {
-  --set-shadow-active: inset 2px 1px 4px 0 color-mix(in srgb, var(--set-color-1) 50%, transparent), -4px -4px 12px color-mix(in srgb, var(--set-color-2) 10%, white), 4px 4px 12px color-mix(in srgb, var(--set-color-4) 60%, transparent);
+  --set-shadow-active: inset 2px 1px 4px 0 color-mix(in srgb, var(--set-color-1) 50%, var(--cms-theme-color-1)), -4px -4px 12px color-mix(in srgb, var(--set-color-2) 10%, var(--cms-theme-color-1)), 4px 4px 12px color-mix(in srgb, var(--set-color-4) 60%, var(--cms-theme-color-1));
 }
 
 .cms-outline.cms-light-shadow {

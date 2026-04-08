@@ -1998,6 +1998,7 @@
     p.class = uiClass([
       "cms-panel",
       "cms-card",
+      'cms-clear-set',
       "cms-singularity",
       uiWhen(rawProps.flat, "cms-card-flat"),
       uiWhen(rawProps.dense, "cms-card-dense"),

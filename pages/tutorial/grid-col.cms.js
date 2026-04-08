@@ -144,7 +144,7 @@ const listSample = {
     code: [
       previewSurface(
         _.Grid({
-          cols: 6,
+          cols: 2,
           gap: "var(--cms-s-md)",
           dense: true
         },
@@ -239,7 +239,7 @@ const listSample = {
         icon: "tune"
       },
         _.Grid({ cols: 2, gap: "var(--cms-s-lg)" },
-          _.GridCol({ span: 3, md: 4, gap: "md", panel: true },
+          _.GridCol({ span: 2, md: 2, gap: "md", panel: true },
             _.div({ style: { fontWeight: "700" } }, "Controlli"),
             _.div(
               _.div({ class: "cms-m-b-xs", style: { fontWeight: "700" } }, "Span"),
@@ -267,9 +267,9 @@ const listSample = {
             ),
             _.Checkbox({ model: livePanel, color: "info" }, "Attiva panel")
           ),
-          _.GridCol({ md: 8 },
+          _.GridCol({ span: 2, md: 2, gap: "md" },
             previewSurface(
-              _.Grid({ cols: 2, gap: "var(--cms-s-md)" },
+              _.Grid({ cols: 12, gap: "var(--cms-s-md)" },
                 _.GridCol({
                   span: liveSpan,
                   md: liveMd,
@@ -285,7 +285,7 @@ const listSample = {
                   end: _.Btn({ color: "info", size: "sm", icon: "visibility" }, "Preview")
                 }),
                 _.GridCol({
-                  span: 12,
+                  span: liveSpan,
                   md: 6,
                   panel: true,
                   gap: "sm",
