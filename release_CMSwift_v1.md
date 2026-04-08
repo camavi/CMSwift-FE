@@ -27,13 +27,24 @@ Conclusione:
 - CMSwift oggi e un progetto serio e strutturato
 - non e ancora automaticamente una `v1` pubblicabile senza una release discipline esplicita
 
+Snapshot gate oggi:
+- README pubblico: presente
+- policy stabilita/compatibilita: presente
+- LICENSE: presente
+- versione package: `1.0.0`
+- changelog/release notes: presenti come draft
+- build runtime: verde
+- test automatici core: verdi
+- smoke browser release: ancora da eseguire
+- decisione finale `stable` vs `unstable` su alcune aree UI avanzate: ancora da chiudere
+
 ## 1. Blocker
 
 Queste voci bloccano una release `v1` pubblica.
 
 ### 1.1 Posizionamento e contratto pubblico
 
-Stato: `BLOCKER`
+Stato: `PARTIAL`
 
 Manca ancora un contratto pubblico corto e definitivo:
 - cosa e CMSwift
@@ -55,7 +66,7 @@ Aggiornamento:
 
 ### 1.2 Versioning e policy di compatibilita
 
-Stato: `BLOCKER`
+Stato: `PARTIAL`
 
 Manca una policy esplicita:
 - quando una modifica e breaking
@@ -70,6 +81,7 @@ Serve prima di pubblicare:
 
 Aggiornamento:
 - policy iniziale definita in `policy_CMSwift_stability.md`
+- package allineato a `1.0.0`
 - da rifinire solo il confine finale `stable` vs `unstable` per alcuni componenti UI avanzati
 
 ### 1.3 Smoke test browser di release
@@ -89,7 +101,7 @@ Aggiornamento:
 
 ### 1.4 Entry point di produzione
 
-Stato: `BLOCKER`
+Stato: `READY`
 
 Va deciso in modo netto quali file sono gli entrypoint ufficiali:
 - `pages/_cmswift-fe/js/cms.js`
@@ -102,9 +114,13 @@ Serve prima di pubblicare:
 - documentare quale file usare in production
 - documentare se il bundle minificato e quello raccomandato
 
+Aggiornamento:
+- entrypoint runtime documentati in `README.md`
+- build standard e minificata gia allineate
+
 ### 1.5 Licenza e metadati di pubblicazione
 
-Stato: `BLOCKER`
+Stato: `PARTIAL`
 
 Il repo ha bisogno di base legale e metadata minimi per essere pubblicabile come prodotto reale.
 
@@ -117,8 +133,10 @@ Serve prima di pubblicare:
 Aggiornamento:
 - `LICENSE` aggiunta con licenza `MIT`
 - ownership iniziale esplicitata come `Carlos Malleux`
+- `package.json` allineato a `1.0.0`
 - draft iniziale release notes creato in `release_notes_CMSwift_v1.0.0.md`
 - `CHANGELOG.md` iniziale creato
+- build runtime e test automatici passati su `1.0.0`
 
 ## 2. Unstable
 

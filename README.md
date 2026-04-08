@@ -9,6 +9,7 @@ CMSwift e un framework UI + runtime reattivo leggero per applicazioni web, con:
 Stato attuale:
 - progetto interno ben strutturato
 - pre-release `v1` in preparazione
+- package allineato a `1.0.0`
 - non ancora dichiarato come prodotto pubblico stabile su tutta la superficie API
 
 ## Cosa Include

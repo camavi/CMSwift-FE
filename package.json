@@ -1,7 +1,10 @@
 {
   "name": "cmswift",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "CMSwift UI + reactive runtime framework",
+  "author": "Carlos Malleux",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
