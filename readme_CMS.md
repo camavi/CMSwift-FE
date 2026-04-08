@@ -14,7 +14,7 @@ Regola di aggiornamento:
 ## Priorita attuali
 
 Stato generale oggi:
-- renderer: milestone 2 chiusa
+- renderer: milestone 3 chiusa
 - reactive core: milestone 2 chiusa
 - rod: milestone 2 chiusa
 - lifecycle / mount / cleanup: milestone 2 chiusa
@@ -26,7 +26,7 @@ Stato generale oggi:
 - area: `createElement`, `setProp`, `bindProp`, gestione `style`, attributi, eventi, children
 - motivo: ogni bug qui impatta tutto il framework
 - obiettivo: rendere prevedibile la traduzione `props -> DOM` e coprire gli edge case con test
-- stato: milestone 2 chiusa, con refactor interno del renderer e copertura automatica del primo giro
+- stato: milestone 3 chiusa, con un mini-terzo-giro dedicato a style, eventi e children dinamici
 
 2. Reactive core
 - area: `CMSwift.reactive.signal` e `CMSwift.reactive.effect`
@@ -73,7 +73,9 @@ Fase 1: Renderer
 Stato:
 - milestone 1 completata a livello funzionale
 - milestone 2 chiusa sul piano strutturale: bridge DOM condiviso, helper estratti e parsing finale separato
-- i prossimi passi sul renderer non sono piu di base ma di affinamento avanzato
+- milestone 3 chiusa sul piano qualitativo: il mini-terzo-giro ha chiuso il cleanup di `style`, `eventi` e `children` dinamici
+- nel terzo giro il blocco eventi del renderer dispone ora davvero gli `effect` dei listener dinamici quando il nodo viene smontato
+- nel terzo giro anche i `children` dinamici puliscono il subtree precedente e dispongono i relativi cleanup/effect quando fanno replace
 
 ## Renderer: contratto attuale
 
@@ -199,6 +201,8 @@ Semantica eventi:
 Pagina demo:
 - route: `/demo/component/cms-renderer`
 - file: `pages/tutorial/cms-renderer.cms.js`
+- route: `/demo/component/cms-renderer-style`
+- file: `pages/tutorial/cms-renderer-style.cms.js`
 
 Checklist manuale:
 - input: `disabled`, `required`, `readOnly`, `placeholder`, `aria-invalid`, `data-empty`
@@ -209,6 +213,7 @@ Checklist manuale:
 - aria/data: presenza e rimozione reale degli attributi
 - svg: attributi `aria-*`, `data-*` e contenuto testuale dinamico
 - dynamic children: ritorno di nodo singolo, array e `null`
+- dynamic style object cleanup: quando la shape cambia, le chiavi stale devono sparire davvero dal `style` del nodo
 
 Fase 2: Reactive
 - documentare il contratto di `signal/effect`
@@ -799,6 +804,11 @@ Campi consigliati per ogni modulo:
 - continuato il secondo giro del blocco `platform` su `auth`, con helper interni estratti per permessi, path protetti e devtools
 - continuato il secondo giro del blocco `platform` su `ui.meta`, con helper interni estratti per fallback component, rows e tab group
 - chiuso formalmente il secondo giro del blocco `platform`
+- aperto il terzo giro del `renderer` con cleanup corretto delle chiavi stale negli oggetti `style` dinamici
+- aggiunta pagina demo dedicata `cms-renderer-style` per verificare visivamente il cleanup delle chiavi stale negli oggetti `style` dinamici
+- corretto anche il cleanup degli `effect` per i listener dinamici del renderer durante l'unmount dei nodi
+- corretto anche il cleanup dei `children` dinamici: il subtree precedente viene pulito davvero durante replace e unmount
+- chiuso formalmente il mini-terzo-giro del `renderer`
 
 ## Test automatici del core
 
@@ -818,6 +828,9 @@ Copertura iniziale:
 - `http.request`: hook `before/after/error` e state surface pubblica
 - `router`: `navigate`, `subscribe`, `isActive`, unmount view precedente e stato `404`
 - `renderer`: `class`, CSS custom properties, boolean props, event options, children dinamici, nodo SVG `text`
+- `renderer`: cleanup corretto delle chiavi stale quando un oggetto `style` dinamico cambia shape
+- `renderer`: cleanup corretto degli `effect` per listener dinamici quando il nodo viene smontato
+- `renderer`: cleanup corretto dei subtree precedenti quando i `children` dinamici fanno replace
 - `lifecycle`: `mount`, `component`, `ctx.onDispose`, cleanup su `clear/unmount`
 - `overlay`: stack, scroll lock, z-index/root, cleanup listener documento/window
 - `auth`: login/logout, ruoli/permessi, `status()/inspect()`, retry `401` una sola volta dopo refresh

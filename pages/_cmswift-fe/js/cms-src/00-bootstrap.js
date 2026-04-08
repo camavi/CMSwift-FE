@@ -46,9 +46,9 @@
       render: {
         description: "Bridge props -> DOM per hyperscript _, attributi, class, style, eventi e children reattivi.",
         entrypoints: ["createElement", "setProp", "bindProp"],
-        status: "milestone-2-closed",
+        status: "milestone-3-closed",
         knownLimits: [
-          "createElement resta ancora un punto centrale da tenere sotto controllo, anche se ora e molto piu spezzato internamente.",
+          "Il mini-terzo-giro ha chiuso style dinamico, eventi dinamici e children dinamici, ma restano altri edge case avanzati da esplorare.",
           "Gli eventi non hanno ancora delegation o composizione/diff avanzato di listener multipli.",
           "Restano da esplorare edge case avanzati del renderer oltre al primo giro gia coperto dai test."
         ]

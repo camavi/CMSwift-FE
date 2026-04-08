@@ -367,6 +367,109 @@ test("renderer applies class, style, boolean props and event options", async () 
   assert.equal(clicks, 1);
 });
 
+test("renderer cleans up stale keys when dynamic style objects change shape", async () => {
+  const CMS = await loadCMS();
+  const [getEnabled, setEnabled] = CMS.signal(true);
+  const [getColor, setColor] = CMS.signal("red");
+
+  const node = CMS.div({
+    style: () => getEnabled()
+      ? { color: getColor(), opacity: "1", "--cms-probe": "10px" }
+      : { color: "blue" }
+  });
+
+  assert.equal(node.style.color, "red");
+  assert.equal(node.style.opacity, "1");
+  assert.equal(node.style.getPropertyValue("--cms-probe"), "10px");
+
+  setColor("green");
+  assert.equal(node.style.color, "green");
+  assert.equal(node.style.opacity, "1");
+
+  setEnabled(false);
+  assert.equal(node.style.color, "blue");
+  assert.equal(node.style.opacity, "");
+  assert.equal(node.style.getPropertyValue("--cms-probe"), "");
+});
+
+test("renderer disposes dynamic event effects on unmount", async () => {
+  const CMS = await loadCMS();
+  const [getMode, setMode] = CMS.signal("idle");
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+
+  const node = CMS.button({
+    onClick: {
+      handler: () => getMode(),
+      options: () => (getMode() === "capture" ? { capture: true } : false)
+    }
+  }, "Dyn");
+
+  const unmount = CMS.mount(host, node, { clear: true });
+  unmount();
+
+  let addCalls = 0;
+  let removeCalls = 0;
+  const originalAdd = node.addEventListener.bind(node);
+  const originalRemove = node.removeEventListener.bind(node);
+
+  node.addEventListener = function (...args) {
+    addCalls += 1;
+    return originalAdd(...args);
+  };
+
+  node.removeEventListener = function (...args) {
+    removeCalls += 1;
+    return originalRemove(...args);
+  };
+
+  setMode("capture");
+
+  assert.equal(addCalls, 0);
+  assert.equal(removeCalls, 0);
+});
+
+test("renderer dynamic children cleanup disposed subtrees on replace", async () => {
+  const CMS = await loadCMS();
+  const [getVisible, setVisible] = CMS.signal(true);
+  const [getMode, setMode] = CMS.signal("idle");
+
+  const host = CMS.div(() => {
+    if (!getVisible()) return null;
+    return CMS.button({
+      onClick: {
+        handler: () => getMode(),
+        options: () => (getMode() === "capture" ? { capture: true } : false)
+      }
+    }, "Child");
+  });
+
+  const button = host.childNodes.find((node) => node.nodeType === 1);
+  assert.ok(button);
+
+  setVisible(false);
+
+  let addCalls = 0;
+  let removeCalls = 0;
+  const originalAdd = button.addEventListener.bind(button);
+  const originalRemove = button.removeEventListener.bind(button);
+
+  button.addEventListener = function (...args) {
+    addCalls += 1;
+    return originalAdd(...args);
+  };
+
+  button.removeEventListener = function (...args) {
+    removeCalls += 1;
+    return originalRemove(...args);
+  };
+
+  setMode("capture");
+
+  assert.equal(addCalls, 0);
+  assert.equal(removeCalls, 0);
+});
+
 test("renderer supports dynamic children and SVG text nodes", async () => {
   const CMS = await loadCMS();
   const [getMode, setMode] = CMS.signal("single");

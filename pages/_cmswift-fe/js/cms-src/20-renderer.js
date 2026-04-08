@@ -76,20 +76,20 @@
         return;
       }
       if (key === "style" && value && typeof value === "object") {
-        Object.entries(value).forEach(([styleName, styleValue]) => {
-          if (typeof styleValue === "function") {
-            CMSwift.reactive.effect(() => {
-              setStyleEntry(styleName, styleValue());
-            });
-            return;
-          }
-          if (isRod(styleValue)) {
-            CMSwift.reactive.effect(() => {
-              setStyleEntry(styleName, styleValue.value);
-            });
-            return;
-          }
-          setStyleEntry(styleName, styleValue);
+        const styleApplier = createStyleObjectApplier(setStyleEntry);
+        if (hasDynamicStyleValue(value, isRod)) {
+          CMSwift.reactive.effect(() => {
+            styleApplier.apply(value, isRod);
+          });
+          return;
+        }
+        styleApplier.apply(value, isRod);
+        return;
+      }
+      if (key === "style" && (typeof value === "function" || isRod(value))) {
+        const styleApplier = createStyleObjectApplier(setStyleEntry);
+        CMSwift.reactive.effect(() => {
+          styleApplier.apply(value, isRod);
         });
         return;
       }

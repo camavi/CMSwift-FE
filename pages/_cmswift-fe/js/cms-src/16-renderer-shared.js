@@ -46,6 +46,60 @@
     return false;
   }
 
+  function hasDynamicStyleValue(value, isRod) {
+    if (value == null || value === false) return false;
+    if (typeof value === "function") return true;
+    if (isRod(value)) return true;
+    if (typeof value !== "object" || Array.isArray(value) || value.nodeType) return false;
+    return Object.values(value).some((entry) => hasDynamicStyleValue(entry, isRod));
+  }
+
+  function resolveStyleObject(value, isRod) {
+    let next = value;
+    if (typeof next === "function") next = next();
+    else if (isRod(next)) next = next.value;
+
+    if (!next || typeof next !== "object" || Array.isArray(next) || next.nodeType) {
+      return null;
+    }
+
+    const out = {};
+    Object.entries(next).forEach(([styleName, styleValue]) => {
+      let resolved = styleValue;
+      if (typeof resolved === "function") resolved = resolved();
+      else if (isRod(resolved)) resolved = resolved.value;
+      out[styleName] = resolved;
+    });
+    return out;
+  }
+
+  function createStyleObjectApplier(setStyleEntry) {
+    let previousKeys = new Set();
+
+    function clearMissing(nextKeys) {
+      previousKeys.forEach((styleName) => {
+        if (!nextKeys.has(styleName)) setStyleEntry(styleName, null);
+      });
+      previousKeys = nextKeys;
+    }
+
+    function apply(value, isRod) {
+      const nextStyle = resolveStyleObject(value, isRod);
+      if (!nextStyle) {
+        clearMissing(new Set());
+        return;
+      }
+
+      const nextKeys = new Set(Object.keys(nextStyle));
+      clearMissing(nextKeys);
+      Object.entries(nextStyle).forEach(([styleName, styleValue]) => {
+        setStyleEntry(styleName, styleValue);
+      });
+    }
+
+    return { apply };
+  }
+
   function isEventProp(key) {
     return typeof key === "string" && (key.startsWith("on:") || (key.startsWith("on") && key.length > 2));
   }
@@ -228,16 +282,18 @@
     CMSwift._registerCleanup(el, detach);
 
     if (isRod(value)) {
-      CMSwift.reactive.effect(() => {
+      const stop = CMSwift.reactive.effect(() => {
         apply(value.value);
       });
+      CMSwift._registerCleanup(el, stop);
       return;
     }
 
     if (hasDynamicEventValue(value, isRod)) {
-      CMSwift.reactive.effect(() => {
+      const stop = CMSwift.reactive.effect(() => {
         apply(value);
       });
+      CMSwift._registerCleanup(el, stop);
       return;
     }
 

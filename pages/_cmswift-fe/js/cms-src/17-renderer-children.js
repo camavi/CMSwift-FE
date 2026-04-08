@@ -11,15 +11,17 @@
     function appendRodText(rod) {
       const t = document.createTextNode("");
       el.appendChild(t);
-      CMSwift.rodBind(t, rod);
+      const unbind = CMSwift.rodBind(t, rod);
+      CMSwift._registerCleanup(t, unbind);
     }
 
     function appendInterpolatedText(segments) {
       const t = document.createTextNode("");
       el.appendChild(t);
-      CMSwift.reactive.effect(() => {
+      const stop = CMSwift.reactive.effect(() => {
         t.textContent = renderInterpolatedSegments(segments);
       });
+      CMSwift._registerCleanup(t, stop);
     }
 
     function normalizeDynamicChildNodes(value) {
@@ -58,8 +60,9 @@
       el.appendChild(anchor);
       let currentNodes = [];
 
-      CMSwift.reactive.effect(() => {
+      const stop = CMSwift.reactive.effect(() => {
         currentNodes.forEach((node) => {
+          cleanupNodeTree(node);
           if (node.parentNode) node.parentNode.removeChild(node);
         });
         currentNodes = [];
@@ -74,6 +77,12 @@
         nextNodes.forEach((node) => frag.appendChild(node));
         parent.insertBefore(frag, anchor.nextSibling);
         currentNodes = nextNodes;
+      });
+
+      CMSwift._registerCleanup(anchor, () => {
+        stop();
+        currentNodes.forEach((node) => cleanupNodeTree(node));
+        currentNodes = [];
       });
     }
 

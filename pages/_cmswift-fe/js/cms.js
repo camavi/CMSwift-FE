@@ -46,9 +46,9 @@
       render: {
         description: "Bridge props -> DOM per hyperscript _, attributi, class, style, eventi e children reattivi.",
         entrypoints: ["createElement", "setProp", "bindProp"],
-        status: "milestone-2-closed",
+        status: "milestone-3-closed",
         knownLimits: [
-          "createElement resta ancora un punto centrale da tenere sotto controllo, anche se ora e molto piu spezzato internamente.",
+          "Il mini-terzo-giro ha chiuso style dinamico, eventi dinamici e children dinamici, ma restano altri edge case avanzati da esplorare.",
           "Gli eventi non hanno ancora delegation o composizione/diff avanzato di listener multipli.",
           "Restano da esplorare edge case avanzati del renderer oltre al primo giro gia coperto dai test."
         ]
@@ -886,6 +886,60 @@
     return false;
   }
 
+  function hasDynamicStyleValue(value, isRod) {
+    if (value == null || value === false) return false;
+    if (typeof value === "function") return true;
+    if (isRod(value)) return true;
+    if (typeof value !== "object" || Array.isArray(value) || value.nodeType) return false;
+    return Object.values(value).some((entry) => hasDynamicStyleValue(entry, isRod));
+  }
+
+  function resolveStyleObject(value, isRod) {
+    let next = value;
+    if (typeof next === "function") next = next();
+    else if (isRod(next)) next = next.value;
+
+    if (!next || typeof next !== "object" || Array.isArray(next) || next.nodeType) {
+      return null;
+    }
+
+    const out = {};
+    Object.entries(next).forEach(([styleName, styleValue]) => {
+      let resolved = styleValue;
+      if (typeof resolved === "function") resolved = resolved();
+      else if (isRod(resolved)) resolved = resolved.value;
+      out[styleName] = resolved;
+    });
+    return out;
+  }
+
+  function createStyleObjectApplier(setStyleEntry) {
+    let previousKeys = new Set();
+
+    function clearMissing(nextKeys) {
+      previousKeys.forEach((styleName) => {
+        if (!nextKeys.has(styleName)) setStyleEntry(styleName, null);
+      });
+      previousKeys = nextKeys;
+    }
+
+    function apply(value, isRod) {
+      const nextStyle = resolveStyleObject(value, isRod);
+      if (!nextStyle) {
+        clearMissing(new Set());
+        return;
+      }
+
+      const nextKeys = new Set(Object.keys(nextStyle));
+      clearMissing(nextKeys);
+      Object.entries(nextStyle).forEach(([styleName, styleValue]) => {
+        setStyleEntry(styleName, styleValue);
+      });
+    }
+
+    return { apply };
+  }
+
   function isEventProp(key) {
     return typeof key === "string" && (key.startsWith("on:") || (key.startsWith("on") && key.length > 2));
   }
@@ -1068,16 +1122,18 @@
     CMSwift._registerCleanup(el, detach);
 
     if (isRod(value)) {
-      CMSwift.reactive.effect(() => {
+      const stop = CMSwift.reactive.effect(() => {
         apply(value.value);
       });
+      CMSwift._registerCleanup(el, stop);
       return;
     }
 
     if (hasDynamicEventValue(value, isRod)) {
-      CMSwift.reactive.effect(() => {
+      const stop = CMSwift.reactive.effect(() => {
         apply(value);
       });
+      CMSwift._registerCleanup(el, stop);
       return;
     }
 
@@ -1096,15 +1152,17 @@
     function appendRodText(rod) {
       const t = document.createTextNode("");
       el.appendChild(t);
-      CMSwift.rodBind(t, rod);
+      const unbind = CMSwift.rodBind(t, rod);
+      CMSwift._registerCleanup(t, unbind);
     }
 
     function appendInterpolatedText(segments) {
       const t = document.createTextNode("");
       el.appendChild(t);
-      CMSwift.reactive.effect(() => {
+      const stop = CMSwift.reactive.effect(() => {
         t.textContent = renderInterpolatedSegments(segments);
       });
+      CMSwift._registerCleanup(t, stop);
     }
 
     function normalizeDynamicChildNodes(value) {
@@ -1143,8 +1201,9 @@
       el.appendChild(anchor);
       let currentNodes = [];
 
-      CMSwift.reactive.effect(() => {
+      const stop = CMSwift.reactive.effect(() => {
         currentNodes.forEach((node) => {
+          cleanupNodeTree(node);
           if (node.parentNode) node.parentNode.removeChild(node);
         });
         currentNodes = [];
@@ -1159,6 +1218,12 @@
         nextNodes.forEach((node) => frag.appendChild(node));
         parent.insertBefore(frag, anchor.nextSibling);
         currentNodes = nextNodes;
+      });
+
+      CMSwift._registerCleanup(anchor, () => {
+        stop();
+        currentNodes.forEach((node) => cleanupNodeTree(node));
+        currentNodes = [];
       });
     }
 
@@ -1355,20 +1420,20 @@
         return;
       }
       if (key === "style" && value && typeof value === "object") {
-        Object.entries(value).forEach(([styleName, styleValue]) => {
-          if (typeof styleValue === "function") {
-            CMSwift.reactive.effect(() => {
-              setStyleEntry(styleName, styleValue());
-            });
-            return;
-          }
-          if (isRod(styleValue)) {
-            CMSwift.reactive.effect(() => {
-              setStyleEntry(styleName, styleValue.value);
-            });
-            return;
-          }
-          setStyleEntry(styleName, styleValue);
+        const styleApplier = createStyleObjectApplier(setStyleEntry);
+        if (hasDynamicStyleValue(value, isRod)) {
+          CMSwift.reactive.effect(() => {
+            styleApplier.apply(value, isRod);
+          });
+          return;
+        }
+        styleApplier.apply(value, isRod);
+        return;
+      }
+      if (key === "style" && (typeof value === "function" || isRod(value))) {
+        const styleApplier = createStyleObjectApplier(setStyleEntry);
+        CMSwift.reactive.effect(() => {
+          styleApplier.apply(value, isRod);
         });
         return;
       }
