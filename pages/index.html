@@ -7,11 +7,13 @@
     <link rel="stylesheet" href="/_cmswift-fe/css/base.css" />
     <link rel="stylesheet" href="/_cmswift-fe/css/responsive.css" />
     <link rel="stylesheet" href="/_cmswift-fe/css/ui.css" />
+    <link rel="stylesheet" href="/_cmswift-fe/css/docs.css" />
     <link rel="stylesheet" href="/_cmswift-fe/css/animation.css" />
     <link rel="stylesheet" href="/_cmswift-fe/css/tabler-icons-out.css" />
     <script src="/config-fe/setting.js"></script>
     <script src="/_cmswift-fe/js/min-cms.js"></script>
     <script src="/_cmswift-fe/js/min-ui.js"></script>
+    <script src="/_cmswift-fe/js/docs.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css"
@@ -362,6 +364,23 @@
     );
     const demoViewCache = new Map();
 
+    function refreshCodeHighlight(root = document) {
+      if (!window.hljs || !root?.querySelectorAll) return;
+
+      const blocks = Array.from(
+        root.querySelectorAll('pre code, code[class*="language-"]'),
+      );
+
+      blocks.forEach((block) => {
+        if (block.dataset?.highlighted) {
+          delete block.dataset.highlighted;
+          block.classList?.remove("hljs");
+          block.innerHTML = block.textContent || "";
+        }
+        hljs.highlightElement(block);
+      });
+    }
+
     function loadDemoView(route) {
       const entry = demoRouteMap.get(route);
       if (!entry) return Promise.resolve(null);
@@ -397,7 +416,7 @@
             _.mount(host, typeof view === "function" ? () => view(ctx) : view, {
               clear: true,
             });
-            requestAnimationFrame(() => hljs.highlightAll());
+            requestAnimationFrame(() => refreshCodeHighlight(host));
           })
           .catch((error) => {
             console.error(`[demo] load failed for ${route}`, error);
@@ -512,7 +531,7 @@
           createComponentItem("Loading Bar", "/demo/component/loadingbar"),
           createComponentItem("Badge", "/demo/component/badge"),
           createComponentItem("Chip", "/demo/component/chip", () =>
-            hljs.highlightAll(),
+            refreshCodeHighlight(),
           ),
         ],
       },
@@ -528,7 +547,7 @@
           createComponentItem("Breadcrumbs", "/demo/component/breadcrumbs"),
           createComponentItem("Drawer", "/demo/component/drawer"),
           createComponentItem("Btn", "/demo/component/btn", () =>
-            hljs.highlightAll(),
+            refreshCodeHighlight(),
           ),
           createComponentItem("Icon", "/demo/component/icon"),
         ],
@@ -666,6 +685,7 @@
     preloadDemoView(window.location.pathname);
     _.router.start();
     /* */
-    hljs.highlightAll();
+    refreshCodeHighlight();
   </script>
 </html>
+

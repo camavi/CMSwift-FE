@@ -3,23 +3,28 @@
 Questa cartella guida e ospita la modularizzazione progressiva del layer UI di CMSwift.
 
 Stato attuale:
+
 - la build dedicata esiste: `npm run build:ui`
 - il monolite `ui.js` e stato spezzato in moduli `ui-src/*`
 - `99-legacy-ui.js` non e piu usato nella build
 - l'output runtime resta `pages/_cmswift-fe/js/ui.js`
 
 Manifest:
+
 - `modules.json`
 
 Comando di build:
+
 ```bash
 npm run build:ui
 ```
 
 Output generato:
+
 - `pages/_cmswift-fe/js/ui.js`
 
 Ordine di migrazione consigliato:
+
 - `00-bootstrap.js`
 - `01-foundation-helpers.js`
 - `10-primitives-layout.js`
@@ -30,7 +35,6 @@ Ordine di migrazione consigliato:
 - `31-form-advanced.js`
 - `40-navigation.js`
 - `41-tab-panel.js`
-- `42-docs.js`
 - `50-feedback.js`
 - `51-feedback-service.js`
 - `60-shell-app.js`
@@ -40,6 +44,7 @@ Ordine di migrazione consigliato:
 - `80-data.js`
 
 Famiglie previste:
+
 - bootstrap/helpers:
   rod path proxy, normalize args, helper condivise, wrapping meta/dev
 - primitives/layout:
@@ -76,12 +81,15 @@ Famiglie previste:
   `Table`
 
 Regola di lavoro:
+
 - prima si sposta una famiglia alla volta
 - poi si rigenera `ui.js`
 - poi si verifica con demo/tutorial rilevanti
 - infine si aggiorna `readme_UI.md`
 
 Nota:
+
 - da questo punto la source of truth e `ui-src/`
 - `99-legacy-ui.js` e stato rimosso: il bundle viene composto solo dai moduli elencati nel manifest
 - quando una famiglia non era contigua nel legacy, la migrazione e stata chiusa seguendo l'ordine reale del file
+

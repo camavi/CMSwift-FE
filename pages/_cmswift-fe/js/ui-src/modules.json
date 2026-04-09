@@ -18,7 +18,6 @@
     "61-form-service.js",
     "70-dialog.js",
     "41-tab-panel.js",
-    "42-docs.js",
     "80-data.js",
     "71-menu-overlays.js"
   ],
@@ -70,45 +69,27 @@
     {
       "file": "20-display-content.js",
       "status": "migrated",
-      "scope": [
-        "Icon",
-        "Badge",
-        "Avatar",
-        "Chip"
-      ]
+      "scope": ["Icon", "Badge", "Avatar", "Chip"]
     },
     {
       "file": "21-list-content.js",
       "status": "migrated",
-      "scope": [
-        "List",
-        "Item",
-        "Separator"
-      ]
+      "scope": ["List", "Item", "Separator"]
     },
     {
       "file": "22-banner-content.js",
       "status": "migrated",
-      "scope": [
-        "Banner"
-      ]
+      "scope": ["Banner"]
     },
     {
       "file": "23-tooltip.js",
       "status": "migrated",
-      "scope": [
-        "Tooltip"
-      ]
+      "scope": ["Tooltip"]
     },
     {
       "file": "30-form-core.js",
       "status": "merged-into-10-primitives-layout.js",
-      "scope": [
-        "FormField",
-        "InputRaw",
-        "Input",
-        "Select"
-      ]
+      "scope": ["FormField", "InputRaw", "Input", "Select"]
     },
     {
       "file": "31-form-advanced.js",
@@ -127,36 +108,17 @@
     {
       "file": "40-navigation.js",
       "status": "partial",
-      "scope": [
-        "Tabs",
-        "RouteTab",
-        "Breadcrumbs",
-        "Pagination"
-      ]
+      "scope": ["Tabs", "RouteTab", "Breadcrumbs", "Pagination"]
     },
     {
       "file": "41-tab-panel.js",
       "status": "migrated",
-      "scope": [
-        "TabPanel"
-      ]
-    },
-    {
-      "file": "42-docs.js",
-      "status": "migrated",
-      "scope": [
-        "ComponentDocs"
-      ]
+      "scope": ["TabPanel"]
     },
     {
       "file": "50-feedback.js",
       "status": "partial",
-      "scope": [
-        "Spinner",
-        "Progress",
-        "LoadingBar",
-        "Notify"
-      ]
+      "scope": ["Spinner", "Progress", "LoadingBar", "Notify"]
     },
     {
       "file": "51-feedback-service.js",
@@ -171,13 +133,7 @@
     {
       "file": "60-shell-app.js",
       "status": "migrated",
-      "scope": [
-        "Header",
-        "Drawer",
-        "Page",
-        "AppShell",
-        "Parallax"
-      ]
+      "scope": ["Header", "Drawer", "Page", "AppShell", "Parallax"]
     },
     {
       "file": "61-form-service.js",
@@ -195,26 +151,17 @@
     {
       "file": "70-dialog.js",
       "status": "migrated",
-      "scope": [
-        "Dialog"
-      ]
+      "scope": ["Dialog"]
     },
     {
       "file": "80-data.js",
       "status": "migrated",
-      "scope": [
-        "Table"
-      ]
+      "scope": ["Table"]
     },
     {
       "file": "71-menu-overlays.js",
       "status": "migrated",
-      "scope": [
-        "Menu",
-        "Popover",
-        "ContextMenu",
-        "bundle footer"
-      ]
+      "scope": ["Menu", "Popover", "ContextMenu", "bundle footer"]
     },
     {
       "file": "90-services-meta.js",
@@ -227,3 +174,4 @@
     }
   ]
 }
+
