@@ -628,6 +628,302 @@
   }
   // Esempio: CMSwift.ui.Chip({ label: "Tag", removable: true })
 
+  UI.Stat = (...args) => {
+    const { props: rawProps, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = rawProps.slots || {};
+    const resolveStateValue = () => normalizeState(uiUnwrap(rawProps.state) || uiUnwrap(rawProps.color) || "");
+    const stateClass = uiComputed([rawProps.state, rawProps.color], () => {
+      const state = resolveStateValue();
+      return state ? `cms-state-${state}` : "";
+    });
+    const trendClass = uiComputed(rawProps.trend, () => {
+      const raw = String(uiUnwrap(rawProps.trend) || "").toLowerCase();
+      if (["up", "positive", "success", "gain", "increase"].includes(raw)) return "is-positive";
+      if (["down", "negative", "danger", "loss", "decrease"].includes(raw)) return "is-negative";
+      if (["flat", "neutral", "steady", "stable"].includes(raw)) return "is-neutral";
+      return "";
+    });
+
+    const props = { ...rawProps };
+    const p = CMSwift.omit(props, [
+      "actions",
+      "aside",
+      "delta",
+      "eyebrow",
+      "footer",
+      "icon",
+      "iconSize",
+      "label",
+      "meta",
+      "note",
+      "slots",
+      "state",
+      "subtitle",
+      "title",
+      "trend",
+      "value"
+    ]);
+    p.class = uiClass([
+      "cms-clear-set",
+      "cms-stat",
+      "cms-singularity",
+      stateClass,
+      trendClass,
+      props.class
+    ]);
+    p.style = { ...(props.style || {}) };
+
+    const renderNamed = (slotName, fallback, ctx = {}) => renderSlotToArray(
+      slots,
+      slotName,
+      ctx,
+      fallback
+    );
+
+    const iconFallback = rawProps.icon == null
+      ? null
+      : (typeof rawProps.icon === "string"
+        ? UI.Icon({ name: rawProps.icon, size: rawProps.iconSize || "md" })
+        : CMSwift.ui.slot(rawProps.icon, { as: "icon" }));
+
+    const eyebrowNodes = renderNamed("eyebrow", rawProps.eyebrow);
+    const labelNodes = renderNamed("label", rawProps.label ?? rawProps.title);
+    const valueNodes = renderNamed("value", rawProps.value);
+    const noteNodes = renderNamed("note", rawProps.note ?? rawProps.subtitle);
+    const metaNodes = renderNamed("meta", rawProps.meta);
+    const deltaNodes = renderNamed("delta", rawProps.delta, { trend: rawProps.trend });
+    const iconNodes = renderNamed("icon", iconFallback);
+    const asideNodes = renderNamed("aside", rawProps.aside);
+    const footerNodes = renderNamed("footer", rawProps.footer);
+    const actionsNodes = renderNamed("actions", rawProps.actions);
+    const bodyNodes = renderNamed("default", children);
+
+    const stat = _.article(
+      p,
+      _.div(
+        { class: "cms-stat-head" },
+        _.div(
+          { class: "cms-stat-lead" },
+          iconNodes.length ? _.div({ class: "cms-stat-icon" }, ...iconNodes) : null,
+          _.div(
+            { class: "cms-stat-copy" },
+            eyebrowNodes.length ? _.div({ class: "cms-stat-eyebrow" }, ...eyebrowNodes) : null,
+            labelNodes.length ? _.div({ class: "cms-stat-label" }, ...labelNodes) : null
+          )
+        ),
+        asideNodes.length ? _.div({ class: "cms-stat-aside" }, ...asideNodes) : null
+      ),
+      _.div(
+        { class: "cms-stat-body" },
+        valueNodes.length ? _.div({ class: "cms-stat-value" }, ...valueNodes) : null,
+        deltaNodes.length
+          ? _.div({ class: "cms-stat-delta" }, ...deltaNodes)
+          : null,
+        noteNodes.length ? _.div({ class: "cms-stat-note" }, ...noteNodes) : null,
+        metaNodes.length ? _.div({ class: "cms-stat-meta" }, ...metaNodes) : null,
+        bodyNodes.length ? _.div({ class: "cms-stat-extra" }, ...bodyNodes) : null
+      ),
+      (footerNodes.length || actionsNodes.length)
+        ? _.div(
+          { class: "cms-stat-footer" },
+          footerNodes.length ? _.div({ class: "cms-stat-footer-copy" }, ...footerNodes) : null,
+          actionsNodes.length ? _.div({ class: "cms-stat-actions" }, ...actionsNodes) : null
+        )
+        : null
+    );
+
+    setPropertyProps(stat, rawProps);
+    return stat;
+  };
+  if (CMSwift.isDev?.()) {
+    UI.meta = UI.meta || {};
+    UI.meta.Stat = {
+      signature: "UI.Stat(...children) | UI.Stat(props, ...children)",
+      props: {
+        eyebrow: "String|Node|Function|Array",
+        label: "String|Node|Function|Array",
+        title: "Alias of label",
+        value: "String|Number|Node|Function|Array",
+        delta: "String|Node|Function|Array",
+        trend: "up|down|flat|positive|negative|neutral",
+        note: "String|Node|Function|Array",
+        subtitle: "Alias of note",
+        meta: "Node|Function|Array",
+        icon: "String|Node|Function|Array",
+        aside: "Node|Function|Array",
+        footer: "Node|Function|Array",
+        actions: "Node|Function|Array",
+        state: "primary|secondary|success|warning|danger|info|light|dark",
+        slots: "{ eyebrow?, label?, value?, delta?, note?, meta?, icon?, aside?, footer?, actions?, default? }",
+        class: "string",
+        style: "object"
+      },
+      slots: {
+        eyebrow: "Small kicker above the stat label",
+        label: "Main stat label",
+        value: "Primary metric value",
+        delta: "Trend / delta content",
+        note: "Supporting note",
+        meta: "Extra meta badges or info",
+        icon: "Leading icon or avatar",
+        aside: "Right-side support content",
+        footer: "Footer/supporting bottom content",
+        actions: "Footer actions cluster",
+        default: "Extra body content"
+      },
+      returns: "HTMLElement",
+      description: "Surface compatta per metriche singole, trend e metadata operative."
+    };
+  }
+  // Esempio: CMSwift.ui.Stat({ label: "Revenue", value: "€ 128k", delta: "+18%" })
+
+  UI.Kpi = (...args) => {
+    const { props: rawProps, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = rawProps.slots || {};
+    const resolveStateValue = () => normalizeState(uiUnwrap(rawProps.state) || uiUnwrap(rawProps.color) || "");
+    const stateClass = uiComputed([rawProps.state, rawProps.color], () => {
+      const state = resolveStateValue();
+      return state ? `cms-state-${state}` : "";
+    });
+
+    const props = { ...rawProps };
+    const p = CMSwift.omit(props, [
+      "actions",
+      "aside",
+      "delta",
+      "eyebrow",
+      "footer",
+      "icon",
+      "iconSize",
+      "label",
+      "media",
+      "meta",
+      "note",
+      "slots",
+      "state",
+      "subtitle",
+      "title",
+      "trend",
+      "value"
+    ]);
+    p.class = uiClass([
+      "cms-clear-set",
+      "cms-kpi",
+      "cms-singularity",
+      stateClass,
+      props.class
+    ]);
+    p.style = { ...(props.style || {}) };
+
+    const renderNamed = (slotName, fallback, ctx = {}) => renderSlotToArray(
+      slots,
+      slotName,
+      ctx,
+      fallback
+    );
+
+    const iconFallback = rawProps.icon == null
+      ? null
+      : (typeof rawProps.icon === "string"
+        ? UI.Icon({ name: rawProps.icon, size: rawProps.iconSize || "lg" })
+        : CMSwift.ui.slot(rawProps.icon, { as: "icon" }));
+
+    const eyebrowNodes = renderNamed("eyebrow", rawProps.eyebrow);
+    const titleNodes = renderNamed("title", rawProps.title ?? rawProps.label);
+    const valueNodes = renderNamed("value", rawProps.value);
+    const deltaNodes = renderNamed("delta", rawProps.delta, { trend: rawProps.trend });
+    const noteNodes = renderNamed("note", rawProps.note ?? rawProps.subtitle);
+    const metaNodes = renderNamed("meta", rawProps.meta);
+    const iconNodes = renderNamed("icon", iconFallback);
+    const asideNodes = renderNamed("aside", rawProps.aside);
+    const mediaNodes = renderNamed("media", rawProps.media);
+    const footerNodes = renderNamed("footer", rawProps.footer);
+    const actionsNodes = renderNamed("actions", rawProps.actions);
+    const bodyNodes = renderNamed("default", children);
+
+    const kpi = _.section(
+      p,
+      _.div(
+        { class: "cms-kpi-head" },
+        _.div(
+          { class: "cms-kpi-title-wrap" },
+          iconNodes.length ? _.div({ class: "cms-kpi-icon" }, ...iconNodes) : null,
+          _.div(
+            { class: "cms-kpi-copy" },
+            eyebrowNodes.length ? _.div({ class: "cms-kpi-eyebrow" }, ...eyebrowNodes) : null,
+            titleNodes.length ? _.div({ class: "cms-kpi-title" }, ...titleNodes) : null
+          )
+        ),
+        asideNodes.length ? _.div({ class: "cms-kpi-aside" }, ...asideNodes) : null
+      ),
+      _.div(
+        { class: "cms-kpi-core" },
+        _.div(
+          { class: "cms-kpi-value-wrap" },
+          valueNodes.length ? _.div({ class: "cms-kpi-value" }, ...valueNodes) : null,
+          deltaNodes.length ? _.div({ class: "cms-kpi-delta" }, ...deltaNodes) : null
+        ),
+        noteNodes.length ? _.div({ class: "cms-kpi-note" }, ...noteNodes) : null,
+        metaNodes.length ? _.div({ class: "cms-kpi-meta" }, ...metaNodes) : null,
+        mediaNodes.length ? _.div({ class: "cms-kpi-media" }, ...mediaNodes) : null,
+        bodyNodes.length ? _.div({ class: "cms-kpi-extra" }, ...bodyNodes) : null
+      ),
+      (footerNodes.length || actionsNodes.length)
+        ? _.div(
+          { class: "cms-kpi-footer" },
+          footerNodes.length ? _.div({ class: "cms-kpi-footer-copy" }, ...footerNodes) : null,
+          actionsNodes.length ? _.div({ class: "cms-kpi-actions" }, ...actionsNodes) : null
+        )
+        : null
+    );
+
+    setPropertyProps(kpi, rawProps);
+    return kpi;
+  };
+  if (CMSwift.isDev?.()) {
+    UI.meta = UI.meta || {};
+    UI.meta.Kpi = {
+      signature: "UI.Kpi(...children) | UI.Kpi(props, ...children)",
+      props: {
+        eyebrow: "String|Node|Function|Array",
+        title: "String|Node|Function|Array",
+        label: "Alias of title",
+        value: "String|Number|Node|Function|Array",
+        delta: "String|Node|Function|Array",
+        trend: "up|down|flat|positive|negative|neutral",
+        note: "String|Node|Function|Array",
+        subtitle: "Alias of note",
+        meta: "Node|Function|Array",
+        media: "Node|Function|Array",
+        icon: "String|Node|Function|Array",
+        aside: "Node|Function|Array",
+        footer: "Node|Function|Array",
+        actions: "Node|Function|Array",
+        state: "primary|secondary|success|warning|danger|info|light|dark",
+        slots: "{ eyebrow?, title?, value?, delta?, note?, meta?, media?, icon?, aside?, footer?, actions?, default? }",
+        class: "string",
+        style: "object"
+      },
+      slots: {
+        eyebrow: "Kicker content",
+        title: "KPI title content",
+        value: "Primary KPI value",
+        delta: "Delta/trend content",
+        note: "Supporting note",
+        meta: "Extra meta badges or inline info",
+        media: "Secondary data view or mini-visual content",
+        icon: "Leading icon or avatar",
+        aside: "Top-right support content",
+        footer: "Bottom support content",
+        actions: "Footer actions cluster",
+        default: "Extra body content"
+      },
+      returns: "HTMLElement",
+      description: "Surface piu ricca per KPI, metriche headline e mini dashboard summary."
+    };
+  }
+  // Esempio: CMSwift.ui.Kpi({ title: "Orders", value: "342", delta: "+12%" })
+
   const overlayAnimDuration = (el, fallback = 180) => {
     const d = getComputedStyle(el).transitionDuration;
     if (!d) return fallback;

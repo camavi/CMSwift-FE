@@ -67,6 +67,10 @@ const descriptions = {
     title: "Badge",
     description: "Badge inline a pillola con notification reattiva e 6 slot icona posizionabili. Usa `label`, `notification` e slot dedicati."
   },
+  "_.Alert": {
+    title: "Alert",
+    description: "Alert compatto per warning inline, note persistenti e validation summary. Supporta dismiss, actions, aside e slots."
+  },
   "_.Avatar": {
     title: "Avatar",
     description: "Avatar con immagine `src` o fallback testuale. Supporta size, square e variante elevated."
@@ -147,6 +151,14 @@ const descriptions = {
     title: "Progress",
     description: "Progress bar orizzontale con value 0-100, colore e variante striped. Dimensioni configurabili."
   },
+  "_.Stat": {
+    title: "Stat",
+    description: "Superficie compatta per metriche singole, delta e metadata operative. Ideale per dashboard dense e summary panel."
+  },
+  "_.Kpi": {
+    title: "Kpi",
+    description: "Superficie per KPI headline e mini dashboard summary con value principale, delta, media, footer e azioni."
+  },
   "_.LoadingBar": {
     title: "LoadingBar",
     description: "Barra di caricamento fissa in alto con API imperativa `set/start/stop`. Montata su `target` o body."
@@ -166,6 +178,10 @@ const descriptions = {
   "_.Drawer": {
     title: "Drawer",
     description: "Drawer di navigazione con items, gruppi e stato persistente. Supporta link, button, icone e closeOnSelect."
+  },
+  "_.EmptyState": {
+    title: "EmptyState",
+    description: "Pattern per zero results, first-run onboarding e pannelli senza dati, con icon/illustration, meta e CTA di recovery."
   },
   "_.Page": {
     title: "Page",

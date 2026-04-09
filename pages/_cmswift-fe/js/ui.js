@@ -5745,6 +5745,302 @@ const unitCover = (v, name = 'size') => {
   }
   // Esempio: CMSwift.ui.Chip({ label: "Tag", removable: true })
 
+  UI.Stat = (...args) => {
+    const { props: rawProps, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = rawProps.slots || {};
+    const resolveStateValue = () => normalizeState(uiUnwrap(rawProps.state) || uiUnwrap(rawProps.color) || "");
+    const stateClass = uiComputed([rawProps.state, rawProps.color], () => {
+      const state = resolveStateValue();
+      return state ? `cms-state-${state}` : "";
+    });
+    const trendClass = uiComputed(rawProps.trend, () => {
+      const raw = String(uiUnwrap(rawProps.trend) || "").toLowerCase();
+      if (["up", "positive", "success", "gain", "increase"].includes(raw)) return "is-positive";
+      if (["down", "negative", "danger", "loss", "decrease"].includes(raw)) return "is-negative";
+      if (["flat", "neutral", "steady", "stable"].includes(raw)) return "is-neutral";
+      return "";
+    });
+
+    const props = { ...rawProps };
+    const p = CMSwift.omit(props, [
+      "actions",
+      "aside",
+      "delta",
+      "eyebrow",
+      "footer",
+      "icon",
+      "iconSize",
+      "label",
+      "meta",
+      "note",
+      "slots",
+      "state",
+      "subtitle",
+      "title",
+      "trend",
+      "value"
+    ]);
+    p.class = uiClass([
+      "cms-clear-set",
+      "cms-stat",
+      "cms-singularity",
+      stateClass,
+      trendClass,
+      props.class
+    ]);
+    p.style = { ...(props.style || {}) };
+
+    const renderNamed = (slotName, fallback, ctx = {}) => renderSlotToArray(
+      slots,
+      slotName,
+      ctx,
+      fallback
+    );
+
+    const iconFallback = rawProps.icon == null
+      ? null
+      : (typeof rawProps.icon === "string"
+        ? UI.Icon({ name: rawProps.icon, size: rawProps.iconSize || "md" })
+        : CMSwift.ui.slot(rawProps.icon, { as: "icon" }));
+
+    const eyebrowNodes = renderNamed("eyebrow", rawProps.eyebrow);
+    const labelNodes = renderNamed("label", rawProps.label ?? rawProps.title);
+    const valueNodes = renderNamed("value", rawProps.value);
+    const noteNodes = renderNamed("note", rawProps.note ?? rawProps.subtitle);
+    const metaNodes = renderNamed("meta", rawProps.meta);
+    const deltaNodes = renderNamed("delta", rawProps.delta, { trend: rawProps.trend });
+    const iconNodes = renderNamed("icon", iconFallback);
+    const asideNodes = renderNamed("aside", rawProps.aside);
+    const footerNodes = renderNamed("footer", rawProps.footer);
+    const actionsNodes = renderNamed("actions", rawProps.actions);
+    const bodyNodes = renderNamed("default", children);
+
+    const stat = _.article(
+      p,
+      _.div(
+        { class: "cms-stat-head" },
+        _.div(
+          { class: "cms-stat-lead" },
+          iconNodes.length ? _.div({ class: "cms-stat-icon" }, ...iconNodes) : null,
+          _.div(
+            { class: "cms-stat-copy" },
+            eyebrowNodes.length ? _.div({ class: "cms-stat-eyebrow" }, ...eyebrowNodes) : null,
+            labelNodes.length ? _.div({ class: "cms-stat-label" }, ...labelNodes) : null
+          )
+        ),
+        asideNodes.length ? _.div({ class: "cms-stat-aside" }, ...asideNodes) : null
+      ),
+      _.div(
+        { class: "cms-stat-body" },
+        valueNodes.length ? _.div({ class: "cms-stat-value" }, ...valueNodes) : null,
+        deltaNodes.length
+          ? _.div({ class: "cms-stat-delta" }, ...deltaNodes)
+          : null,
+        noteNodes.length ? _.div({ class: "cms-stat-note" }, ...noteNodes) : null,
+        metaNodes.length ? _.div({ class: "cms-stat-meta" }, ...metaNodes) : null,
+        bodyNodes.length ? _.div({ class: "cms-stat-extra" }, ...bodyNodes) : null
+      ),
+      (footerNodes.length || actionsNodes.length)
+        ? _.div(
+          { class: "cms-stat-footer" },
+          footerNodes.length ? _.div({ class: "cms-stat-footer-copy" }, ...footerNodes) : null,
+          actionsNodes.length ? _.div({ class: "cms-stat-actions" }, ...actionsNodes) : null
+        )
+        : null
+    );
+
+    setPropertyProps(stat, rawProps);
+    return stat;
+  };
+  if (CMSwift.isDev?.()) {
+    UI.meta = UI.meta || {};
+    UI.meta.Stat = {
+      signature: "UI.Stat(...children) | UI.Stat(props, ...children)",
+      props: {
+        eyebrow: "String|Node|Function|Array",
+        label: "String|Node|Function|Array",
+        title: "Alias of label",
+        value: "String|Number|Node|Function|Array",
+        delta: "String|Node|Function|Array",
+        trend: "up|down|flat|positive|negative|neutral",
+        note: "String|Node|Function|Array",
+        subtitle: "Alias of note",
+        meta: "Node|Function|Array",
+        icon: "String|Node|Function|Array",
+        aside: "Node|Function|Array",
+        footer: "Node|Function|Array",
+        actions: "Node|Function|Array",
+        state: "primary|secondary|success|warning|danger|info|light|dark",
+        slots: "{ eyebrow?, label?, value?, delta?, note?, meta?, icon?, aside?, footer?, actions?, default? }",
+        class: "string",
+        style: "object"
+      },
+      slots: {
+        eyebrow: "Small kicker above the stat label",
+        label: "Main stat label",
+        value: "Primary metric value",
+        delta: "Trend / delta content",
+        note: "Supporting note",
+        meta: "Extra meta badges or info",
+        icon: "Leading icon or avatar",
+        aside: "Right-side support content",
+        footer: "Footer/supporting bottom content",
+        actions: "Footer actions cluster",
+        default: "Extra body content"
+      },
+      returns: "HTMLElement",
+      description: "Surface compatta per metriche singole, trend e metadata operative."
+    };
+  }
+  // Esempio: CMSwift.ui.Stat({ label: "Revenue", value: "€ 128k", delta: "+18%" })
+
+  UI.Kpi = (...args) => {
+    const { props: rawProps, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = rawProps.slots || {};
+    const resolveStateValue = () => normalizeState(uiUnwrap(rawProps.state) || uiUnwrap(rawProps.color) || "");
+    const stateClass = uiComputed([rawProps.state, rawProps.color], () => {
+      const state = resolveStateValue();
+      return state ? `cms-state-${state}` : "";
+    });
+
+    const props = { ...rawProps };
+    const p = CMSwift.omit(props, [
+      "actions",
+      "aside",
+      "delta",
+      "eyebrow",
+      "footer",
+      "icon",
+      "iconSize",
+      "label",
+      "media",
+      "meta",
+      "note",
+      "slots",
+      "state",
+      "subtitle",
+      "title",
+      "trend",
+      "value"
+    ]);
+    p.class = uiClass([
+      "cms-clear-set",
+      "cms-kpi",
+      "cms-singularity",
+      stateClass,
+      props.class
+    ]);
+    p.style = { ...(props.style || {}) };
+
+    const renderNamed = (slotName, fallback, ctx = {}) => renderSlotToArray(
+      slots,
+      slotName,
+      ctx,
+      fallback
+    );
+
+    const iconFallback = rawProps.icon == null
+      ? null
+      : (typeof rawProps.icon === "string"
+        ? UI.Icon({ name: rawProps.icon, size: rawProps.iconSize || "lg" })
+        : CMSwift.ui.slot(rawProps.icon, { as: "icon" }));
+
+    const eyebrowNodes = renderNamed("eyebrow", rawProps.eyebrow);
+    const titleNodes = renderNamed("title", rawProps.title ?? rawProps.label);
+    const valueNodes = renderNamed("value", rawProps.value);
+    const deltaNodes = renderNamed("delta", rawProps.delta, { trend: rawProps.trend });
+    const noteNodes = renderNamed("note", rawProps.note ?? rawProps.subtitle);
+    const metaNodes = renderNamed("meta", rawProps.meta);
+    const iconNodes = renderNamed("icon", iconFallback);
+    const asideNodes = renderNamed("aside", rawProps.aside);
+    const mediaNodes = renderNamed("media", rawProps.media);
+    const footerNodes = renderNamed("footer", rawProps.footer);
+    const actionsNodes = renderNamed("actions", rawProps.actions);
+    const bodyNodes = renderNamed("default", children);
+
+    const kpi = _.section(
+      p,
+      _.div(
+        { class: "cms-kpi-head" },
+        _.div(
+          { class: "cms-kpi-title-wrap" },
+          iconNodes.length ? _.div({ class: "cms-kpi-icon" }, ...iconNodes) : null,
+          _.div(
+            { class: "cms-kpi-copy" },
+            eyebrowNodes.length ? _.div({ class: "cms-kpi-eyebrow" }, ...eyebrowNodes) : null,
+            titleNodes.length ? _.div({ class: "cms-kpi-title" }, ...titleNodes) : null
+          )
+        ),
+        asideNodes.length ? _.div({ class: "cms-kpi-aside" }, ...asideNodes) : null
+      ),
+      _.div(
+        { class: "cms-kpi-core" },
+        _.div(
+          { class: "cms-kpi-value-wrap" },
+          valueNodes.length ? _.div({ class: "cms-kpi-value" }, ...valueNodes) : null,
+          deltaNodes.length ? _.div({ class: "cms-kpi-delta" }, ...deltaNodes) : null
+        ),
+        noteNodes.length ? _.div({ class: "cms-kpi-note" }, ...noteNodes) : null,
+        metaNodes.length ? _.div({ class: "cms-kpi-meta" }, ...metaNodes) : null,
+        mediaNodes.length ? _.div({ class: "cms-kpi-media" }, ...mediaNodes) : null,
+        bodyNodes.length ? _.div({ class: "cms-kpi-extra" }, ...bodyNodes) : null
+      ),
+      (footerNodes.length || actionsNodes.length)
+        ? _.div(
+          { class: "cms-kpi-footer" },
+          footerNodes.length ? _.div({ class: "cms-kpi-footer-copy" }, ...footerNodes) : null,
+          actionsNodes.length ? _.div({ class: "cms-kpi-actions" }, ...actionsNodes) : null
+        )
+        : null
+    );
+
+    setPropertyProps(kpi, rawProps);
+    return kpi;
+  };
+  if (CMSwift.isDev?.()) {
+    UI.meta = UI.meta || {};
+    UI.meta.Kpi = {
+      signature: "UI.Kpi(...children) | UI.Kpi(props, ...children)",
+      props: {
+        eyebrow: "String|Node|Function|Array",
+        title: "String|Node|Function|Array",
+        label: "Alias of title",
+        value: "String|Number|Node|Function|Array",
+        delta: "String|Node|Function|Array",
+        trend: "up|down|flat|positive|negative|neutral",
+        note: "String|Node|Function|Array",
+        subtitle: "Alias of note",
+        meta: "Node|Function|Array",
+        media: "Node|Function|Array",
+        icon: "String|Node|Function|Array",
+        aside: "Node|Function|Array",
+        footer: "Node|Function|Array",
+        actions: "Node|Function|Array",
+        state: "primary|secondary|success|warning|danger|info|light|dark",
+        slots: "{ eyebrow?, title?, value?, delta?, note?, meta?, media?, icon?, aside?, footer?, actions?, default? }",
+        class: "string",
+        style: "object"
+      },
+      slots: {
+        eyebrow: "Kicker content",
+        title: "KPI title content",
+        value: "Primary KPI value",
+        delta: "Delta/trend content",
+        note: "Supporting note",
+        meta: "Extra meta badges or inline info",
+        media: "Secondary data view or mini-visual content",
+        icon: "Leading icon or avatar",
+        aside: "Top-right support content",
+        footer: "Bottom support content",
+        actions: "Footer actions cluster",
+        default: "Extra body content"
+      },
+      returns: "HTMLElement",
+      description: "Surface piu ricca per KPI, metriche headline e mini dashboard summary."
+    };
+  }
+  // Esempio: CMSwift.ui.Kpi({ title: "Orders", value: "342", delta: "+12%" })
+
   const overlayAnimDuration = (el, fallback = 180) => {
     const d = getComputedStyle(el).transitionDuration;
     if (!d) return fallback;
@@ -6333,6 +6629,240 @@ const unitCover = (v, name = 'size') => {
     };
   }
   // Esempio: CMSwift.ui.Banner({ type: "warning", title: "Pagamento in sospeso", message: "Aggiorna il batch entro le 18:00" })
+
+  UI.Alert = (...args) => {
+    const { props: rawProps, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = rawProps.slots || {};
+
+    const resolveStateValue = () => normalizeState(uiUnwrap(rawProps.type) || uiUnwrap(rawProps.state) || uiUnwrap(rawProps.color) || "warning");
+    const stateClass = uiComputed([rawProps.type, rawProps.state, rawProps.color], () => {
+      const state = resolveStateValue();
+      return state ? `cms-state-${state}` : "";
+    });
+
+    const props = { ...rawProps };
+    const p = CMSwift.omit(props, [
+      "actions", "aside", "closeLabel", "description", "dismiss", "dismissible",
+      "icon", "iconSize", "message", "meta", "onDismiss", "slots", "state",
+      "subtitle", "title", "type", "variant"
+    ]);
+    p.class = uiClass([
+      "cms-clear-set",
+      "cms-alert",
+      "cms-singularity",
+      stateClass,
+      uiWhen(rawProps.dismissible, "is-dismissible"),
+      props.class
+    ]);
+    p.style = { ...(props.style || {}) };
+
+    const autoIconMap = {
+      success: "check_circle",
+      warning: "warning",
+      danger: "error",
+      info: "info",
+      primary: "bolt",
+      secondary: "campaign",
+      dark: "shield",
+      light: "notifications"
+    };
+
+    const iconFallback = (() => {
+      if (rawProps.icon === false || rawProps.icon === null) return null;
+      if (rawProps.icon != null) {
+        return typeof rawProps.icon === "string"
+          ? UI.Icon({ name: rawProps.icon, size: rawProps.iconSize || "sm" })
+          : CMSwift.ui.slot(rawProps.icon, { as: "icon" });
+      }
+      const iconName = autoIconMap[resolveStateValue()] || autoIconMap.warning;
+      return UI.Icon({ name: iconName, size: rawProps.iconSize || "sm" });
+    })();
+
+    const titleNodes = renderSlotToArray(slots, "title", {}, rawProps.title);
+    const messageNodes = renderSlotToArray(slots, "message", {}, rawProps.message != null ? rawProps.message : children);
+    const descriptionNodes = renderSlotToArray(slots, "description", {}, rawProps.description ?? rawProps.subtitle);
+    const metaNodes = renderSlotToArray(slots, "meta", {}, rawProps.meta);
+    const actionsNodes = renderSlotToArray(slots, "actions", {}, rawProps.actions);
+    const asideNodes = renderSlotToArray(slots, "aside", {}, rawProps.aside);
+    const iconNodes = renderSlotToArray(slots, "icon", {}, iconFallback);
+    const dismissNodes = renderSlotToArray(slots, "dismiss", {}, rawProps.dismiss);
+
+    let alertEl = null;
+    const defaultDismissNode = rawProps.dismissible || rawProps.onDismiss
+      ? UI.Btn({
+        class: "cms-alert-close",
+        outline: true,
+        size: "sm",
+        "aria-label": rawProps.closeLabel || "Chiudi alert",
+        onClick: (e) => {
+          rawProps.onDismiss?.(e);
+          if (e.defaultPrevented) return;
+          alertEl?.remove();
+        }
+      }, UI.Icon({ name: "close", size: "sm" }))
+      : null;
+
+    alertEl = _.div(
+      p,
+      iconNodes.length ? _.div({ class: "cms-alert-icon" }, ...iconNodes) : null,
+      _.div(
+        { class: "cms-alert-body" },
+        titleNodes.length ? _.div({ class: "cms-alert-title" }, ...titleNodes) : null,
+        messageNodes.length ? _.div({ class: "cms-alert-message" }, ...messageNodes) : null,
+        descriptionNodes.length ? _.div({ class: "cms-alert-description" }, ...descriptionNodes) : null,
+        metaNodes.length ? _.div({ class: "cms-alert-meta" }, ...metaNodes) : null,
+        actionsNodes.length ? _.div({ class: "cms-alert-actions" }, ...actionsNodes) : null
+      ),
+      (asideNodes.length || dismissNodes.length || defaultDismissNode)
+        ? _.div(
+          { class: "cms-alert-side" },
+          ...asideNodes,
+          ...(dismissNodes.length ? dismissNodes : (defaultDismissNode ? [defaultDismissNode] : []))
+        )
+        : null
+    );
+
+    alertEl.setAttribute("role", resolveStateValue() === "danger" || resolveStateValue() === "warning" ? "alert" : "status");
+    setPropertyProps(alertEl, rawProps);
+    return alertEl;
+  };
+  if (CMSwift.isDev?.()) {
+    UI.meta = UI.meta || {};
+    UI.meta.Alert = {
+      signature: "UI.Alert(...children) | UI.Alert(props, ...children)",
+      props: {
+        title: "String|Node|Function|Array",
+        message: "String|Node|Function|Array",
+        description: "String|Node|Function|Array",
+        meta: "Node|Function|Array",
+        icon: "String|Node|Function|Array|false",
+        actions: "Node|Function|Array",
+        aside: "Node|Function|Array",
+        dismissible: "boolean",
+        dismiss: "Node|Function|Array",
+        onDismiss: "function",
+        closeLabel: "string",
+        type: "success|warning|danger|error|info|primary|secondary|light|dark",
+        state: "success|warning|danger|error|info|primary|secondary|light|dark",
+        slots: "{ icon?, title?, message?, description?, meta?, actions?, aside?, dismiss?, default? }",
+        class: "string",
+        style: "object"
+      },
+      slots: {
+        icon: "Leading alert icon content",
+        title: "Alert title content",
+        message: "Primary alert copy",
+        description: "Secondary/supporting text",
+        meta: "Inline meta content",
+        actions: "Alert actions cluster",
+        aside: "Right side support content",
+        dismiss: "Custom dismiss control",
+        default: "Fallback alert message content"
+      },
+      returns: "HTMLDivElement",
+      description: "Alert compatto per warning inline, policy note e feedback persistente dentro page o card."
+    };
+  }
+  // Esempio: CMSwift.ui.Alert({ type: "warning", title: "Review richiesta", message: "Controlla il batch prima del go-live" })
+
+  UI.EmptyState = (...args) => {
+    const { props: rawProps, children } = CMSwift.uiNormalizeArgs(args);
+    const slots = rawProps.slots || {};
+    const resolveStateValue = () => normalizeState(uiUnwrap(rawProps.state) || uiUnwrap(rawProps.color) || "");
+    const stateClass = uiComputed([rawProps.state, rawProps.color], () => {
+      const state = resolveStateValue();
+      return state ? `cms-state-${state}` : "";
+    });
+
+    const props = { ...rawProps };
+    const p = CMSwift.omit(props, [
+      "actions", "description", "eyebrow", "icon", "iconSize", "illustration", "media",
+      "message", "meta", "slots", "state", "title"
+    ]);
+    p.class = uiClass([
+      "cms-clear-set",
+      "cms-empty-state",
+      "cms-singularity",
+      stateClass,
+      uiWhen(rawProps.compact, "compact"),
+      uiWhen(rawProps.inline, "inline"),
+      props.class
+    ]);
+    p.style = { ...(props.style || {}) };
+
+    const iconFallback = rawProps.icon === false
+      ? null
+      : (rawProps.icon != null
+        ? (typeof rawProps.icon === "string"
+          ? UI.Icon({ name: rawProps.icon, size: rawProps.iconSize || "xl" })
+          : CMSwift.ui.slot(rawProps.icon, { as: "icon" }))
+        : UI.Icon({ name: "inbox", size: rawProps.iconSize || "xl" }));
+
+    const illustrationNodes = renderSlotToArray(slots, "illustration", {}, rawProps.illustration ?? rawProps.media);
+    const iconNodes = renderSlotToArray(slots, "icon", {}, iconFallback);
+    const eyebrowNodes = renderSlotToArray(slots, "eyebrow", {}, rawProps.eyebrow);
+    const titleNodes = renderSlotToArray(slots, "title", {}, rawProps.title);
+    const messageNodes = renderSlotToArray(slots, "message", {}, rawProps.message != null ? rawProps.message : children);
+    const descriptionNodes = renderSlotToArray(slots, "description", {}, rawProps.description);
+    const metaNodes = renderSlotToArray(slots, "meta", {}, rawProps.meta);
+    const actionsNodes = renderSlotToArray(slots, "actions", {}, rawProps.actions);
+    const bodyNodes = renderSlotToArray(slots, "default", {}, rawProps.message != null ? children : null);
+
+    const emptyState = _.section(
+      p,
+      illustrationNodes.length
+        ? _.div({ class: "cms-empty-state-illustration" }, ...illustrationNodes)
+        : null,
+      iconNodes.length ? _.div({ class: "cms-empty-state-icon" }, ...iconNodes) : null,
+      eyebrowNodes.length ? _.div({ class: "cms-empty-state-eyebrow" }, ...eyebrowNodes) : null,
+      titleNodes.length ? _.div({ class: "cms-empty-state-title" }, ...titleNodes) : null,
+      messageNodes.length ? _.div({ class: "cms-empty-state-message" }, ...messageNodes) : null,
+      descriptionNodes.length ? _.div({ class: "cms-empty-state-description" }, ...descriptionNodes) : null,
+      metaNodes.length ? _.div({ class: "cms-empty-state-meta" }, ...metaNodes) : null,
+      bodyNodes.length ? _.div({ class: "cms-empty-state-extra" }, ...bodyNodes) : null,
+      actionsNodes.length ? _.div({ class: "cms-empty-state-actions" }, ...actionsNodes) : null
+    );
+
+    setPropertyProps(emptyState, rawProps);
+    return emptyState;
+  };
+  if (CMSwift.isDev?.()) {
+    UI.meta = UI.meta || {};
+    UI.meta.EmptyState = {
+      signature: "UI.EmptyState(...children) | UI.EmptyState(props, ...children)",
+      props: {
+        eyebrow: "String|Node|Function|Array",
+        title: "String|Node|Function|Array",
+        message: "String|Node|Function|Array",
+        description: "String|Node|Function|Array",
+        meta: "Node|Function|Array",
+        icon: "String|Node|Function|Array|false",
+        illustration: "Node|Function|Array",
+        media: "Alias of illustration",
+        actions: "Node|Function|Array",
+        compact: "boolean",
+        inline: "boolean",
+        state: "primary|secondary|success|warning|danger|info|light|dark",
+        slots: "{ illustration?, icon?, eyebrow?, title?, message?, description?, meta?, actions?, default? }",
+        class: "string",
+        style: "object"
+      },
+      slots: {
+        illustration: "Top visual / illustration content",
+        icon: "Leading empty-state icon",
+        eyebrow: "Small kicker content",
+        title: "Primary empty-state heading",
+        message: "Primary message content",
+        description: "Secondary supporting text",
+        meta: "Meta badges or summary content",
+        actions: "Actions cluster",
+        default: "Extra empty-state body content"
+      },
+      returns: "HTMLElement",
+      description: "Surface per zero-results, onboarding vuoti e pannelli senza dati con CTA di recupero."
+    };
+  }
+  // Esempio: CMSwift.ui.EmptyState({ title: "No results", message: "Prova a cambiare i filtri" })
 
   // -------------------------------
   // 3) APP SHELL
