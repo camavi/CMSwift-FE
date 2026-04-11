@@ -21,15 +21,15 @@ const docList = (value) => Array.isArray(value) ? value.filter(Boolean) : [];
 const renderDocRichItem = (item) => {
   if (item == null || item === false) return null;
   if (typeof item === "string" || typeof item === "number") {
-    return _.div({ class: "cms-component-docs-list-item" },
+    return _.Grid({ gap: 12, cols: 1, padding: 14, class: "cms-component-docs-prop" },
       _.div({ class: "cms-component-docs-list-copy" }, String(item))
     );
   }
-  return _.div({ class: "cms-component-docs-list-item" },
+  return _.Grid({ gap: 12, cols: 1, padding: 14, class: "cms-component-docs-prop" },
     item.kicker ? _.div({ class: "cms-component-docs-list-kicker" }, ...docNodes(item.kicker)) : null,
     _.div({ class: "cms-component-docs-list-copy" },
       item.title ? _.div({ class: "cms-component-docs-list-title" }, ...docNodes(item.title)) : null,
-      item.text ? _.div({ class: "cms-component-docs-list-text" }, ...docNodes(item.text)) : null
+      item.text ? _.div({ class: "cms-component-docs-prop-text" }, ...docNodes(item.text)) : null
     )
   );
 };
@@ -37,23 +37,23 @@ const renderDocRichItem = (item) => {
 const renderDocGroup = (title, items, opts = {}) => {
   const list = docList(items);
   if (!list.length) return null;
-  return _.div({ class: _.uiClass(["cms-component-docs-surface", opts.className]) },
-    _.div({ class: "cms-component-docs-surface-head" },
-      _.div({ class: "cms-component-docs-surface-title" }, title),
+  return _.Card({ class: 'cms-p-sm' },
+    _.Row({ gap: 20 },
+      _.b({ class: "cms-component-docs-surface-title" }, title),
       opts.note ? _.div({ class: "cms-component-docs-surface-note" }, ...docNodes(opts.note)) : null
     ),
-    _.div({ class: "cms-component-docs-list" }, ...list.map(renderDocRichItem))
+    _.Grid({ gap: 12, cols: 1 }, ...list.map(renderDocRichItem))
   );
 };
 
-const renderDocFact = (item) => _.div({ class: "cms-component-docs-fact" },
+const renderDocFact = (item) => _.Card(
   _.div({ class: "cms-component-docs-fact-label" }, docText(item?.label)),
   _.div({ class: "cms-component-docs-fact-value" }, ...docNodes(item?.value))
 );
 
 const renderDocProp = (item) => {
   if (!item) return null;
-  return _.div({ class: "cms-component-docs-prop" },
+  return _.Grid({ gap: 12, cols: 1, padding: "sm", class: "cms-component-docs-prop", },
     _.div({ class: "cms-component-docs-prop-head" },
       _.Chip({ dense: true, outline: true, color: "primary" }, item.name || "prop"),
       item.default != null && item.default !== ""
@@ -71,11 +71,11 @@ const renderDocProp = (item) => {
 
 const renderDocPattern = (item) => {
   if (!item) return null;
-  return _.div({ class: "cms-component-docs-pattern" },
-    _.div({ class: "cms-component-docs-pattern-title" }, ...docNodes(item.title || item.name || "Pattern")),
-    item.text ? _.div({ class: "cms-component-docs-pattern-text" }, ...docNodes(item.text)) : null,
+  return _.div({ class: "cms-component-docs-prop" },
+    _.div({ class: "cms-component-docs-list-title" }, ...docNodes(item.title || item.name || "Pattern")),
+    item.text ? _.div({ class: "cms-component-docs-prop-text" }, ...docNodes(item.text)) : null,
     docList(item.tags).length
-      ? _.div({ class: "cms-component-docs-pattern-tags" },
+      ? _.div({ class: "cms-component-docs-prop-tags" },
         ...docList(item.tags).map((tag) => _.Chip({ dense: true, outline: true, color: "secondary" }, tag))
       )
       : null
@@ -107,41 +107,43 @@ _.ComponentDocs = (...args) => {
     ? props.api()
     : (props.api || (rawName ? _.docTable(rawName) : null));
 
-  const hero = _.div({ class: "cms-component-docs-hero" },
-    _.div({ class: "cms-component-docs-hero-copy" },
-      _.div({ class: "cms-component-docs-eyebrow" },
-        _.Chip({ dense: true, color: statusColor }, status),
-        rawName ? _.span({ class: "cms-component-docs-raw-name" }, `_.${rawName}`) : null
+  const hero = _.Card({ class: "cms-component-docs-hero" },
+    _.Row(
+      _.Col(
+        _.Row({ class: "cms-component-docs-eyebrow", gap: 10 },
+          _.Chip({ dense: true, color: statusColor }, status),
+          rawName ? _.span({ class: "cms-component-docs-raw-name" }, `_.${rawName}`) : null
+        ),
+        _.h1({ class: "cms-component-docs-title" }, title),
+        summary ? _.p({ class: "cms-component-docs-summary" }, ...docNodes(summary)) : null,
+        signature ? _.Chip({ color: "secondary", outline: true }, signature) : null,
+        heroTags.length
+          ? _.Row({ gap: 12, class: "cms-m-t-sm" },
+            ...heroTags.map((tag) => _.Badge({ color: "secondary" }, tag))
+          )
+          : null
       ),
-      _.h1({ class: "cms-component-docs-title" }, title),
-      summary ? _.p({ class: "cms-component-docs-summary" }, ...docNodes(summary)) : null,
-      signature ? _.div({ class: "cms-component-docs-signature" }, signature) : null,
-      heroTags.length
-        ? _.div({ class: "cms-component-docs-tags" },
-          ...heroTags.map((tag) => _.Chip({ dense: true, outline: true }, tag))
-        )
+      quickFacts.length
+        ? _.Col({ gap: 12 }, ...quickFacts.map(renderDocFact))
         : null
-    ),
-    quickFacts.length
-      ? _.div({ class: "cms-component-docs-facts" }, ...quickFacts.map(renderDocFact))
-      : null
+    )
   );
 
-  const overviewContent = _.div({ class: "cms-component-docs-panel" },
-    _.div({ class: "cms-component-docs-grid cms-component-docs-grid-two" },
+  const overviewContent = _.Grid({ gap: 18, cols: 1, class: "cms-p-sm" },
+    _.Grid({ gap: 18, cols: 2, class: "cms-p-sm" },
       renderDocGroup("When To Use", useWhen, { note: "Situazioni in cui il componente fa risparmiare markup e decisioni." }),
       renderDocGroup("Avoid When", avoidWhen, { note: "Casi in cui un altro pattern resta piu chiaro o piu onesto." })
     ),
     essentialProps.length
-      ? _.div({ class: "cms-component-docs-surface" },
-        _.div({ class: "cms-component-docs-surface-head" },
-          _.div({ class: "cms-component-docs-surface-title" }, "Props Essenziali"),
+      ? _.Card({ class: 'cms-p-sm' },
+        _.Row({ gap: 20 },
+          _.b({ class: "cms-component-docs-surface-title" }, "Props Essenziali"),
           _.div({ class: "cms-component-docs-surface-note" }, "Le leve che cambiano davvero tono, struttura e comportamento.")
         ),
-        _.div({ class: "cms-component-docs-props" }, ...essentialProps.map(renderDocProp))
+        _.Grid({ gap: 12, cols: 1 }, ...essentialProps.map(renderDocProp))
       )
       : null,
-    _.div({ class: "cms-component-docs-grid cms-component-docs-grid-two" },
+    _.Grid({ gap: 18, cols: 2, class: "cms-p-sm" },
       renderDocGroup("Anatomy", anatomy, { note: "Come leggere il componente senza partire dalla tabella raw delle props." }),
       renderDocGroup("Slots & Extensibility", slots, { note: "Punti in cui puoi rompere il layout standard senza riscrivere il componente." })
     ),
@@ -150,17 +152,17 @@ _.ComponentDocs = (...args) => {
       : null
   );
 
-  const patternsContent = _.div({ class: "cms-component-docs-panel" },
+  const patternsContent = _.Grid({ gap: 18, cols: 1, class: "cms-p-sm" },
     patterns.length
-      ? _.div({ class: "cms-component-docs-surface" },
-        _.div({ class: "cms-component-docs-surface-head" },
-          _.div({ class: "cms-component-docs-surface-title" }, "Common Patterns"),
+      ? _.Card({ class: 'cms-p-sm' },
+        _.Row({ gap: 20 },
+          _.b({ class: "cms-component-docs-surface-title" }, "Common Patterns"),
           _.div({ class: "cms-component-docs-surface-note" }, "Ricette veloci per i casi veri, non solo per la demo.")
         ),
-        _.div({ class: "cms-component-docs-patterns" }, ...patterns.map(renderDocPattern))
+        _.Grid({ gap: 12, cols: 1 }, ...patterns.map(renderDocPattern))
       )
       : null,
-    _.div({ class: "cms-component-docs-grid cms-component-docs-grid-two" },
+    _.Grid({ gap: 18, cols: 2, class: "cms-p-sm" },
       renderDocGroup("Accessibility", accessibility, { note: "Aspetti da non rompere quando cambi copy, tono o dismiss." }),
       renderDocGroup("Gotchas", gotchas, { note: "Cose che conviene sapere prima di abusare del componente." })
     )
@@ -184,7 +186,7 @@ _.ComponentDocs = (...args) => {
     tabs.push({
       name: "api",
       label: "Full API",
-      content: _.div({ class: "cms-component-docs-panel cms-component-docs-api" }, apiContent)
+      content: _.Grid({ gap: 18, cols: 1, class: "cms-p-sm" }, apiContent)
     });
   }
 
@@ -199,7 +201,7 @@ _.ComponentDocs = (...args) => {
       model: tabModel,
       tabs
     })
-    : _.div({ class: "cms-component-docs-stack" }, ...tabs.map((tab) => _.div({ class: "cms-component-docs-panel" }, tab.content)));
+    : _.div({ class: "cms-component-docs-stack" }, ...tabs.map((tab) => _.Grid({ gap: 18, cols: 1, class: "cms-p-sm" }, tab.content)));
 
   const rootProps = CMSwift.omit(props, [
     "doc", "name", "title", "summary", "signature", "status", "tags", "quickFacts",

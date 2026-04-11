@@ -4,29 +4,14 @@
 }
 
 .cms-component-docs-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.75fr) minmax(280px, 1fr);
-  gap: 20px;
-  padding: 24px;
-  border: 1px solid color-mix(in srgb, var(--cms-border-color) 85%, white);
-  border-radius: 22px;
   background:
     radial-gradient(circle at top right, color-mix(in srgb, var(--cms-warning-200) 60%, transparent), transparent 44%),
     linear-gradient(145deg, color-mix(in srgb, var(--cms-primary-50) 60%, var(--cms-panel)), color-mix(in srgb, var(--cms-info-50) 70%, var(--cms-panel)));
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
 }
 
-.cms-component-docs-hero-copy {
-  display: grid;
-  gap: 12px;
-  align-content: start;
-}
-
 .cms-component-docs-eyebrow {
-  display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
 }
 
 .cms-component-docs-raw-name {
@@ -36,7 +21,7 @@
 }
 
 .cms-component-docs-title {
-  margin: 0;
+  margin: 15px 0;
   font-size: clamp(34px, 5vw, 52px);
   line-height: 0.96;
   letter-spacing: -0.04em;
@@ -48,41 +33,6 @@
   font-size: 16px;
   line-height: 1.6;
   color: var(--cms-text-2);
-}
-
-.cms-component-docs-signature {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--cms-primary-300) 40%, var(--cms-border-color));
-  background: color-mix(in srgb, var(--cms-panel) 72%, white);
-  color: var(--cms-text-2);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 13px;
-  overflow-x: auto;
-}
-
-.cms-component-docs-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.cms-component-docs-facts {
-  display: grid;
-  gap: 12px;
-  align-content: start;
-}
-
-.cms-component-docs-fact {
-  display: grid;
-  gap: 8px;
-  padding: 16px;
-  border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--cms-border-color) 85%, white);
-  background: color-mix(in srgb, var(--cms-panel) 74%, white);
 }
 
 .cms-component-docs-fact-label {
@@ -109,33 +59,6 @@
   backdrop-filter: blur(12px);
 }
 
-.cms-component-docs-panel {
-  display: grid;
-  gap: 18px;
-  padding: 10px;
-}
-
-.cms-component-docs-grid {
-  display: grid;
-  gap: 18px;
-}
-
-.cms-component-docs-grid-two {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.cms-component-docs-surface {
-  display: grid;
-  gap: 16px;
-  padding: 20px;
-  border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--cms-border-color) 88%, white);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, white 52%, transparent), transparent 26%),
-    color-mix(in srgb, var(--cms-panel) 84%, white);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-}
-
 .cms-component-docs-surface-head {
   display: flex;
   align-items: start;
@@ -146,8 +69,6 @@
 
 .cms-component-docs-surface-title {
   font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
 }
 
 .cms-component-docs-surface-note {
@@ -157,19 +78,7 @@
   color: var(--cms-text-3);
 }
 
-.cms-component-docs-list,
-.cms-component-docs-patterns,
-.cms-component-docs-props {
-  display: grid;
-  gap: 12px;
-}
-
-.cms-component-docs-list-item,
-.cms-component-docs-pattern,
 .cms-component-docs-prop {
-  display: grid;
-  gap: 8px;
-  padding: 14px;
   border-radius: 14px;
   background: color-mix(in srgb, var(--cms-panel) 76%, white);
   border: 1px solid color-mix(in srgb, var(--cms-border-color) 82%, white);
@@ -182,15 +91,12 @@
   color: var(--cms-text-3);
 }
 
-.cms-component-docs-list-title,
-.cms-component-docs-pattern-title {
+.cms-component-docs-list-title {
   font-size: 16px;
   font-weight: 700;
   line-height: 1.2;
 }
 
-.cms-component-docs-list-text,
-.cms-component-docs-pattern-text,
 .cms-component-docs-prop-text {
   font-size: 14px;
   line-height: 1.6;
@@ -210,25 +116,10 @@
   color: var(--cms-text-3);
 }
 
-.cms-component-docs-prop-tags,
-.cms-component-docs-pattern-tags {
+.cms-component-docs-prop-tags {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-}
-
-.cms-component-docs-api .cms-card,
-.cms-component-docs-api .cms-doc-table,
-.cms-component-docs-api>* {
-  max-width: 100%;
-}
-
-.cms-component-docs-api .cms-doc-table {
-  gap: 18px;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-  border: 0;
 }
 
 .cms-doc-table-header {
@@ -241,20 +132,6 @@
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.03em;
-}
-
-.cms-doc-table-signature {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--cms-border-color) 82%, white);
-  background: color-mix(in srgb, var(--cms-panel) 82%, white);
-  color: var(--cms-text-2);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
-  overflow-x: auto;
 }
 
 .cms-doc-table-section-title {
@@ -381,11 +258,6 @@
 }
 
 @media (max-width: 980px) {
-
-  .cms-component-docs-hero,
-  .cms-component-docs-grid-two {
-    grid-template-columns: 1fr;
-  }
 
   .cms-component-docs-tabs>.cms-tabpanel-nav {
     position: static;
