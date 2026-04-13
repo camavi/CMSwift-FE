@@ -715,6 +715,7 @@
   box-sizing: border-box;
   margin-top: 2px;
   margin-bottom: 2px;
+  display: flex;
 }
 
 .cms-drawer a,
@@ -5564,12 +5565,29 @@
   justify-content: center;
 }
 
-.cms-empty-state.cms-state-success { --cms-empty-accent: var(--cms-success); }
-.cms-empty-state.cms-state-warning { --cms-empty-accent: var(--cms-warning); }
-.cms-empty-state.cms-state-danger { --cms-empty-accent: var(--cms-danger); }
-.cms-empty-state.cms-state-info { --cms-empty-accent: var(--cms-info); }
-.cms-empty-state.cms-state-primary { --cms-empty-accent: var(--cms-primary); }
-.cms-empty-state.cms-state-secondary { --cms-empty-accent: var(--cms-secondary); }
+.cms-empty-state.cms-state-success {
+  --cms-empty-accent: var(--cms-success);
+}
+
+.cms-empty-state.cms-state-warning {
+  --cms-empty-accent: var(--cms-warning);
+}
+
+.cms-empty-state.cms-state-danger {
+  --cms-empty-accent: var(--cms-danger);
+}
+
+.cms-empty-state.cms-state-info {
+  --cms-empty-accent: var(--cms-info);
+}
+
+.cms-empty-state.cms-state-primary {
+  --cms-empty-accent: var(--cms-primary);
+}
+
+.cms-empty-state.cms-state-secondary {
+  --cms-empty-accent: var(--cms-secondary);
+}
 
 .cms-t-nowrap {
   white-space: nowrap;

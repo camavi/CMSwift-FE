@@ -291,7 +291,11 @@
       ["/demo/component/banner", "../tutorial/banner.cms.js", "banner"],
       ["/demo/component/alert", "../tutorial/alert.cms.js", "alert"],
       ["/demo/component/notify", "../tutorial/notify.cms.js", "notify"],
-      ["/demo/component/emptystate", "../tutorial/empty-state.cms.js", "emptyState"],
+      [
+        "/demo/component/emptystate",
+        "../tutorial/empty-state.cms.js",
+        "emptyState",
+      ],
       ["/demo/component/spinner", "../tutorial/spinner.cms.js", "spinner"],
       ["/demo/component/progress", "../tutorial/progress.cms.js", "progress"],
       [
@@ -593,6 +597,15 @@
           createComponentItem("Spacer", "/demo/component/spacer"),
         ],
       },
+      {
+        label: "Js Html",
+        icon: "html",
+        items: [
+          ..._.DOM_ELEMENTS.map((tag) =>
+            createComponentItem(tag, "/demo/html/" + tag),
+          ),
+        ],
+      },
     ];
 
     function layoutPage(
@@ -694,5 +707,7 @@
     _.router.start();
     /* */
     refreshCodeHighlight();
+    console.log(_.DOM_ELEMENTS);
   </script>
 </html>
+

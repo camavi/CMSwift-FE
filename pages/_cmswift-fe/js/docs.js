@@ -208,10 +208,12 @@ _.ComponentDocs = (...args) => {
     "essentialProps", "useWhen", "avoidWhen", "anatomy", "slots", "patterns",
     "accessibility", "gotchas", "api", "class", "style"
   ]);
-  rootProps.class = _.uiClass(["cms-component-docs", `is-${status}`, props.class]);
+  rootProps.class = _.uiClass([`is-${status}`, props.class]);
   rootProps.style = props.style;
+  rootProps.gap = 24;
+  rootProps.cols = 1;
 
-  return _.section(rootProps, hero, panel);
+  return _.Grid(rootProps, hero, panel);
 };
 
 if (CMSwift.isDev?.()) {
