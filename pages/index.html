@@ -265,6 +265,51 @@
         "../tutorial/cms-renderer-style.cms.js",
         "cmsRendererStyle",
       ],
+      [
+        "/demo/component/cmswift-tutorial",
+        "../tutorial/cmswift/cmswift-intro.cms.js",
+        "cmswiftTutorialIntro",
+      ],
+      [
+        "/demo/component/cmswift-architecture",
+        "../tutorial/cmswift/cmswift-architecture.cms.js",
+        "architecturePage",
+      ],
+      [
+        "/demo/component/cmswift-renderer",
+        "../tutorial/cmswift/cmswift-renderer.cms.js",
+        "rendererTutorialPage",
+      ],
+      [
+        "/demo/component/cmswift-reactive",
+        "../tutorial/cmswift/cmswift-reactive-core.cms.js",
+        "reactiveCorePage",
+      ],
+      [
+        "/demo/component/cmswift-rod",
+        "../tutorial/cmswift/cmswift-rod.cms.js",
+        "rodBindingPage",
+      ],
+      [
+        "/demo/component/cmswift-components",
+        "../tutorial/cmswift/cmswift-components.cms.js",
+        "componentLifecyclePage",
+      ],
+      [
+        "/demo/component/cmswift-ui",
+        "../tutorial/cmswift/cmswift-ui.cms.js",
+        "uiCompositionPage",
+      ],
+      [
+        "/demo/component/cmswift-platform-overview",
+        "../tutorial/cmswift/cmswift-platform-overview.cms.js",
+        "platformOverviewPage",
+      ],
+      [
+        "/demo/component/cmswift-patterns",
+        "../tutorial/cmswift/cmswift-patterns.cms.js",
+        "appPatternsPage",
+      ],
       ["/demo/component/docs", "../tutorial/docs-index.cms.js", "docsIndex"],
       ["/demo/component/layout", "../tutorial/layout.cms.js", "layout"],
       ["/demo/component/page", "../tutorial/page.cms.js", "page"],
@@ -496,6 +541,48 @@
     });
 
     const componentItems = [
+      {
+        label: "CMSwift Tutorial",
+        icon: "widgets",
+        items: [
+          createComponentItem(
+            "Introduction",
+            "/demo/component/cmswift-tutorial",
+          ),
+          createComponentItem(
+            "Architecture",
+            "/demo/component/cmswift-architecture",
+          ),
+          createComponentItem(
+            "Renderer",
+            "/demo/component/cmswift-renderer",
+          ),
+          createComponentItem(
+            "Reactive Core",
+            "/demo/component/cmswift-reactive",
+          ),
+          createComponentItem(
+            "Rod Binding",
+            "/demo/component/cmswift-rod",
+          ),
+          createComponentItem(
+            "Components",
+            "/demo/component/cmswift-components",
+          ),
+          createComponentItem(
+            "UI Composition",
+            "/demo/component/cmswift-ui",
+          ),
+          createComponentItem(
+            "Platform",
+            "/demo/component/cmswift-platform-overview",
+          ),
+          createComponentItem(
+            "App Patterns",
+            "/demo/component/cmswift-patterns",
+          ),
+        ],
+      },
       {
         label: "CMS Tests tools",
         icon: "bug_report",
