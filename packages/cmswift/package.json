@@ -1,0 +1,25 @@
+{
+  "name": "cmswift",
+  "version": "1.0.0",
+  "description": "Umbrella package for CMSwift core + UI",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/cmswift.js",
+  "module": "./dist/cmswift.js",
+  "exports": {
+    ".": "./dist/cmswift.js",
+    "./min": "./dist/min-cmswift.js",
+    "./css/base.css": "../ui/dist/css/base.css",
+    "./css/ui.css": "../ui/dist/css/ui.css",
+    "./css/responsive.css": "../ui/dist/css/responsive.css",
+    "./css/animation.css": "../ui/dist/css/animation.css",
+    "./css/tabler-icons-out.css": "../ui/dist/css/tabler-icons-out.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@cmswift/core": "^1.0.0",
+    "@cmswift/ui": "^1.0.0"
+  }
+}

@@ -39,8 +39,8 @@
   CMSwift.meta = CMSwift.meta || {
     version: "core-draft",
     policy: {
-      sourceOfTruth: "readme_CMS.md",
-      syncRule: "Quando cambia un modulo core, aggiornare sia questo meta sia readme_CMS.md."
+      sourceOfTruth: "docs/reference/core.md",
+      syncRule: "Quando cambia un modulo core, aggiornare sia questo meta sia docs/reference/core.md."
     },
     modules: {
       render: {

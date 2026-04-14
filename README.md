@@ -1,168 +1,99 @@
 # CMSwift
 
-CMSwift e un framework UI + runtime reattivo leggero per applicazioni web, con:
+CMSwift e un framework web leggero con:
+
 - core DOM/reactivity custom
-- componenti UI pronti all'uso
-- build runtime leggibile e minificata
-- demo/tutorial locali per verificare il comportamento reale
+- layer UI componibile
+- output runtime leggibili e minificati
+- struttura package-oriented pronta per publish pubblico
 
-Stato attuale:
-- progetto interno ben strutturato
-- pre-release `v1` in preparazione
-- package allineato a `1.0.0`
-- non ancora dichiarato come prodotto pubblico stabile su tutta la superficie API
+## Stato
 
-## Cosa Include
+- repository framework pronto per GitHub
+- package structure pronta per `npm` e `CDN`
+- release `v1.0.0` ancora in preparazione
+- tutorial e landing page mantenuti fuori da questo repo
 
-Core:
-- renderer DOM
-- reactive core
-- `rod` bindings/model
-- lifecycle, mount, cleanup
-- router, http, auth, overlay, store
+## Struttura
 
-UI:
-- layout e shell app
-- form controls
-- navigation
-- feedback
-- data display
-- overlay components
+- `packages/core`
+  renderer, reactive core, `rod`, lifecycle e moduli platform
+- `packages/ui`
+  componenti UI e asset CSS/font/img
+- `packages/cmswift`
+  bundle umbrella per caricare tutto insieme
+- `pages`
+  demo HTML locali, smoke manuale e mirror runtime compatibile
+- `docs`
+  reference tecnica, policy e materiali di release
 
-## Entry Point Runtime
+## Output Runtime
 
-Sviluppo / debug:
-- [cms.js](/Users/cmalleux/Sites/CMSwift-FE/pages/_cmswift-fe/js/cms.js)
-- [ui.js](/Users/cmalleux/Sites/CMSwift-FE/pages/_cmswift-fe/js/ui.js)
+Package dist:
 
-Produzione:
-- [min-cms.js](/Users/cmalleux/Sites/CMSwift-FE/pages/_cmswift-fe/js/min-cms.js)
-- [min-ui.js](/Users/cmalleux/Sites/CMSwift-FE/pages/_cmswift-fe/js/min-ui.js)
+- `packages/core/dist/cms.js`
+- `packages/core/dist/min-cms.js`
+- `packages/ui/dist/ui.js`
+- `packages/ui/dist/min-ui.js`
+- `packages/cmswift/dist/cmswift.js`
+- `packages/cmswift/dist/min-cmswift.js`
 
-Build:
+Mirror locale compatibile:
+
+- `pages/_cmswift-fe/js/cms.js`
+- `pages/_cmswift-fe/js/min-cms.js`
+- `pages/_cmswift-fe/js/ui.js`
+- `pages/_cmswift-fe/js/min-ui.js`
+
+## Comandi
+
+Build runtime:
+
 ```bash
 npm run build:runtime
 ```
 
-## Quick Start
+Dev locale:
 
-Con i file runtime standard:
-
-```html
-<link rel="stylesheet" href="/pages/_cmswift-fe/css/base.css" />
-<link rel="stylesheet" href="/pages/_cmswift-fe/css/ui.css" />
-
-<script src="/pages/_cmswift-fe/js/cms.js"></script>
-<script src="/pages/_cmswift-fe/js/ui.js"></script>
+```bash
+npm run dev
 ```
 
-Con i file minificati:
+Test automatici:
 
-```html
-<link rel="stylesheet" href="/pages/_cmswift-fe/css/base.css" />
-<link rel="stylesheet" href="/pages/_cmswift-fe/css/ui.css" />
-
-<script src="/pages/_cmswift-fe/js/min-cms.js"></script>
-<script src="/pages/_cmswift-fe/js/min-ui.js"></script>
+```bash
+npm test
 ```
 
-Esempio minimo:
+Autocomplete UI:
 
-```html
-<div id="app"></div>
-<script>
-  const root = document.getElementById("app");
-
-  _.mount(root, _.Layout({
-    header: _.Header({ title: "CMSwift" }),
-    page: _.Page(
-      _.Card(
-        _.cardBody(
-          _.Input({ label: "Name" }),
-          _.Btn({ color: "primary" }, "Save")
-        )
-      )
-    )
-  }));
-</script>
+```bash
+npm run gen:ui-dts
 ```
 
-## Stable vs Unstable
+## Distribuzione
 
-Piu stabili oggi:
-- renderer core
-- reactive core
-- `rod` base
-- lifecycle / mount / cleanup
-- layout base
-- componenti UI principali
+Direzione prevista:
 
-Da considerare ancora `unstable` o `experimental` finche non chiudiamo la pre-release `v1`:
-- overlay avanzati: `Tooltip`, `Dialog`, `Menu`, `Popover`, `ContextMenu`
-- picker `Date` e `Time`
-- `UI.meta` e dev helpers come API pubblica stabile
-- messaging pubblico finale su `rod` vs `reactive`
+- `@cmswift/core`
+- `@cmswift/ui`
+- `cmswift`
 
-Decisione attuale per `v1.0.0`:
-- overlay avanzati: `unstable`
-- `Date` e `Time`: `unstable`
-- `UI.meta` e dev helpers: `dev-only`
-- messaging pubblico: `reactive` come core primitives, `rod` come model/binding layer
+Fino alla pubblicazione effettiva, il riferimento pratico sono i file in `packages/*/dist`.
 
-## Stable API Surface
+## Documentazione
 
-Per la `v1`, la superficie da considerare piu stabile e questa:
+- [Docs Index](docs/README.md)
+- [Core Reference](docs/reference/core.md)
+- [UI Reference](docs/reference/ui.md)
+- [Stability Policy](docs/policy/stability.md)
+- [Release Plan v1](docs/release/release-plan-v1.md)
+- [Release Notes v1.0.0](docs/release/release-notes-v1.0.0.md)
+- [Smoke Checklist v1](docs/release/smoke-v1.md)
+- [Changelog](CHANGELOG.md)
 
-Core:
-- renderer DOM
-- `CMSwift.reactive`
-- lifecycle base (`mount`, `component`, cleanup)
-- runtime outputs ufficiali
+## Note
 
-State / binding:
-- `rod` per model e binding UI
-- form controls principali gia consolidati
-
-UI:
-- layout base
-- input/select base
-- checkbox/radio/toggle consolidati
-- navigation base
-- feedback base
-- table base
-
-Contratto pratico:
-- questa superficie non dovrebbe rompere in `PATCH` o `MINOR`
-- eventuali breaking change qui devono seguire la policy in [policy_CMSwift_stability.md](/Users/cmalleux/Sites/CMSwift-FE/policy_CMSwift_stability.md)
-
-## Known Limits
-
-Limiti da tenere presenti oggi:
-- overlay avanzati ancora piu sensibili a edge case reali di focus, anchor e close rules
-- `Date` e `Time` non ancora da considerare superficie completamente stabilizzata
-- `UI.meta` e dev helpers non sono ancora da trattare come API pubblica stabile
-- il posizionamento pubblico finale di `rod` vs `reactive` e definito a livello policy, ma la narrativa di prodotto puo ancora essere rifinita
-- la copertura automatica del core e buona, ma la release `v1` richiede comunque smoke test browser espliciti
-
-## Documentazione Interna
-
-Riferimenti attuali:
-- [readme_CMS.md](/Users/cmalleux/Sites/CMSwift-FE/readme_CMS.md)
-- [readme_UI.md](/Users/cmalleux/Sites/CMSwift-FE/readme_UI.md)
-- [policy_CMSwift_stability.md](/Users/cmalleux/Sites/CMSwift-FE/policy_CMSwift_stability.md)
-- [release_CMSwift_v1.md](/Users/cmalleux/Sites/CMSwift-FE/release_CMSwift_v1.md)
-
-Demo/tutorial:
-- [index.html](/Users/cmalleux/Sites/CMSwift-FE/pages/index.html)
-
-## Roadmap Immediata
-
-Prima di dichiarare `v1`:
-- chiudere la checklist pre-release
-- scrivere release notes iniziali
-- eseguire smoke test browser di release
-
-## Nota
-
-Questo repository oggi e pronto per lavoro serio e verifica tecnica.
-Per una `v1` pubblica manca soprattutto il contratto di prodotto, non una rifondazione del framework.
+- `packages/*/src` e la source of truth del framework
+- `pages/` non e documentazione editoriale: serve solo per demo e compatibilita locale
+- `pages/tutorial/` resta volutamente vuota

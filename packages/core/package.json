@@ -1,0 +1,17 @@
+{
+  "name": "@cmswift/core",
+  "version": "1.0.0",
+  "description": "CMSwift core runtime: renderer, reactive, rod, lifecycle and platform modules",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/cms.js",
+  "module": "./dist/cms.js",
+  "exports": {
+    ".": "./dist/cms.js",
+    "./min": "./dist/min-cms.js"
+  },
+  "files": [
+    "dist",
+    "src"
+  ]
+}

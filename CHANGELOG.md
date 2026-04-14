@@ -11,13 +11,14 @@ Il formato segue in modo pragmatico:
 ## [1.0.0] - draft
 
 ### Added
-- modularizzazione completa del core `cms-src`
-- modularizzazione completa del layer UI `ui-src`
+- modularizzazione completa del core in `packages/core/src`
+- modularizzazione completa del layer UI in `packages/ui/src`
 - build runtime standard e minificata:
   - `cms.js`
   - `min-cms.js`
   - `ui.js`
   - `min-ui.js`
+- bundle umbrella `cmswift.js` e `min-cmswift.js`
 - documentazione interna per core e UI
 - checklist pre-release `v1`
 - policy di stabilita e compatibilita
@@ -39,7 +40,7 @@ Il formato segue in modo pragmatico:
 
 ### Docs
 - aggiunto `README.md` pubblico
-- aggiunti `readme_CMS.md` e `readme_UI.md` come riferimenti tecnici
+- aggiunti `docs/reference/core.md` e `docs/reference/ui.md` come riferimenti tecnici
 - aggiunto `LICENSE`
 
 ## Note

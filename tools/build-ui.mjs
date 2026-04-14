@@ -2,10 +2,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { transform } from "esbuild";
 
-const rootDir = path.resolve("pages/_cmswift-fe/js/ui-src");
-const outputFile = path.resolve("pages/_cmswift-fe/js/ui.js");
-const minOutputFile = path.resolve("pages/_cmswift-fe/js/min-ui.js");
+const rootDir = path.resolve("packages/ui/src");
+const outputFile = path.resolve("packages/ui/dist/ui.js");
+const minOutputFile = path.resolve("packages/ui/dist/min-ui.js");
 const manifestFile = path.join(rootDir, "modules.json");
+const legacyOutputFile = path.resolve("pages/_cmswift-fe/js/ui.js");
+const legacyMinOutputFile = path.resolve("pages/_cmswift-fe/js/min-ui.js");
 
 async function readModule(name) {
   const filename = path.join(rootDir, name);
@@ -26,9 +28,13 @@ async function main() {
     legalComments: "none",
     target: "es2018"
   });
+  await fs.mkdir(path.dirname(outputFile), { recursive: true });
+  await fs.mkdir(path.dirname(legacyOutputFile), { recursive: true });
   await fs.writeFile(outputFile, output, "utf8");
   await fs.writeFile(minOutputFile, minified.code, "utf8");
-  process.stdout.write(`[build:ui] wrote ${path.relative(process.cwd(), outputFile)} and ${path.relative(process.cwd(), minOutputFile)} from ${modules.length} modules\n`);
+  await fs.writeFile(legacyOutputFile, output, "utf8");
+  await fs.writeFile(legacyMinOutputFile, minified.code, "utf8");
+  process.stdout.write(`[build:ui] wrote ${path.relative(process.cwd(), outputFile)} and ${path.relative(process.cwd(), minOutputFile)} from ${modules.length} modules (legacy mirror updated)\n`);
 }
 
 main().catch((error) => {

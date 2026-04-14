@@ -1,0 +1,25 @@
+{
+  "name": "@cmswift/ui",
+  "version": "1.0.0",
+  "description": "CMSwift UI layer built on top of @cmswift/core",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/ui.js",
+  "module": "./dist/ui.js",
+  "exports": {
+    ".": "./dist/ui.js",
+    "./min": "./dist/min-ui.js",
+    "./css/base.css": "./dist/css/base.css",
+    "./css/ui.css": "./dist/css/ui.css",
+    "./css/responsive.css": "./dist/css/responsive.css",
+    "./css/animation.css": "./dist/css/animation.css",
+    "./css/tabler-icons-out.css": "./dist/css/tabler-icons-out.css"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "peerDependencies": {
+    "@cmswift/core": "^1.0.0"
+  }
+}
