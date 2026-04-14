@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMSwift UI</title>
+    <link rel="stylesheet" href="./demo/demo.css" />
+    <link rel="stylesheet" href="/_cmswift-fe/css/ui.css" />
+    <script src="./demo/i18n.js" defer></script>
+    <script src="/config-fe/setting.js"></script>
+    <script src="/_cmswift-fe/js/cms.js"></script>
+    <script src="/_cmswift-fe/js/ui.js"></script>
+    <script src="./demo/ui-demo.js" defer></script>
+  </head>
+  <body data-i18n-title="ui.metaTitle">
+    <main class="demo-shell">
+      <div class="demo-toolbar">
+        <nav class="top-nav">
+          <a href="./index.html" data-i18n="common.navHome">Home</a>
+          <a class="active" href="./ui.html" data-i18n="common.navUi">UI</a>
+          <a href="./cmswift.html" data-i18n="common.navCore">CMSwift</a>
+          <a href="./developers.html" data-i18n="common.navDevelopers">Developer View</a>
+        </nav>
+        <div data-language-switcher></div>
+      </div>
+
+      <section class="hero compact">
+        <span class="eyebrow" data-i18n="ui.eyebrow">UI Layer</span>
+        <h1 data-i18n="ui.heroTitle">CMSwift UI ti da componenti veri, non solo markup stilizzato.</h1>
+        <p class="hero-copy" data-i18n="ui.heroCopy">La parte UI e potente perche lavora sopra il core reattivo, ma resta leggibile: stessi pattern, stesso modo di comporre, meno boilerplate.</p>
+      </section>
+
+      <section class="grid cards-3">
+        <article class="card">
+          <h2 data-i18n="ui.strongTitle">Perche e forte</h2>
+          <ul class="feature-list">
+            <li data-i18n="ui.strong1">Stessa ergonomia per layout, form e feedback</li>
+            <li data-i18n="ui.strong2">Binding semplice con `rod` o signal</li>
+            <li data-i18n="ui.strong3">Composizione naturale tra componenti e HTML helper</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2 data-i18n="ui.pageTitle">Cosa mostra questa pagina</h2>
+          <ul class="feature-list">
+            <li data-i18n="ui.page1">Input e Select collegati a stato reale</li>
+            <li data-i18n="ui.page2">Button, Badge, Chip e Card nello stesso flusso</li>
+            <li data-i18n="ui.page3">Un esempio piccolo ma abbastanza reale da leggere</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2 data-i18n="ui.approachTitle">Approccio</h2>
+          <p data-i18n="ui.approachCopy">UI non prova a nascondere il framework: prova a renderlo piu veloce da usare.</p>
+        </article>
+      </section>
+
+      <section class="grid cards-2">
+        <article class="card code-card">
+          <h2 data-i18n="ui.exampleTitle">Esempio</h2>
+          <pre><code>const role = _.rod("developer");
+
+_.Select({
+  label: "Role",
+  model: role,
+  options: ["developer", "designer", "operator"]
+});</code></pre>
+        </article>
+        <article class="card">
+          <h2 data-i18n="ui.playgroundTitle">Live playground</h2>
+          <div id="ui-playground"></div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

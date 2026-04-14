@@ -15,25 +15,6 @@ function getHtmlEntries(dir, base = dir, entries = {}) {
 
 export default defineConfig({
   root: "pages",
-  plugins: [
-    {
-      name: "cmswift-rewrite-demo",
-      configureServer(server) {
-        server.middlewares.use((req, res, next) => {
-          const original = req.url || "/";
-          const pathname = original.split("?")[0];
-          if (path.posix.extname(pathname)) return next();
-
-          if (pathname === "/demo" || pathname.startsWith("/demo/")) {
-            const q = original.includes("?") ? original.slice(original.indexOf("?")) : "";
-            req.url = "/demo/index.html" + q;
-          }
-          next();
-        });
-      },
-    },
-  ],
-
   build: {
     outDir: "../dist",
     emptyOutDir: true,

@@ -1,0 +1,292 @@
+@font-face {
+  font-family: "Nunito";
+  src: url("/_cmswift-fe/fonts/Nunito-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito";
+  src: url("/_cmswift-fe/fonts/Nunito-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --demo-bg: #f5f3ec;
+  --demo-bg-soft: #fbfaf7;
+  --demo-panel: rgba(255, 255, 255, 0.9);
+  --demo-text: #1d2a1f;
+  --demo-muted: #56655a;
+  --demo-border: rgba(29, 42, 31, 0.1);
+  --demo-shadow: 0 22px 60px rgba(29, 42, 31, 0.08);
+  --demo-primary: #21543d;
+  --demo-primary-strong: #183d2c;
+  --demo-ui: #b7d9c7;
+  --demo-core: #f1d9a5;
+  --demo-dev: #d8c3ef;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", system-ui, sans-serif;
+  color: var(--demo-text);
+  background:
+    radial-gradient(circle at top left, rgba(183, 217, 199, 0.75), transparent 32%),
+    radial-gradient(circle at top right, rgba(241, 217, 165, 0.5), transparent 28%),
+    linear-gradient(180deg, var(--demo-bg-soft) 0%, var(--demo-bg) 100%);
+}
+
+a {
+  color: inherit;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: rgba(29, 42, 31, 0.06);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+pre {
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.demo-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+.demo-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.demo-toolbar.solo {
+  justify-content: flex-end;
+}
+
+.top-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.top-nav a {
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--demo-border);
+}
+
+.top-nav a.active {
+  background: var(--demo-primary);
+  color: white;
+  border-color: var(--demo-primary);
+}
+
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--demo-border);
+  color: var(--demo-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.language-switcher select {
+  border: 1px solid var(--demo-border);
+  border-radius: 10px;
+  background: white;
+  color: var(--demo-text);
+  min-height: 36px;
+  padding: 0 10px;
+  font: inherit;
+}
+
+.hero {
+  padding: 32px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid var(--demo-border);
+  box-shadow: var(--demo-shadow);
+}
+
+.hero.compact {
+  padding-bottom: 28px;
+}
+
+.eyebrow,
+.card-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(33, 84, 61, 0.1);
+  color: var(--demo-primary);
+}
+
+.hero h1,
+.card h2 {
+  margin: 14px 0 12px;
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  line-height: 0.96;
+}
+
+.hero-copy,
+.card p,
+.feature-list li {
+  color: var(--demo-muted);
+  line-height: 1.6;
+}
+
+.hero-copy {
+  max-width: 64ch;
+  margin-bottom: 0;
+}
+
+.hero-actions,
+.grid {
+  display: grid;
+  gap: 18px;
+}
+
+.hero-actions {
+  grid-template-columns: repeat(auto-fit, minmax(160px, max-content));
+  margin-top: 24px;
+}
+
+.cards-2 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  margin-top: 22px;
+}
+
+.cards-3 {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: 22px;
+}
+
+.card {
+  padding: 24px;
+  border-radius: 24px;
+  background: var(--demo-panel);
+  border: 1px solid var(--demo-border);
+  box-shadow: var(--demo-shadow);
+}
+
+.feature-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -40px -40px auto;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  opacity: 0.6;
+}
+
+.accent-ui::after {
+  background: var(--demo-ui);
+}
+
+.accent-core::after {
+  background: var(--demo-core);
+}
+
+.accent-dev::after {
+  background: var(--demo-dev);
+}
+
+.feature-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.button,
+.text-link {
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid var(--demo-border);
+  background: white;
+}
+
+.button.primary {
+  background: var(--demo-primary);
+  color: white;
+  border-color: var(--demo-primary);
+}
+
+.text-link {
+  display: inline-block;
+  margin-top: 18px;
+  color: var(--demo-primary);
+}
+
+.code-card pre {
+  padding: 16px;
+  border-radius: 18px;
+  background: #f0ede5;
+  border: 1px solid rgba(29, 42, 31, 0.08);
+}
+
+.manifesto {
+  margin-top: 22px;
+}
+
+#ui-playground,
+#cmswift-playground {
+  min-height: 200px;
+}
+
+@media (max-width: 720px) {
+
+  .hero,
+  .card {
+    padding: 20px;
+  }
+
+  .hero h1 {
+    max-width: none;
+  }
+}

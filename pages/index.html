@@ -1,140 +1,77 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CMSwift Local Entry</title>
-    <style>
-      :root {
-        color-scheme: light;
-      }
-      body {
-        margin: 0;
-        font-family:
-          ui-sans-serif,
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          sans-serif;
-        background:
-          radial-gradient(circle at top left, #e8f1ff, transparent 36%),
-          linear-gradient(180deg, #f8fbff 0%, #eef3f8 100%);
-        color: #162033;
-      }
-      main {
-        max-width: 920px;
-        margin: 0 auto;
-        padding: 64px 24px 96px;
-      }
-      .panel {
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(22, 32, 51, 0.08);
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(22, 32, 51, 0.08);
-        padding: 28px;
-        margin-top: 20px;
-      }
-      .eyebrow {
-        display: inline-block;
-        margin-bottom: 12px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        background: #dbeafe;
-        color: #1d4ed8;
-      }
-      h1,
-      h2 {
-        margin: 0 0 12px;
-      }
-      p,
-      li {
-        line-height: 1.6;
-      }
-      .actions {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-top: 20px;
-      }
-      a.button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 42px;
-        padding: 0 16px;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 600;
-        border: 1px solid #c9d7eb;
-        color: #162033;
-        background: white;
-      }
-      a.button.primary {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
-        color: white;
-      }
-      code {
-        font-family:
-          ui-monospace,
-          SFMono-Regular,
-          Menlo,
-          monospace;
-        font-size: 0.95em;
-        background: rgba(15, 23, 42, 0.06);
-        padding: 2px 6px;
-        border-radius: 8px;
-      }
-      ul {
-        margin: 12px 0 0;
-        padding-left: 18px;
-      }
-    </style>
+    <title>CMSwift Demo</title>
+    <link rel="stylesheet" href="./demo/demo.css" />
+    <script src="./demo/i18n.js" defer></script>
   </head>
-  <body>
-    <main>
-      <span class="eyebrow">Local Entry</span>
-      <h1>`pages/` e un entrypoint locale del framework</h1>
-      <p>
-        Questo albero serve per demo locali, asset runtime compatibili e smoke
-        test rapidi del framework. La documentazione narrativa non e parte di
-        questo repository pubblico.
-      </p>
-
-      <section class="panel">
-        <h2>Dove lavorare adesso</h2>
-        <p>
-          Le sorgenti reali del framework sono in
-          <code>packages/core/src</code> e <code>packages/ui/src</code>.
+  <body data-i18n-title="home.metaTitle">
+    <main class="demo-shell">
+      <div class="demo-toolbar solo">
+        <div data-language-switcher></div>
+      </div>
+      <section class="hero">
+        <span class="eyebrow" data-i18n="home.heroEyebrow">CMSwift Framework</span>
+        <h1 data-i18n="home.heroTitle">Una demo locale pulita per vedere CMSwift e UI senza rumore.</h1>
+        <p class="hero-copy" data-i18n="home.heroCopy">
+          Questa pagina resta semplice: entra nella parte UI, entra nella parte CMSwift core, oppure apri la pagina pensata come introduzione per developer.
         </p>
-        <div class="actions">
-          <a class="button primary" href="./test.html">Apri demo UI</a>
-          <a class="button" href="./test2.html">Apri layout test</a>
-          <a class="button" href="./sample/layout.html">Apri sample layout</a>
+        <div class="hero-actions">
+          <a class="button primary" href="./ui.html" data-i18n="home.ctaUi">Apri UI</a>
+          <a class="button" href="./cmswift.html" data-i18n="home.ctaCore">Apri CMSwift</a>
+          <a class="button" href="./developers.html" data-i18n="home.ctaDevelopers">Apri Developer View</a>
         </div>
       </section>
 
-      <section class="panel">
-        <h2>Comandi corretti</h2>
-        <ul>
-          <li><code>npm run dev</code> per avviare l'entrypoint locale sotto <code>pages/</code></li>
-          <li><code>npm run build:runtime</code> per rigenerare core, ui e bundle unificato</li>
-          <li><code>npm test</code> per eseguire i test automatici del core</li>
-        </ul>
+      <section class="grid cards-3">
+        <article class="card feature-card accent-ui">
+          <div class="card-kicker">UI</div>
+          <h2 data-i18n="home.uiTitle">Componenti pronti</h2>
+          <p data-i18n="home.uiCopy">Layout, form, feedback e composizione visuale con API coerente.</p>
+          <ul class="feature-list">
+            <li data-i18n="home.uiPoint1">Componenti riusabili</li>
+            <li data-i18n="home.uiPoint2">Styling gia integrato</li>
+            <li data-i18n="home.uiPoint3">Esempi piccoli ma reali</li>
+          </ul>
+          <a class="text-link" href="./ui.html" data-i18n="home.uiLink">Vai alla pagina UI</a>
+        </article>
+
+        <article class="card feature-card accent-core">
+          <div class="card-kicker">Core</div>
+          <h2 data-i18n="home.coreTitle">Renderer e reattivita</h2>
+          <p data-i18n="home.coreCopy">Helper HTML, signal, computed, effect e component model senza stack pesante.</p>
+          <ul class="feature-list">
+            <li data-i18n="home.corePoint1">HTML helpers coerenti</li>
+            <li data-i18n="home.corePoint2">Reactive primitives semplici</li>
+            <li data-i18n="home.corePoint3">Binding diretto con `rod`</li>
+          </ul>
+          <a class="text-link" href="./cmswift.html" data-i18n="home.coreLink">Vai alla pagina CMSwift</a>
+        </article>
+
+        <article class="card feature-card accent-dev">
+          <div class="card-kicker">Developer</div>
+          <h2 data-i18n="home.developerTitle">Visione prodotto</h2>
+          <p data-i18n="home.developerCopy">Una pagina fatta per capire dove il framework puo portare un team o un solo developer.</p>
+          <ul class="feature-list">
+            <li data-i18n="home.developerPoint1">Package structure chiara</li>
+            <li data-i18n="home.developerPoint2">Publish npm e CDN</li>
+            <li data-i18n="home.developerPoint3">Adozione progressiva</li>
+          </ul>
+          <a class="text-link" href="./developers.html" data-i18n="home.developerLink">Apri la pagina developer</a>
+        </article>
       </section>
 
-      <section class="panel">
-        <h2>Cosa resta in `pages/`</h2>
-        <ul>
-          <li>asset runtime compatibili in <code>pages/_cmswift-fe/</code></li>
-          <li>sample HTML locali e pagine di test rapide</li>
-          <li>nessun contenuto tutoriale editoriale come source of truth</li>
-        </ul>
+      <section class="grid cards-2">
+        <article class="card">
+          <h2 data-i18n="home.whyTitle">Perche questa demo esiste</h2>
+          <p data-i18n="home.whyCopy">`pages/` non e piu un tutorial enorme. Qui resta una shell locale corta, facile da capire e utile per mostrare il framework in modo diretto.</p>
+        </article>
+        <article class="card">
+          <h2 data-i18n="home.whereTitle">Dove sta il framework</h2>
+          <p data-i18n-html="home.whereCopy">Le sorgenti vere restano in <code>packages/core/src</code> e <code>packages/ui/src</code>. Questa area serve solo per demo e smoke visuale.</p>
+        </article>
       </section>
     </main>
   </body>

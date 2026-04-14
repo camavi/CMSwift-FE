@@ -1,11 +1,17 @@
-# Local Pages
+# Local Demo Pages
 
-Questa cartella contiene entrypoint HTML locali, asset compatibili e sample rapidi per lo sviluppo del framework.
+Questa cartella contiene la demo locale minimale del framework: poche pagine HTML, asset runtime compatibili e smoke visuale rapido.
 
 ## Stato
 
 - `pages/index.html`
-  entrypoint locale minimale
+  landing locale con accesso a UI, CMSwift e developer view
+- `pages/ui.html`
+  demo UI con piccoli esempi reali
+- `pages/cmswift.html`
+  demo core con signal, computed, batch e component
+- `pages/developers.html`
+  pagina narrativa pensata per presentare il framework a developer
 - `pages/tutorial/`
   placeholder vuoto, senza tutorial attivi
 

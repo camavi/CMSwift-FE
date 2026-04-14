@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMSwift Core</title>
+    <link rel="stylesheet" href="./demo/demo.css" />
+    <script src="./demo/i18n.js" defer></script>
+    <script src="/config-fe/setting.js"></script>
+    <script src="/_cmswift-fe/js/cms.js"></script>
+    <script src="./demo/cmswift-demo.js" defer></script>
+  </head>
+  <body data-i18n-title="core.metaTitle">
+    <main class="demo-shell">
+      <div class="demo-toolbar">
+        <nav class="top-nav">
+          <a href="./index.html" data-i18n="common.navHome">Home</a>
+          <a href="./ui.html" data-i18n="common.navUi">UI</a>
+          <a class="active" href="./cmswift.html" data-i18n="common.navCore">CMSwift</a>
+          <a href="./developers.html" data-i18n="common.navDevelopers">Developer View</a>
+        </nav>
+        <div data-language-switcher></div>
+      </div>
+
+      <section class="hero compact">
+        <span class="eyebrow" data-i18n="core.eyebrow">Core</span>
+        <h1 data-i18n="core.heroTitle">CMSwift e forte quando vuoi scrivere poco, ma restare vicino al DOM.</h1>
+        <p class="hero-copy" data-i18n="core.heroCopy">Renderer dichiarativo, reactive core e component model stanno nella stessa linea: pochi concetti, composizione diretta, meno astrazione inutile.</p>
+      </section>
+
+      <section class="grid cards-3">
+        <article class="card">
+          <h2 data-i18n="core.strengthsTitle">Punti forti</h2>
+          <ul class="feature-list">
+            <li data-i18n="core.strengths1">Helper HTML leggibili</li>
+            <li data-i18n="core.strengths2">`signal`, `computed`, `effect`, `batch`</li>
+            <li data-i18n="core.strengths3">Mount e component model senza overhead grosso</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2 data-i18n="core.whereTitle">Dove aiuta davvero</h2>
+          <ul class="feature-list">
+            <li data-i18n="core.where1">Pagine backoffice</li>
+            <li data-i18n="core.where2">Dashboard reattive</li>
+            <li data-i18n="core.where3">UI custom dove vuoi controllo pieno</li>
+          </ul>
+        </article>
+        <article class="card code-card">
+          <h2 data-i18n="core.exampleTitle">Esempio</h2>
+          <pre><code>const [count, setCount] = _.signal(0);
+const doubled = _.computed(() =&gt; count() * 2);
+
+_.button({ onClick: () =&gt; setCount(count() + 1) }, "Add");</code></pre>
+        </article>
+      </section>
+
+      <section class="grid cards-2">
+        <article class="card">
+          <h2 data-i18n="core.playgroundTitle">Live playground</h2>
+          <div id="cmswift-playground"></div>
+        </article>
+        <article class="card">
+          <h2 data-i18n="core.notUiTitle">Perche non e solo una libreria UI</h2>
+          <p data-i18n="core.notUiCopy">Anche senza il layer UI puoi costruire una pagina intera con helper HTML, stato reattivo e lifecycle coerente.</p>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
