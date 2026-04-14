@@ -1,14 +1,16 @@
 # CMSwift v1.0.1 Release Notes
 
-Stato:
-- pubblicata su npm
-- release patch di consolidamento dopo il primo assetto package-oriented
+Status:
+
+- published on npm
+- patch release focused on consolidation after the first package-oriented release layout
 
 ## Summary
 
-`v1.0.1` e la prima release pubblicata e verificata in un progetto npm/browser reale.
+`v1.0.1` is the first CMSwift release published and verified in a real npm and browser project.
 
-Include:
+Included packages:
+
 - `@cmswift/core@1.0.1`
 - `@cmswift/ui@1.0.1`
 - `cmswift@1.0.1`
@@ -16,52 +18,60 @@ Include:
 ## Included In v1.0.1
 
 Core:
-- bootstrap sicuro anche senza `window.CMSwift_setting`
-- fallback sicuri sulla config HTTP
+
+- safe bootstrap even when `window.CMSwift_setting` is not defined
+- safe fallback behavior for HTTP configuration
 
 UI:
-- package riallineato a `@cmswift/core@^1.0.1`
-- export CSS verificati in installazione npm reale
+
+- package aligned to `@cmswift/core@^1.0.1`
+- CSS exports verified in a real npm installation
 
 Umbrella:
-- `cmswift` pubblicato come package unico
-- `dist/` autonomo con:
+
+- `cmswift` published as a single-package distribution
+- self-contained `dist/` with:
   - `cmswift.js`
   - `min-cmswift.js`
   - CSS
-  - font
-  - immagini
+  - fonts
+  - images
 
 ## Distribution
 
 npm:
+
 - `@cmswift/core`
 - `@cmswift/ui`
 - `cmswift`
 
 Readable:
+
 - `packages/core/dist/cms.js`
 - `packages/ui/dist/ui.js`
 - `packages/cmswift/dist/cmswift.js`
 
 Minified:
+
 - `packages/core/dist/min-cms.js`
 - `packages/ui/dist/min-ui.js`
 - `packages/cmswift/dist/min-cmswift.js`
 
 ## Validation
 
-Verifiche eseguite:
-- build runtime del repo
-- test npm reale con `@cmswift/core + @cmswift/ui`
-- test npm reale con package unico `cmswift`
-- build browser/Vite del progetto di test
+Executed checks:
+
+- repository runtime build
+- real npm test with `@cmswift/core + @cmswift/ui`
+- real npm test with the single package `cmswift`
+- browser/Vite build in the external test project
 
 ## Notes
 
-`v1.0.1` e la prima base pubblica davvero consumabile del framework in forma package.
+`v1.0.1` is the first truly consumable public package baseline for the framework.
 
-Resta consigliato:
-- usare version pin su npm e CDN
-- usare Vite o un ambiente browser equivalente
-- aggiornare Node a `20.19+` per allinearsi ai requisiti moderni di Vite
+Still recommended:
+
+- pin versions on npm and CDN
+- use Vite or an equivalent browser-oriented environment
+- upgrade Node to `20.19+` to match modern Vite requirements

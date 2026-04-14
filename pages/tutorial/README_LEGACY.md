@@ -1,9 +1,9 @@
 # Tutorial Placeholder
 
-Il tutorial editoriale non e piu mantenuto in questo repository.
+The editorial tutorial is no longer maintained in this repository.
 
-## Regola
+## Rules
 
-- non aggiungere nuovi contenuti editoriali qui
-- questa cartella resta volutamente vuota
-- se il tutorial torna nel workflow, va gestito in un repo o albero separato
+- do not add new editorial content here
+- this folder is intentionally left empty
+- if the tutorial returns to the workflow, it should live in a separate repo or tree

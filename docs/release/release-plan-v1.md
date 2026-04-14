@@ -1,118 +1,113 @@
 # CMSwift v1 Pre-release Checklist
 
-Nota storica:
-- questo documento descrive il gate originale verso `v1.0.0`
-- il primo publish npm effettivo del repo e stato chiuso su `v1.0.1`
-- usarlo come checklist storica e come base per i release gate successivi
+Historical note:
 
-Documento operativo per decidere quando CMSwift puo essere pubblicato come `v1`.
+- this document describes the original gate toward `v1.0.0`
+- the first actual npm publish for this repository was `v1.0.1`
+- keep this file as a historical checklist and as a base for future release gates
 
-Obiettivo:
-- separare chiaramente cio che blocca la release
-- dichiarare cosa e `unstable`
-- congelare le aree che non vanno toccate senza motivo serio
-- definire cosa manca prima di pubblicare
+This document records the minimum release discipline required before calling CMSwift a `v1` product.
 
-Regola pratica:
-- se una voce e `BLOCKER`, la release `v1` non parte
-- se una voce e `UNSTABLE`, puo uscire solo se marcata esplicitamente come sperimentale
-- se una voce e `FROZEN`, si tocca solo per bug fix o regressioni
+## Goals
 
-## Stato Attuale
+- separate real release blockers from nice-to-have work
+- mark unstable areas clearly
+- freeze critical surfaces before release
+- keep the release decision technical and explicit
 
-Valutazione rapida oggi:
-- core framework: buono
-- modularizzazione: buona
-- documentazione tecnica interna: buona
-- demo/tutorial: buoni
-- test automatici core: buoni
-- readiness prodotto pubblico: chiusa storicamente con il publish `1.0.1`
+## Practical Rule
 
-Conclusione:
-- CMSwift oggi e un progetto serio e strutturato
-- non e ancora automaticamente una `v1` pubblicabile senza una release discipline esplicita
+- if an item is `BLOCKER`, `v1` does not ship
+- if an item is `UNSTABLE`, it ships only when labeled clearly
+- if an item is `FROZEN`, touch it only for real bugs or regressions
 
-Snapshot gate oggi:
-- README pubblico: presente
-- policy stabilita/compatibilita: presente
-- LICENSE: presente
-- versione target originale: `1.0.0`
-- release pubblicata di riferimento: `1.0.1`
-- changelog/release notes: presenti
-- build runtime: verde
-- test automatici core: verdi
-- smoke browser release: passata
-- decisione finale `stable` vs `unstable` su aree UI avanzate: chiusa
+## Historical Snapshot
 
-## 1. Blocker
+Reference state at the time of the first public release cycle:
 
-Queste voci bloccano una release `v1` pubblica.
+- public README: present
+- stability and compatibility policy: present
+- LICENSE: present
+- original target version: `1.0.0`
+- first actual published version: `1.0.1`
+- changelog and release notes: present
+- runtime build: green
+- core automated tests: green
+- browser smoke release pass: recorded
+- stable vs unstable decision for advanced UI areas: closed
 
-### 1.1 Posizionamento e contratto pubblico
+## 1. Blockers
 
-Stato: `PARTIAL`
+### 1.1 Public Positioning And Contract
 
-Manca ancora un contratto pubblico corto e definitivo:
-- cosa e CMSwift
-- chi lo deve usare
-- cosa fa il core
-- cosa fa il layer UI
-- cosa e supportato ufficialmente
-- cosa non e supportato
+Status: `PARTIAL`
 
-Serve prima di pubblicare:
-- una pagina `README` pubblico da repo/prodotto
-- una sezione `Quick start`
-- una sezione `Stable API surface`
-- una sezione `Known limits`
+What had to be clear before release:
 
-Aggiornamento:
-- `README.md` pubblico iniziale creato
-- aggiunte anche le sezioni `Stable API surface` e `Known limits`
+- what CMSwift is
+- who it is for
+- what the core covers
+- what the UI layer covers
+- what is officially supported
+- what is explicitly outside the support contract
 
-### 1.2 Versioning e policy di compatibilita
+Required artifacts:
 
-Stato: `PARTIAL`
+- a product-facing `README`
+- a `Quick start` section
+- a `Stable API surface` section
+- a `Known limits` section
 
-Manca una policy esplicita:
-- quando una modifica e breaking
-- cosa promette `v1`
-- se il meta/UI API sono stabili o no
-- se `rod` e `reactive` sono entrambi first-class oppure uno dei due e legacy/advanced
+Historical closure:
 
-Serve prima di pubblicare:
-- policy semver
-- policy breaking changes
-- policy deprecations
+- initial public `README.md` was created
+- core installation and runtime entry points were documented
 
-Aggiornamento:
-- policy iniziale definita in `docs/policy/stability.md`
-- package baseline iniziale allineato a `1.0.0`
-- confine `stable` vs `unstable` chiuso per la baseline `v1`
+### 1.2 Versioning And Compatibility Policy
 
-### 1.3 Smoke test browser di release
+Status: `PARTIAL`
 
-Stato: `READY`
+What had to be decided:
 
-Ci sono buoni test automatici sul core, ma manca una checklist release browser esplicita da eseguire sempre.
+- what counts as breaking
+- what `v1` promises
+- whether meta and UI helper surfaces are stable
+- how `rod` and `reactive` are positioned publicly
 
-Serve prima di pubblicare:
-- smoke test manuale minimo su demo chiave
-- verifica `cms.js`, `min-cms.js`, `ui.js`, `min-ui.js`
-- verifica route demo principali
-- verifica overlay, router, form, table, layout
+Required artifacts:
 
-Aggiornamento:
-- checklist browser iniziale preparata in `docs/release/smoke-v1.md`
-- preflight automatico via server locale non eseguibile in questo ambiente: `vite` richiede Node `20.19+` e il bind locale nel sandbox e bloccato
-- preflight HTTP locale eseguito fuori sandbox con `200 OK` su `pages/index.html`, `cms.js`, `min-cms.js`, `min-ui.js`
-- smoke browser manuale confermata come passata
+- semver policy
+- breaking-change policy
+- deprecation policy
 
-### 1.4 Entry point di produzione
+Historical closure:
 
-Stato: `READY`
+- baseline policy landed in `docs/policy/stability.md`
+- stable vs unstable boundaries were fixed for the initial baseline
 
-Va deciso in modo netto quali file sono gli entrypoint ufficiali:
+### 1.3 Browser Release Smoke
+
+Status: `READY`
+
+Required before release:
+
+- a minimum manual smoke pass on key demos
+- verification of `cms.js`, `min-cms.js`, `ui.js`, and `min-ui.js`
+- verification of main demo routes
+- verification of overlays, router, form, table, and layout flows
+
+Historical closure:
+
+- smoke checklist created in `docs/release/smoke-v1.md`
+- local HTTP preflight was executed outside sandbox
+- manual browser smoke was recorded as passed
+
+### 1.4 Production Entry Points
+
+Status: `READY`
+
+Official entry points had to be explicit:
+
 - `packages/core/dist/cms.js`
 - `packages/core/dist/min-cms.js`
 - `packages/ui/dist/ui.js`
@@ -120,259 +115,197 @@ Va deciso in modo netto quali file sono gli entrypoint ufficiali:
 - `packages/cmswift/dist/cmswift.js`
 - `packages/cmswift/dist/min-cmswift.js`
 
-Serve prima di pubblicare:
-- documentare quale file usare in dev
-- documentare quale file usare in production
-- documentare se il bundle minificato e quello raccomandato
+Required before release:
 
-Aggiornamento:
-- entrypoint runtime documentati in `README.md`
-- build standard e minificata gia allineate
+- document which file to use in development
+- document which file to use in production
+- document whether minified bundles are the recommended default
 
-### 1.5 Licenza e metadati di pubblicazione
+Historical closure:
 
-Stato: `PARTIAL`
+- runtime entry points were documented in `README.md`
+- standard and minified outputs were aligned
 
-Il repo ha bisogno di base legale e metadata minimi per essere pubblicabile come prodotto reale.
+### 1.5 License And Publish Metadata
 
-Serve prima di pubblicare:
-- file `LICENSE`
-- autore/ownership chiari
-- versione iniziale ufficiale
-- changelog iniziale o release notes `v1.0.0`
+Status: `PARTIAL`
 
-Aggiornamento:
-- `LICENSE` aggiunta con licenza `MIT`
-- ownership iniziale esplicitata come `Carlos Malleux`
-- `package.json` inizialmente allineato a `1.0.0`
-- release notes baseline create in `docs/release/release-notes-v1.0.0.md`
-- `CHANGELOG.md` iniziale creato
-- build runtime e test automatici passati sulla baseline `v1`
+Required before release:
 
-## 2. Unstable
+- `LICENSE`
+- clear ownership metadata
+- official release version
+- initial changelog or release notes
 
-Queste aree possono uscire solo se marcate in modo esplicito come sperimentali.
+Historical closure:
 
-### 2.1 Overlay avanzati
+- `LICENSE` added as `MIT`
+- authorship documented as `Carlos Malleux`
+- baseline release notes added for `v1.0.0`
+- changelog initialized
 
-Stato: `UNSTABLE`
+## 2. Unstable Areas
 
-Componenti:
+These areas can ship only when explicitly labeled.
+
+### 2.1 Advanced Overlays
+
+Status: `UNSTABLE`
+
+Components:
+
 - `Tooltip`
 - `Dialog`
 - `Menu`
 - `Popover`
 - `ContextMenu`
 
-Motivo:
-- tanta superficie interattiva
-- anchor logic, focus, close rules e runtime overrides sono sempre zone sensibili
+Why:
 
-Decisione consigliata:
-- pubblicarli come `stable` solo se fai smoke test dedicato
-- altrimenti marcarli `experimental`
+- large interactive surface
+- anchor logic, focus behavior, closing rules, and runtime overrides are sensitive areas
+
+Recommended handling:
+
+- promote to `stable` only after dedicated smoke coverage
+- otherwise keep them `experimental` or `unstable`
 
 ### 2.2 Date / Time
 
-Stato: `UNSTABLE`
+Status: `UNSTABLE`
 
-Motivo:
-- molti edge case naturali
-- parsing, UX, keyboard, close rules, conferma selezione
+Why:
 
-Decisione consigliata:
-- non promettere stabilita completa `v1`
+- many natural edge cases
+- parsing, UX, keyboard behavior, and confirmation flows are easy to regress
+
+Recommended handling:
+
+- do not promise full `v1` stability
 
 ### 2.3 `rod` vs `reactive`
 
-Stato: `UNSTABLE` a livello di messaging pubblico
+Status: `UNSTABLE` in public messaging
 
-Motivo:
-- tecnicamente sono entrambi funzionanti
-- come narrativa di prodotto non e ancora chiarissimo se sono due modelli equivalenti o due livelli diversi
+Why:
 
-Decisione consigliata:
-- nel messaggio pubblico scegli un primary model
-- l’altro va descritto come compat layer oppure advanced API
+- both work technically
+- product messaging can still confuse them as equivalent instead of complementary
 
-### 2.4 UI meta / dev helpers
+Recommended handling:
 
-Stato: `UNSTABLE`
+- choose one primary narrative model
+- describe the other as an advanced or adjacent layer
 
-Motivo:
-- utilissimi internamente e per AI/devtools
-- non ancora chiarito se fanno parte del contratto pubblico stabile
+### 2.4 UI Meta / Dev Helpers
 
-Decisione consigliata:
-- marcare `UI.meta`, inspect helpers e doc helpers come `dev-only` o `subject to change`
+Status: `UNSTABLE`
 
-## 3. Do Not Touch
+Why:
 
-Queste aree vanno congelate fino alla release `v1`, salvo bug fix reali o regressioni.
+- highly useful internally and for tooling
+- not appropriate as stable public contract yet
 
-### 3.1 Renderer core
+Recommended handling:
 
-Stato: `FROZEN`
+- mark `UI.meta`, inspect helpers, and doc helpers as `dev-only` or `subject to change`
 
-Non toccare senza motivo serio:
-- bridge `props -> DOM`
-- semantica `class`
-- semantica `style`
-- children dinamici
+## 3. Frozen Areas
+
+These areas should stay frozen until release, except for real bug fixes.
+
+### 3.1 Core Renderer
+
+Status: `FROZEN`
+
+Do not change casually:
+
+- `props -> DOM` bridge
+- `class` semantics
+- `style` semantics
+- dynamic children behavior
 - event binding
 
-Motivo:
-- e la base del framework
-- ogni refactor qui rischia regressioni trasversali
+Reason:
 
-### 3.2 Reactive core
+- this is the foundation of the framework
+- broad refactors here carry cross-cutting regression risk
 
-Stato: `FROZEN`
+### 3.2 Reactive Core
 
-Non toccare senza motivo serio:
+Status: `FROZEN`
+
+Do not change casually:
+
 - `signal`
 - `effect`
 - `computed`
 - `untracked`
 - `batch`
 
-Motivo:
-- il contratto e finalmente piu chiaro
-- una modifica affrettata qui rompe renderer, rod e store
+Reason:
 
-### 3.3 Rod bridge
+- this contract feeds renderer, `rod`, and store behavior
 
-Stato: `FROZEN`
+### 3.3 Rod Bridge
 
-Non toccare senza motivo serio:
+Status: `FROZEN`
+
+Do not change casually:
+
 - `rodBind`
 - `rodModel`
 - `rodFromSignal`
-- binding form controls
+- form-control binding behavior
 
-Motivo:
-- hai appena chiuso molti edge case veri
-- questa zona va stabilizzata, non reinventata prima della release
+Reason:
 
-### 3.4 Build outputs
+- this area had already closed several real edge cases
+- it needed stabilization more than reinvention
 
-Stato: `FROZEN`
+### 3.4 Build Outputs
 
-Non cambiare ora:
-- nomi degli output runtime
+Status: `FROZEN`
+
+Do not change casually:
+
 - `build:cms`
 - `build:ui`
-- `min-cms.js`
-- `min-ui.js`
+- runtime output names
+- publish paths
 
-Motivo:
-- la pipeline va resa affidabile, non creativa
+Reason:
 
-## 4. Before Publish
+- release pipelines must be reliable, not creative
 
-Questa e la checklist minima prima di dire “pubblichiamo v1”.
+## 4. Minimum Checklist
 
-### 4.1 Repo e packaging
+This is the minimum bar before saying “ship v1”.
 
-Stato: `TODO`
+- public README exists
+- stability policy exists
+- LICENSE exists
+- changelog and release notes exist
+- runtime build passes
+- standard and minified outputs are verified
+- core automated tests pass
+- browser smoke passes
+- frozen areas are not under active refactor
+- unstable areas are labeled honestly
 
-- aggiungere `LICENSE`
-- definire versione iniziale ufficiale
-- definire nome release
-- aggiungere changelog iniziale
-- aggiungere README pubblico sintetico
+## 5. What Was Intentionally Left Out Of v1
 
-### 4.2 Docs minime pubbliche
+The following were not required to block the first public package release:
 
-Stato: `TODO`
+- advanced design system polish
+- perfect documentation parity for every UI component
+- promotion of all overlays to stable
+- promotion of meta/devtools as public stable API
 
-- quick start core
-- quick start UI
-- esempio minimo con `cms.js + ui.js`
-- esempio minimo con `min-cms.js + min-ui.js`
-- tabella `stable vs unstable`
-- guida “quale stato usare: rod o reactive”
+## 6. Final Historical Assessment
 
-### 4.3 Release smoke tests
+At the time of the original gate:
 
-Stato: `TODO`
-
-Smoke test minimo consigliato:
-- `/demo/component/cms-renderer`
-- `/demo/component/cms-reactive`
-- `/demo/component/cms-rod`
-- `/demo/component/cms-lifecycle`
-- `/demo/component/cms-platform`
-- layout demo
-- form demo
-- dialog/menu/popover demo
-- table demo
-
-### 4.4 Build artifacts
-
-Stato: `TODO`
-
-Verificare a ogni release:
-- `npm run build:cms`
-- `npm run build:ui`
-- `npm test`
-- `node --check pages/_cmswift-fe/js/cms.js`
-- `node --check pages/_cmswift-fe/js/min-cms.js`
-- `node --check pages/_cmswift-fe/js/ui.js`
-- `node --check pages/_cmswift-fe/js/min-ui.js`
-
-### 4.5 Public release note
-
-Stato: `TODO`
-
-Scrivere:
-- cosa include `v1`
-- cosa e stabile
-- cosa e sperimentale
-- cosa arriva dopo
-
-## 5. Suggested Release Scope
-
-Scope consigliato per `v1`:
-- core `CMSwift` stabile
-- UI kit base stabile
-- build runtime standard e minificata
-- demo/tutorial ufficiali
-- test automatici del core
-
-Fuori scope o da marcare experimental:
-- overlay avanzati
-- date/time complessi
-- meta/devtools come API pubblica stabile
-
-## 6. Release Decision Gate
-
-`v1` puo partire solo se tutte queste sono vere:
-
-- nessun `BLOCKER` aperto
-- tutte le aree `UNSTABLE` sono marcate chiaramente
-- le aree `FROZEN` non sono piu in refactor
-- README pubblico esiste
-- smoke test release eseguito
-- build normale e minificata verificate
-- changelog/release note scritti
-
-## 7. Suggested Next Actions
-
-Ordine pragmatico:
-1. creare `README` pubblico corto del progetto
-2. decidere `stable vs unstable`
-3. aggiungere `LICENSE`
-4. scrivere una `release note v1.0.0`
-5. eseguire smoke test release
-6. tagliare la release
-
-## 8. Decision Today
-
-Valutazione onesta oggi:
-- `v1` non e ancora da pubblicare oggi
-- ma il progetto e vicino a una pre-release seria
-
-Tradotto in una frase:
-- non serve piu rifondare il framework
-- serve chiudere il contratto di prodotto
+- the framework no longer needed a structural rewrite
+- the remaining work was product-contract and release-discipline work
+- the real publication baseline ultimately landed as `v1.0.1`

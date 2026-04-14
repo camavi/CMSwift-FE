@@ -1,85 +1,98 @@
 # CMSwift v1.0.0 Release Notes
 
-Stato:
-- baseline iniziale della release discipline
-- documento storico di pre-release
-- non corrisponde al primo publish npm effettivo
+Status:
 
-Nota:
-- la prima release pubblicata su npm nel repo attuale e `v1.0.1`
-- questo documento resta utile come baseline della release discipline iniziale
+- initial release-discipline baseline
+- historical pre-release document
+- not the first actual npm publish
+
+Note:
+
+- the first release actually published from the current repository is `v1.0.1`
+- this document remains useful as the baseline for the initial release discipline
 
 ## Summary
 
-`v1.0.0` segna la prima release disciplinata di CMSwift come runtime + UI framework con:
-- core modulare
-- build runtime standard e minificata
-- documentazione tecnica interna allineata
-- struttura package-oriented pronta al publish
-- test automatici del core
+`v1.0.0` marks the first disciplined release baseline for CMSwift as a runtime and UI framework with:
+
+- a modular core
+- standard and minified runtime builds
+- aligned internal technical documentation
+- a package-oriented structure ready for publishing
+- automated core tests
 
 ## Included In v1.0.0
 
 Core:
-- renderer DOM consolidato
-- reactive core con `signal`, `effect`, `computed`, `untracked`, `batch`
-- `rod` con bridge e binding piu coerenti
-- lifecycle / mount / cleanup piu robusti
-- platform modules allineati
+
+- consolidated DOM renderer
+- reactive core with `signal`, `effect`, `computed`, `untracked`, and `batch`
+- `rod` with a more coherent bridge and binding model
+- more robust lifecycle, mount, and cleanup behavior
+- aligned platform modules
 
 UI:
-- modularizzazione di `ui.js` completata
-- runtime `ui.js` e `min-ui.js`
-- componenti principali organizzati per famiglie
+
+- completed `ui.js` modularization
+- `ui.js` and `min-ui.js` runtime outputs
+- main components organized by family
 
 Build:
+
 - `cms.js`
 - `min-cms.js`
 - `ui.js`
 - `min-ui.js`
 
 Quality:
-- test automatici core
-- demo browser per core e UI
-- checklist pre-release dedicata
+
+- automated core tests
+- browser demos for core and UI
+- dedicated pre-release checklist
 
 ## Stable
 
-Da considerare parte principale della superficie `stable`:
-- renderer core
+The main `stable` surface for this baseline is:
+
+- core renderer
 - reactive core
-- lifecycle base
-- `rod` base
-- componenti UI principali consolidati
-- runtime outputs ufficiali
+- base lifecycle
+- base `rod`
+- consolidated primary UI components
+- official runtime outputs
 
 ## Unstable / Experimental
 
-Per questa release, da considerare ancora non completamente stabilizzati:
-- overlay avanzati
+The following areas still remained not fully stabilized for this baseline:
+
+- advanced overlays
 - `Date`
 - `Time`
-- `UI.meta` e dev helpers come API pubblica stabile
+- `UI.meta` and dev helpers as stable public API
 
-Decisione esplicita per `v1.0.0`:
-- overlay avanzati restano `unstable`
-- `Date` e `Time` restano `unstable`
-- `UI.meta` resta `dev-only`
-- `reactive` e il set di primitive core; `rod` e il layer di binding/model
+Explicit decision for `v1.0.0`:
+
+- advanced overlays remain `unstable`
+- `Date` and `Time` remain `unstable`
+- `UI.meta` remains `dev-only`
+- `reactive` is the core primitive layer, while `rod` is the binding and model layer
 
 ## Distribution
 
 Readable:
+
 - `packages/core/dist/cms.js`
 - `packages/ui/dist/ui.js`
 - `packages/cmswift/dist/cmswift.js`
 
 Minified:
+
 - `packages/core/dist/min-cms.js`
 - `packages/ui/dist/min-ui.js`
 - `packages/cmswift/dist/min-cmswift.js`
 
 Legacy local mirror:
+
 - `pages/_cmswift-fe/js/cms.js`
 - `pages/_cmswift-fe/js/min-cms.js`
 - `pages/_cmswift-fe/js/ui.js`
@@ -87,8 +100,9 @@ Legacy local mirror:
 
 ## Notes
 
-Questa release resta la base storica della prima disciplina di rilascio.
-Il passaggio che ha chiuso la pubblicazione reale e poi confluito in `v1.0.1`, con:
-- smoke test browser
-- versione ufficiale
-- changelog/release gate finale
+This release remains the historical base of the first release discipline.
+The final step that closed the real publication later flowed into `v1.0.1`, together with:
+
+- browser smoke validation
+- the official published version
+- final changelog and release-gate closure

@@ -1,25 +1,23 @@
 # CMSwift Packages
 
-Questa cartella contiene la nuova struttura package-oriented del framework.
+This folder contains the package-oriented structure of the framework.
 
-## Package
+## Packages
 
 - `packages/core`
-  renderer, reactive core, rod, lifecycle e moduli platform
+  renderer, reactive core, `rod`, lifecycle, and platform modules
 - `packages/ui`
-  componenti UI e asset CSS/font/img costruiti sopra `@cmswift/core`
+  UI components and CSS, font, and image assets built on top of `@cmswift/core`
 - `packages/cmswift`
-  package umbrella per chi vuole caricare tutto insieme
+  umbrella package for users who want everything loaded together
 
-## Regola
+## Rules
 
-Da qui in avanti:
+- the framework source of truth lives in `packages/*/src`
+- publishable outputs are generated into `packages/*/dist`
+- `pages/_cmswift-fe/` remains only as a compatible runtime mirror for local demos
 
-- la source of truth del framework deve convergere in `packages/*/src`
-- gli output pubblicabili devono uscire in `packages/*/dist`
-- `pages/_cmswift-fe/` resta solo come mirror runtime compatibile per demo locali
-
-## Documentazione
+## Documentation
 
 - `../README.md`
 - `../docs/reference/core.md`

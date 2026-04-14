@@ -1,11 +1,13 @@
 ## CMS Source Modules
 
-Questa cartella contiene i sorgenti interni del core CMSwift.
+This folder contains the internal source modules of the CMSwift core.
 
 Manifest:
+
 - `modules.json`
 
-Ordine di build attuale:
+Current build order:
+
 - `00-bootstrap.js`
 - `09-overlay-shared.js`
 - `10-overlay.js`
@@ -36,18 +38,21 @@ Ordine di build attuale:
 - `52-router.js`
 - `53-footer.js`
 
-Comando di build:
+Build command:
+
 ```bash
 npm run build:cms
 ```
 
-Output generati:
+Generated outputs:
+
 - `packages/core/dist/cms.js`
 - `packages/core/dist/min-cms.js`
-- mirror legacy in `pages/_cmswift-fe/js/`
+- compatibility mirror in `pages/_cmswift-fe/js/`
 
-Regola:
-- modificare i file in `packages/core/src/`
-- rigenerare il package core
-- poi eseguire `npm test`
-- aggiornare `docs/reference/core.md` se cambia il contratto tecnico
+Rules:
+
+- edit files in `packages/core/src/`
+- rebuild the core package
+- run `npm test`
+- update `docs/reference/core.md` if the technical contract changes

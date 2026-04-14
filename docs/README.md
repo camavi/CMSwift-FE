@@ -1,6 +1,6 @@
 # CMSwift Docs
 
-Indice della documentazione tecnica del repo framework.
+Index of the technical documentation for the framework repository.
 
 ## Reference
 

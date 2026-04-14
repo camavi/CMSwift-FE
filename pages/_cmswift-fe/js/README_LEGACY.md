@@ -1,15 +1,15 @@
 # Runtime JS Mirror
 
-Questa cartella contiene solo un mirror compatibile degli output runtime usati dalla demo locale sotto `pages/`.
+This folder only contains a compatible mirror of the runtime outputs used by the local demo under `pages/`.
 
 ## Source Of Truth
 
-- core sorgente: [packages/core/src](/Users/cmalleux/Sites/CMSwift-FE/packages/core/src)
-- ui sorgente: [packages/ui/src](/Users/cmalleux/Sites/CMSwift-FE/packages/ui/src)
-- runtime buildati: [packages/core/dist](/Users/cmalleux/Sites/CMSwift-FE/packages/core/dist), [packages/ui/dist](/Users/cmalleux/Sites/CMSwift-FE/packages/ui/dist), [packages/cmswift/dist](/Users/cmalleux/Sites/CMSwift-FE/packages/cmswift/dist)
+- core source: [packages/core/src](/Users/cmalleux/Sites/CMSwift-FE/packages/core/src)
+- UI source: [packages/ui/src](/Users/cmalleux/Sites/CMSwift-FE/packages/ui/src)
+- built runtimes: [packages/core/dist](/Users/cmalleux/Sites/CMSwift-FE/packages/core/dist), [packages/ui/dist](/Users/cmalleux/Sites/CMSwift-FE/packages/ui/dist), [packages/cmswift/dist](/Users/cmalleux/Sites/CMSwift-FE/packages/cmswift/dist)
 
-## Regola
+## Rules
 
-- non ricreare sorgenti legacy in questa cartella
-- questo albero resta un mirror compatibile dei file buildati
-- i package `packages/*/dist` restano la source of truth dei bundle pubblicabili
+- do not recreate legacy source files in this folder
+- this tree remains only as a compatibility mirror of built files
+- `packages/*/dist` remains the source of truth for publishable bundles

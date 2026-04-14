@@ -1,8 +1,9 @@
 # Changelog
 
-Tutte le modifiche rilevanti di CMSwift verranno documentate qui.
+All significant CMSwift changes are documented here.
 
-Il formato segue in modo pragmatico:
+The format is kept intentionally simple:
+
 - Added
 - Changed
 - Fixed
@@ -11,60 +12,67 @@ Il formato segue in modo pragmatico:
 ## [1.0.1] - 2026-04-14
 
 ### Added
-- publish npm di `@cmswift/core`
-- publish npm di `@cmswift/ui`
-- publish npm del package umbrella `cmswift`
-- documentazione README con percorsi npm e CDN
-- package `cmswift` reso autonomo con `dist/cmswift.js`, CSS e asset inclusi nel tarball
+
+- npm publish of `@cmswift/core`
+- npm publish of `@cmswift/ui`
+- npm publish of the umbrella package `cmswift`
+- public README coverage for npm and CDN usage
+- a self-contained `cmswift` package tarball with `dist/cmswift.js`, CSS, and bundled assets
 
 ### Fixed
-- bootstrap del core ora parte anche senza `window.CMSwift_setting`
-- configurazione HTTP del core ora usa fallback sicuri quando la config globale non esiste
-- consumo npm browser-first piu robusto nei progetti che importano `@cmswift/core` senza setup legacy
-- export CSS del package `cmswift` ora puntano a file interni al package
-- build del package umbrella riallineata con JS, CSS, font e immagini inclusi
+
+- core bootstrap now works even when `window.CMSwift_setting` is not defined
+- core HTTP configuration now uses safe fallbacks when the global config is missing
+- browser-first npm consumption is more robust in projects that import `@cmswift/core` without legacy setup
+- CSS exports in `cmswift` now point only to files inside the package
+- umbrella package build now includes aligned JS, CSS, fonts, and images
 
 ### Docs
-- quick start pubblico aggiornato per `@cmswift/core`, `@cmswift/ui` e `cmswift`
-- aggiunte note di release dedicate per `v1.0.1`
-- documentazione release `v1.0.0` riclassificata come archivio storico/pre-release
+
+- updated the public quick start for `@cmswift/core`, `@cmswift/ui`, and `cmswift`
+- added dedicated release notes for `v1.0.1`
+- reclassified `v1.0.0` release material as historical pre-release archive
 
 ## [1.0.0] - historical pre-release baseline
 
 ### Added
-- modularizzazione completa del core in `packages/core/src`
-- modularizzazione completa del layer UI in `packages/ui/src`
-- build runtime standard e minificata:
+
+- full core modularization under `packages/core/src`
+- full UI layer modularization under `packages/ui/src`
+- standard and minified runtime builds:
   - `cms.js`
   - `min-cms.js`
   - `ui.js`
   - `min-ui.js`
-- bundle umbrella `cmswift.js` e `min-cmswift.js`
-- documentazione interna per core e UI
-- checklist pre-release `v1`
-- policy di stabilita e compatibilita
-- smoke checklist browser di release
-- prima bozza di release notes `v1.0.0`
+- umbrella bundles `cmswift.js` and `min-cmswift.js`
+- internal technical documentation for core and UI
+- `v1` pre-release checklist
+- stability and compatibility policy
+- browser smoke checklist for release
+- first `v1.0.0` release notes baseline
 
 ### Changed
-- consolidata la struttura del renderer
-- consolidato il reactive core
-- riallineato `rod` al bridge DOM e ai form controls
-- separati i moduli platform e i moduli UI in file sorgente dedicati
+
+- consolidated renderer structure
+- consolidated reactive core
+- realigned `rod` with the DOM bridge and form controls
+- split platform modules and UI modules into dedicated source files
 
 ### Fixed
-- CSS custom properties nel renderer
-- semantica di remove/update props
-- children dinamici, classi, eventi e cleanup
-- casi rari dei form controls
-- bug reali emersi da demo e test del core
+
+- CSS custom property handling in the renderer
+- prop removal and update semantics
+- dynamic children, class handling, event cleanup, and general cleanup paths
+- rare form-control edge cases
+- real bugs surfaced by demos and core tests
 
 ### Docs
-- aggiunto `README.md` pubblico
-- aggiunti `docs/reference/core.md` e `docs/reference/ui.md` come riferimenti tecnici
-- aggiunto `LICENSE`
 
-## Note
+- added the public `README.md`
+- added `docs/reference/core.md` and `docs/reference/ui.md` as technical references
+- added `LICENSE`
 
-La release `1.0.0` resta come baseline storica di pre-release.
-La prima release pubblicata e consumata via npm nel repo e `1.0.1`.
+## Notes
+
+The `1.0.0` release remains the historical pre-release baseline.
+The first release published and consumed through npm in this repository is `1.0.1`.

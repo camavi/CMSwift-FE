@@ -1,45 +1,49 @@
 # CMSwift v1 Browser Smoke Checklist
 
-Checklist manuale minima da eseguire prima di una release `v1`.
+Minimum manual checklist to execute before a `v1` release.
 
-Nota:
-- questo documento resta come baseline operativa della prima release pubblica
-- ultima verifica di riferimento chiusa il `2026-04-14`
+Note:
 
-Regola:
-- se una voce fallisce, la release si ferma
-- il check va fatto almeno su build runtime corrente
-- preferibile verificare sia bundle standard sia minificato
+- this document remains the operational baseline of the first public release
+- the latest reference verification was closed on `2026-04-14`
 
-Stato preflight di riferimento:
-- preflight HTTP locale eseguito il `2026-04-14`
-- verificati `200 OK` su:
+Rule:
+
+- if one item fails, the release stops
+- the check must run against the current runtime build at minimum
+- verify both the standard and minified bundles when possible
+
+Reference preflight status:
+
+- local HTTP preflight executed on `2026-04-14`
+- `200 OK` verified for:
   - `pages/index.html`
   - `pages/_cmswift-fe/js/cms.js`
   - `pages/_cmswift-fe/js/ui.js`
   - `pages/_cmswift-fe/js/min-cms.js`
   - `pages/_cmswift-fe/js/min-ui.js`
-- il check interattivo browser resta comunque obbligatorio per release future
+- interactive browser validation is still required for future releases
 
-Stato smoke di riferimento:
-- smoke browser manuale eseguita
-- demo core e UI principali verificate
-- esito registrato: `PASS`
+Reference smoke status:
+
+- manual browser smoke executed
+- main core and UI demos verified
+- recorded result: `PASS`
 
 ## 1. Runtime Files
 
-- [x] `pages/_cmswift-fe/js/cms.js` carica senza errori
-- [x] `pages/_cmswift-fe/js/ui.js` carica senza errori
-- [x] `pages/_cmswift-fe/js/min-cms.js` carica senza errori
-- [x] `pages/_cmswift-fe/js/min-ui.js` carica senza errori
+- [x] `pages/_cmswift-fe/js/cms.js` loads without errors
+- [x] `pages/_cmswift-fe/js/ui.js` loads without errors
+- [x] `pages/_cmswift-fe/js/min-cms.js` loads without errors
+- [x] `pages/_cmswift-fe/js/min-ui.js` loads without errors
 
 ## 2. Demo Shell
 
-- [x] [index.html](/Users/cmalleux/Sites/CMSwift-FE/pages/index.html) risponde `200 OK` nel preflight HTTP
-- [x] [index.html](/Users/cmalleux/Sites/CMSwift-FE/pages/index.html) carica senza errori console
-- [x] routing demo funzionante
-- [x] drawer shell principale funzionante
-- [x] main layout responsive almeno in check rapido desktop/mobile
+- [x] [index.html](/Users/cmalleux/Sites/CMSwift-FE/pages/index.html) returns `200 OK` in local HTTP preflight
+- [x] [index.html](/Users/cmalleux/Sites/CMSwift-FE/pages/index.html) loads without console errors
+- [x] demo routing works
+- [x] main shell drawer works
+- [x] main layout is responsive in a quick desktop/mobile check
 
 ## 3. Core Demo
 
@@ -50,7 +54,7 @@ Stato smoke di riferimento:
 - [x] `/demo/component/cms-platform`
 - [x] `/demo/component/cms-renderer-style`
 
-## 4. UI Demo Prioritarie
+## 4. Priority UI Demos
 
 - [x] layout
 - [x] form
@@ -66,17 +70,19 @@ Stato smoke di riferimento:
 
 ## 5. What To Verify
 
-Su ogni demo chiave:
-- [x] nessun errore console
-- [x] nessun warning nuovo inatteso
-- [x] interazioni principali funzionanti
-- [x] stato reattivo coerente
-- [x] overlay aprono/chiudono correttamente
-- [x] keyboard base non rotta
+For each key demo:
+
+- [x] no console errors
+- [x] no unexpected new warnings
+- [x] core interactions work
+- [x] reactive state stays coherent
+- [x] overlays open and close correctly
+- [x] basic keyboard behavior is not broken
 
 ## 6. Release Gate
 
-La release puo proseguire solo se:
-- [x] tutti i check sopra sono passati
-- [x] eventuali failure sono documentati e chiusi
-- [x] non restano blocker aperti in `docs/release/release-plan-v1.md`
+The release can continue only if:
+
+- [x] all checks above have passed
+- [x] any failures are documented and closed
+- [x] no blockers remain open in `docs/release/release-plan-v1.md`

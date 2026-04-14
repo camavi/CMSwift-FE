@@ -1,228 +1,254 @@
 # CMSwift Stability And Compatibility Policy
 
-Questa policy definisce come CMSwift gestisce:
-- stabilita delle API
-- compatibilita tra versioni
+This policy defines how CMSwift handles:
+
+- API stability
+- cross-version compatibility
 - breaking changes
 - deprecations
 
-Obiettivo:
-- dare un contratto chiaro prima della `v1`
-- evitare ambiguita tra API stabili, sperimentali e dev-only
+Goal:
+
+- provide a clear contract around `v1`
+- remove ambiguity between stable, unstable, experimental, and dev-only APIs
 
 ## 1. Versioning
 
-CMSwift adotta `SemVer`:
+CMSwift follows `SemVer`:
+
 - `MAJOR.MINOR.PATCH`
 
-Regola:
-- `PATCH`: bug fix, cleanup interni, miglioramenti senza cambi di contratto pubblico
-- `MINOR`: nuove feature compatibili, nuove props opzionali, nuovi componenti o nuove API additive
-- `MAJOR`: breaking changes sulla superficie pubblica stabile
+Rules:
 
-Esempi:
-- fix renderer senza cambiare API pubblica: `PATCH`
-- aggiunta di un nuovo componente UI: `MINOR`
-- rinomina o rimozione di una prop stabile: `MAJOR`
+- `PATCH`: bug fixes, internal cleanup, and improvements that do not change the public contract
+- `MINOR`: backward-compatible features, optional props, new components, or additive APIs
+- `MAJOR`: breaking changes to the stable public surface
 
-## 2. Classificazione Delle API
+Examples:
 
-CMSwift divide la superficie in 4 classi.
+- renderer fix without public API changes: `PATCH`
+- adding a new UI component: `MINOR`
+- renaming or removing a stable prop: `MAJOR`
+
+## 2. API Classes
+
+CMSwift uses four API classes.
 
 ### 2.1 Stable
 
-Queste API possono essere usate in produzione con aspettativa di compatibilita semver.
+These APIs can be used in production with normal semver expectations.
 
-Regola:
-- non si rompe il comportamento o la firma in `PATCH` o `MINOR`
-- ogni breaking change richiede un `MAJOR`
+Rules:
 
-Oggi rientrano qui, salvo nota contraria:
+- behavior and signatures do not break in `PATCH` or `MINOR`
+- every breaking change requires a `MAJOR`
+
+Currently included here, unless explicitly noted otherwise:
+
 - core renderer
 - reactive core
-- lifecycle base
-- `rod` base
-- componenti UI principali gia consolidati
-- build outputs ufficiali
+- base lifecycle helpers
+- base `rod`
+- consolidated primary UI components
+- official runtime outputs
 
 ### 2.2 Unstable
 
-Queste API esistono e possono essere usate, ma non promettono ancora piena stabilita di contratto.
+These APIs exist and can be used, but they do not yet promise a fully stable contract.
 
-Regola:
-- possono cambiare anche in `MINOR`
-- il cambiamento deve comunque essere documentato
-- vanno evitate come fondazione contrattuale di prodotti terzi se non accettano churn
+Rules:
 
-Oggi rientrano qui:
-- overlay avanzati
+- they may still change in `MINOR`
+- every change must still be documented
+- they should not be used as hard contractual foundations unless downstream users accept churn
+
+Currently included here:
+
+- advanced overlays
 - `Date`
 - `Time`
-- aree dove il contratto pubblico non e ancora fissato completamente
+- areas where the public contract is still not fully fixed
 
-Decisione per `v1`:
-- `Tooltip`, `Dialog`, `Menu`, `Popover`, `ContextMenu` restano `unstable`
-- `Date` e `Time` restano `unstable`
-- non vengono promossi a `stable` nella `1.0.0`
+Current `v1` policy:
+
+- `Tooltip`, `Dialog`, `Menu`, `Popover`, and `ContextMenu` remain `unstable`
+- `Date` and `Time` remain `unstable`
 
 ### 2.3 Experimental
 
-Queste API sono da considerare prova tecnica o superficie in osservazione.
+These APIs should be treated as technical experiments or surfaces under active observation.
 
-Regola:
-- possono cambiare o sparire senza garanzia semver forte
-- devono essere marcate chiaramente come sperimentali
+Rules:
 
-Uso consigliato:
-- demo
-- validazione interna
-- feedback loop rapido
+- they may change or disappear without strong semver guarantees
+- they must be labeled clearly as experimental
+
+Typical use:
+
+- demos
+- internal validation
+- fast feedback loops
 
 ### 2.4 Dev-only / Internal
 
-Queste API non fanno parte del contratto pubblico stabile.
+These APIs are not part of the stable public contract.
 
-Regola:
-- possono cambiare liberamente se necessario
-- non vanno promesse come interfaccia pubblica
+Rules:
 
-Esempi:
+- they may change whenever necessary
+- they should not be presented as public integration surfaces
+
+Examples:
+
 - `UI.meta`
-- helper inspect/devtools
-- helper interni di build
-- wiring tecnico non documentato come pubblico
+- inspect and devtool helpers
+- build helpers
+- undocumented internal wiring
 
-## 3. Compatibilita Garantita
+## 3. Guaranteed Compatibility
 
-CMSwift garantisce compatibilita semver solo per:
-- API marcate `stable`
-- entrypoint runtime ufficiali documentati
+CMSwift guarantees semver compatibility only for:
 
-Compatibilita garantita significa:
-- stessa firma o firma compatibile
-- stesso significato delle props gia documentate
-- stesso ruolo dei file runtime ufficiali
+- APIs classified as `stable`
+- official documented runtime entry points
 
-Non significa:
-- CSS identico al pixel
-- assenza totale di bug fix comportamentali
-- stabilita di API non documentate
+Guaranteed compatibility means:
+
+- same signature, or a compatible extension of that signature
+- same documented meaning of existing props
+- same role for official runtime files
+
+It does not mean:
+
+- pixel-perfect CSS stability
+- zero behavior changes from bug fixes
+- stability for undocumented APIs
 
 ## 4. Breaking Change Policy
 
-Una breaking change e qualunque modifica che rompe codice esistente che usa API `stable`.
+A breaking change is any change that breaks existing code using a `stable` API.
 
-Esempi di breaking:
-- rimozione di componente o metodo pubblico
-- rinomina di prop stabile
-- cambio di default con impatto comportamentale forte
-- cambio di shape dei valori ritornati
-- rimozione o rinomina di output runtime ufficiali
+Examples:
 
-Regola:
-- una breaking change su API `stable` richiede `MAJOR`
-- va documentata in release notes
-- se possibile va preceduta da deprecazione
+- removing a public method or component
+- renaming a stable prop
+- changing a default with strong behavior impact
+- changing the shape of returned values
+- renaming or removing official runtime outputs
+
+Rules:
+
+- a breaking change on a `stable` API requires `MAJOR`
+- it must be documented in release notes
+- when possible, it should be preceded by a deprecation period
 
 ## 5. Deprecation Policy
 
-Quando un'API `stable` deve essere sostituita:
-- prima si marca `deprecated`
-- poi si mantiene per almeno un ciclo `MINOR` prima della rimozione, salvo impossibilita tecnica seria
+When a `stable` API must be replaced:
 
-Ogni deprecazione deve avere:
-- cosa e deprecato
-- alternativa corretta
-- da quale versione e deprecato
-- da quale `MAJOR` puo essere rimosso
+- mark it as `deprecated` first
+- keep it for at least one `MINOR` cycle before removal, unless a serious technical constraint makes that impossible
 
-Formato consigliato:
-- README / release notes
-- warning opzionale in dev mode dove ha senso
+Every deprecation should specify:
+
+- what is deprecated
+- the correct replacement
+- the version where it became deprecated
+- the `MAJOR` where it may be removed
+
+Recommended channels:
+
+- README
+- release notes
+- optional dev-mode warnings where appropriate
 
 ## 6. Public Runtime Contract
 
-I file runtime pubblici ufficiali sono:
+Official public runtime files:
 
 Readable:
+
 - `packages/core/dist/cms.js`
 - `packages/ui/dist/ui.js`
 - `packages/cmswift/dist/cmswift.js`
 
 Minified:
+
 - `packages/core/dist/min-cms.js`
 - `packages/ui/dist/min-ui.js`
 - `packages/cmswift/dist/min-cmswift.js`
 
-Mirror locale compatibile:
+Compatible local mirror:
+
 - `pages/_cmswift-fe/js/cms.js`
 - `pages/_cmswift-fe/js/min-cms.js`
 - `pages/_cmswift-fe/js/ui.js`
 - `pages/_cmswift-fe/js/min-ui.js`
 
-Regola:
-- questi file non cambiano nome o ruolo in `PATCH` o `MINOR`
-- un cambio di naming o di strategia di distribuzione richiede almeno documentazione forte e, se rompe integrazioni, `MAJOR`
+Rules:
 
-## 7. Current Policy For `rod` And `reactive`
+- these files do not change name or role in `PATCH` or `MINOR`
+- changing the naming or distribution strategy requires strong documentation and, if integrations break, a `MAJOR`
 
-Per la `v1`, la policy consigliata e:
-- `reactive` e parte del core stabile
-- `rod` e supportato e stabile per il binding applicativo
-- la narrativa pubblica deve dire che sono due strumenti distinti, non due alias dello stesso modello
+## 7. `rod` And `reactive`
 
-Posizionamento consigliato:
-- `reactive`: primitive base del framework
-- `rod`: binding e model layer ergonomico sopra i casi UI/applicativi
+Current product policy:
 
-## 8. Current Policy For UI Components
+- `reactive` is part of the stable core
+- `rod` is supported and stable for application binding
+- public messaging should describe them as two distinct tools, not as aliases of the same model
 
-Per la `v1`, classificazione consigliata:
+Recommended positioning:
+
+- `reactive`: low-level core primitives
+- `rod`: ergonomic binding and model layer for UI and application flows
+
+## 8. UI Component Policy
+
+Recommended `v1` classification:
 
 Stable:
-- layout base
-- input base
-- select base
-- checkbox/radio/toggle consolidati
-- navigation base
-- feedback base
-- table base
+
+- base layout
+- base inputs
+- base select
+- consolidated checkbox, radio, and toggle components
+- base navigation
+- base feedback
+- base table
 
 Unstable:
-- overlay avanzati
-- date/time
-- superfici con comportamento molto ricco e piu sensibile a edge case
 
-Decisione chiusa per `v1.0.0`:
-- overlay avanzati: `unstable`
-- `Date`: `unstable`
-- `Time`: `unstable`
-- `UI.meta` e dev helpers: `dev-only`
-- narrativa pubblica: `reactive` come core primitives, `rod` come model/binding layer
+- advanced overlays
+- date/time inputs
+- rich surfaces with more edge-case-sensitive behavior
 
 Dev-only:
+
 - `UI.meta`
 - inspect helpers
-- tooling helpers per AI/dev
+- AI and tooling helpers
 
 ## 9. Release Discipline
 
-Prima di ogni release pubblica:
-- build runtime normale e minificata
-- test automatici core
-- smoke test browser sulle demo chiave
-- aggiornamento README
-- aggiornamento release notes
-- verifica di eventuali deprecations attive
+Before every public release:
+
+- build standard and minified runtimes
+- run automated core tests
+- run browser smoke checks on key demos
+- update the README
+- update release notes
+- review active deprecations
 
 ## 10. Decision Rule
 
-Se un cambiamento tocca una API `stable`, bisogna chiedersi:
+If a change touches a `stable` API, ask:
 
-1. rompe codice esistente?
-2. cambia comportamento atteso?
-3. cambia file/runtime ufficiali?
+1. Does it break existing code?
+2. Does it change expected behavior?
+3. Does it change official runtime files or their role?
 
-Se la risposta e `si`, non e un semplice refactor interno:
-- o si trasforma in modifica compatibile
-- oppure si tratta come breaking change vera
+If the answer is `yes`, it is not just an internal refactor:
+
+- either redesign it into a compatible change
+- or treat it as a real breaking change

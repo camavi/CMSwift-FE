@@ -1,26 +1,26 @@
 # Local Demo Pages
 
-Questa cartella contiene la demo locale minimale del framework: poche pagine HTML, asset runtime compatibili e smoke visuale rapido.
+This folder contains the minimal local framework demo: a few HTML pages, compatible runtime assets, and quick visual smoke coverage.
 
-## Stato
+## Contents
 
 - `pages/index.html`
-  landing locale con accesso a UI, CMSwift e developer view
+  local landing page with access to UI, CMSwift core, and the developer view
 - `pages/ui.html`
-  demo UI con piccoli esempi reali
+  UI demo with small real examples
 - `pages/cmswift.html`
-  demo core con signal, computed, batch e component
+  core demo with `signal`, `computed`, `batch`, and components
 - `pages/developers.html`
-  pagina narrativa pensata per presentare il framework a developer
+  narrative page meant to explain the framework to developers
 - `pages/tutorial/`
-  placeholder vuoto, senza tutorial attivi
+  empty placeholder with no active tutorial content
 
-## Regola
+## Rules
 
-Nuove modifiche al framework non devono partire da qui se riguardano core o UI: la source of truth resta in `packages/core/src` e `packages/ui/src`.
+New framework work should not start here when it affects core or UI. The source of truth remains in `packages/core/src` and `packages/ui/src`.
 
-Questa cartella resta utile per:
+This folder is still useful for:
 
-- demo locali veloci
-- runtime mirror compatibile
-- smoke test manuali HTML
+- quick local demos
+- compatibility runtime mirrors
+- manual HTML smoke checks
