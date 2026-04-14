@@ -10,7 +10,11 @@
 
 
   CMSwift.config = CMSwift.config || {};
-  CMSwift.config.debug = CMSwift_setting?.modeDev ?? false;
+  const CMSwiftBootstrapSetting =
+    typeof globalThis !== "undefined" && globalThis.CMSwift_setting
+      ? globalThis.CMSwift_setting
+      : {};
+  CMSwift.config.debug = CMSwiftBootstrapSetting.modeDev ?? false;
 
   CMSwift.isDev = function () {
     return CMSwift.config.debug;

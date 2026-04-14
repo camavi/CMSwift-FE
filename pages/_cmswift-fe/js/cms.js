@@ -10,7 +10,11 @@
 
 
   CMSwift.config = CMSwift.config || {};
-  CMSwift.config.debug = CMSwift_setting?.modeDev ?? false;
+  const CMSwiftBootstrapSetting =
+    typeof globalThis !== "undefined" && globalThis.CMSwift_setting
+      ? globalThis.CMSwift_setting
+      : {};
+  CMSwift.config.debug = CMSwiftBootstrapSetting.modeDev ?? false;
 
   CMSwift.isDev = function () {
     return CMSwift.config.debug;
@@ -3993,13 +3997,17 @@ _.dynamic = function (renderFn) {
     wrapResponse,
     withJSON
   } = CMSwift._httpShared;
+  const CMSwiftHttpSetting =
+    typeof globalThis !== "undefined" && globalThis.CMSwift_setting
+      ? globalThis.CMSwift_setting
+      : {};
   const configHTTP = {
-    baseURL: CMSwift_setting?.http?.baseURL || "",
-    timeout: CMSwift_setting?.http?.timeout ?? 0, // ms, 0 = no timeout
-    retry: CMSwift_setting?.http?.retry || { attempts: 0, delay: 250, factor: 2 }, // attempts extra
-    headers: CMSwift_setting?.http?.headers || {},
-    credentials: CMSwift_setting?.http?.credentials, // "include" etc (optional)
-    debug: CMSwift_setting?.debug ?? false
+    baseURL: CMSwiftHttpSetting.http?.baseURL || "",
+    timeout: CMSwiftHttpSetting.http?.timeout ?? 0, // ms, 0 = no timeout
+    retry: CMSwiftHttpSetting.http?.retry || { attempts: 0, delay: 250, factor: 2 }, // attempts extra
+    headers: CMSwiftHttpSetting.http?.headers || {},
+    credentials: CMSwiftHttpSetting.http?.credentials, // "include" etc (optional)
+    debug: CMSwiftHttpSetting.debug ?? false
   };
   const httpState = createHttpReactiveState(CMSwift);
   const now = () => (typeof performance !== "undefined" && performance.now ? performance.now() : Date.now());

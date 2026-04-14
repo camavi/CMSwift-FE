@@ -4,8 +4,10 @@ import { transform } from "esbuild";
 
 const coreFile = path.resolve("packages/core/dist/cms.js");
 const uiFile = path.resolve("packages/ui/dist/ui.js");
-const outputFile = path.resolve("packages/cmswift/dist/cmswift.js");
-const minOutputFile = path.resolve("packages/cmswift/dist/min-cmswift.js");
+const uiDistDir = path.resolve("packages/ui/dist");
+const cmswiftDistDir = path.resolve("packages/cmswift/dist");
+const outputFile = path.join(cmswiftDistDir, "cmswift.js");
+const minOutputFile = path.join(cmswiftDistDir, "min-cmswift.js");
 
 async function main() {
   const [core, ui] = await Promise.all([
@@ -21,12 +23,21 @@ async function main() {
     target: "es2018",
   });
 
-  await fs.mkdir(path.dirname(outputFile), { recursive: true });
+  await fs.mkdir(cmswiftDistDir, { recursive: true });
   await fs.writeFile(outputFile, output, "utf8");
   await fs.writeFile(minOutputFile, minified.code, "utf8");
+  await copyDir(path.join(uiDistDir, "css"), path.join(cmswiftDistDir, "css"));
+  await copyDir(path.join(uiDistDir, "fonts"), path.join(cmswiftDistDir, "fonts"));
+  await copyDir(path.join(uiDistDir, "img"), path.join(cmswiftDistDir, "img"));
   process.stdout.write(
-    `[build:cmswift] wrote ${path.relative(process.cwd(), outputFile)} and ${path.relative(process.cwd(), minOutputFile)}\n`,
+    `[build:cmswift] wrote ${path.relative(process.cwd(), outputFile)} and ${path.relative(process.cwd(), minOutputFile)} (with css/fonts/img)\n`,
   );
+}
+
+async function copyDir(source, destination) {
+  await fs.rm(destination, { recursive: true, force: true });
+  await fs.mkdir(path.dirname(destination), { recursive: true });
+  await fs.cp(source, destination, { recursive: true });
 }
 
 main().catch((error) => {

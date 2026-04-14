@@ -1,6 +1,6 @@
 {
   "name": "cmswift",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Umbrella package for CMSwift core + UI",
   "license": "MIT",
   "type": "module",
@@ -9,20 +9,16 @@
   "exports": {
     ".": "./dist/cmswift.js",
     "./min": "./dist/min-cmswift.js",
-    "./css/base.css": "../ui/dist/css/base.css",
-    "./css/ui.css": "../ui/dist/css/ui.css",
-    "./css/min-ui.css": "../ui/dist/css/min-ui.css",
-    "./css/ui-components.css": "../ui/dist/css/ui-components.css",
-    "./css/responsive.css": "../ui/dist/css/responsive.css",
-    "./css/animation.css": "../ui/dist/css/animation.css",
-    "./css/tabler-icons-out.css": "../ui/dist/css/tabler-icons-out.css",
-    "./css/docs.css": "../ui/dist/css/docs.css"
+    "./css/base.css": "./dist/css/base.css",
+    "./css/ui.css": "./dist/css/ui.css",
+    "./css/min-ui.css": "./dist/css/min-ui.css",
+    "./css/ui-components.css": "./dist/css/ui-components.css",
+    "./css/responsive.css": "./dist/css/responsive.css",
+    "./css/animation.css": "./dist/css/animation.css",
+    "./css/tabler-icons-out.css": "./dist/css/tabler-icons-out.css",
+    "./css/docs.css": "./dist/css/docs.css"
   },
   "files": [
     "dist"
-  ],
-  "dependencies": {
-    "@cmswift/core": "^1.0.0",
-    "@cmswift/ui": "^1.0.0"
-  }
+  ]
 }

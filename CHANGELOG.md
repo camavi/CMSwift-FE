@@ -43,6 +43,13 @@ Il formato segue in modo pragmatico:
 - aggiunti `docs/reference/core.md` e `docs/reference/ui.md` come riferimenti tecnici
 - aggiunto `LICENSE`
 
+## [1.0.1] - 2026-04-14
+
+### Fixed
+- bootstrap del core ora parte anche senza `window.CMSwift_setting`
+- configurazione HTTP del core ora usa fallback sicuri quando la config globale non esiste
+- consumo npm browser-first piu robusto nei progetti che importano `@cmswift/core` senza setup legacy
+
 ## Note
 
 La release `1.0.0` resta draft finche non sono chiusi:

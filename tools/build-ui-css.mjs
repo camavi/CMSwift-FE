@@ -2,9 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const SOURCE_DIR = path.join(ROOT, "pages", "_cmswift-fe", "css");
+const LEGACY_SOURCE_DIR = path.join(ROOT, "pages", "_cmswift-fe", "css");
 const DIST_DIR = path.join(ROOT, "packages", "ui", "dist", "css");
-const LEGACY_DIR = SOURCE_DIR;
+const FALLBACK_SOURCE_DIR = DIST_DIR;
+const SOURCE_DIR = fs.existsSync(path.join(LEGACY_SOURCE_DIR, "base.css"))
+  ? LEGACY_SOURCE_DIR
+  : FALLBACK_SOURCE_DIR;
+const LEGACY_DIR = LEGACY_SOURCE_DIR;
 
 const COPY_FILES = [
   "base.css",
@@ -24,6 +28,7 @@ const BUNDLE_FILES = [
 ];
 
 fs.mkdirSync(DIST_DIR, { recursive: true });
+fs.mkdirSync(LEGACY_DIR, { recursive: true });
 
 for (const fileName of COPY_FILES) {
   const sourceFile = path.join(SOURCE_DIR, fileName);
@@ -55,6 +60,7 @@ console.log(
 console.log(
   `ui-css: built minified bundle -> ${path.relative(ROOT, path.join(DIST_DIR, "min-ui.css"))}`,
 );
+console.log(`ui-css: source directory -> ${path.relative(ROOT, SOURCE_DIR)}`);
 
 function minifyCss(css) {
   return css
