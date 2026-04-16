@@ -49,9 +49,9 @@ Single package via jsDelivr:
 ```html
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/cmswift@1.0.3/dist/css/ui.css"
+  href="https://cdn.jsdelivr.net/npm/cmswift@1.0.4/dist/css/ui.css"
 />
-<script src="https://cdn.jsdelivr.net/npm/cmswift@1.0.3/dist/cmswift.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cmswift@1.0.4/dist/cmswift.js"></script>
 ```
 
 Minified single package:
@@ -59,9 +59,9 @@ Minified single package:
 ```html
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/cmswift@1.0.3/dist/css/ui.min.css"
+  href="https://cdn.jsdelivr.net/npm/cmswift@1.0.4/dist/css/ui.min.css"
 />
-<script src="https://cdn.jsdelivr.net/npm/cmswift@1.0.3/dist/cmswift.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cmswift@1.0.4/dist/cmswift.min.js"></script>
 ```
 
 Split core + UI via jsDelivr:
@@ -69,10 +69,10 @@ Split core + UI via jsDelivr:
 ```html
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@cmswift/ui@1.0.3/dist/css/ui.css"
+  href="https://cdn.jsdelivr.net/npm/@cmswift/ui@1.0.4/dist/css/ui.css"
 />
-<script src="https://cdn.jsdelivr.net/npm/@cmswift/core@1.0.3/dist/cms.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@cmswift/ui@1.0.3/dist/ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@cmswift/core@1.0.4/dist/cms.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@cmswift/ui@1.0.4/dist/ui.js"></script>
 ```
 
 Minified split core + UI:
@@ -80,15 +80,15 @@ Minified split core + UI:
 ```html
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@cmswift/ui@1.0.3/dist/css/ui.min.css"
+  href="https://cdn.jsdelivr.net/npm/@cmswift/ui@1.0.4/dist/css/ui.min.css"
 />
-<script src="https://cdn.jsdelivr.net/npm/@cmswift/core@1.0.3/dist/cms.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@cmswift/ui@1.0.3/dist/ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@cmswift/core@1.0.4/dist/cms.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@cmswift/ui@1.0.4/dist/ui.min.js"></script>
 ```
 
 For production:
 
-- pin explicit versions, for example `@1.0.3`
+- pin explicit versions, for example `@1.0.4`
 - prefer minified bundles when you do not need readable builds
 - use `dist/cmswift.min.js` or `dist/min-cmswift.js` for `cmswift`
 - use `dist/cms.min.js` and `dist/ui.min.js` for split core and UI
@@ -147,6 +147,36 @@ Minimal HTML:
 import "@cmswift/core";
 import "@cmswift/ui";
 import "@cmswift/ui/css/ui.css";
+```
+
+## Theme Helper
+
+Use the theme helpers to control `data-theme` on the root `html` element:
+
+```js
+CMSwift.setTheme("dark");
+CMSwift.getTheme();
+CMSwift.toggleTheme(["light", "dark", "sepia"]);
+```
+
+This sets `data-theme` on `<html>`:
+
+```html
+<html data-theme="dark">
+```
+
+Behavior:
+
+- `CMSwift.setTheme(theme)` applies the theme and persists it to `localStorage`
+- `CMSwift.getTheme()` reads the current theme from `html[data-theme]`, with fallback to the saved value
+- `CMSwift.toggleTheme(themes)` cycles through any number of themes, not only `light/dark`
+- on startup, CMSwift restores the saved theme automatically if one exists
+
+If you want multi-theme toggling without passing the list every time, set:
+
+```js
+CMSwift.theme.themes = ["light", "dark", "sepia", "midnight"];
+CMSwift.toggleTheme();
 ```
 
 ## Available CSS Exports
@@ -233,6 +263,7 @@ npm run gen:ui-dts
 - [Core Reference](docs/reference/core.md)
 - [UI Reference](docs/reference/ui.md)
 - [Stability Policy](docs/policy/stability.md)
+- [Release Notes v1.0.4](docs/release/release-notes-v1.0.4.md)
 - [Release Notes v1.0.3](docs/release/release-notes-v1.0.3.md)
 - [Release Notes v1.0.2](docs/release/release-notes-v1.0.2.md)
 - [Release Notes v1.0.1](docs/release/release-notes-v1.0.1.md)

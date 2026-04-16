@@ -8311,6 +8311,10 @@
   --set-shadow-active: var(--cms-shadow-sm);
 }
 
+.cms-field>.cms-control {
+  --set-border-color: var(--cms-border-color, #7a7a7a3d);
+}
+
 .cms-grid-col-surface {
   position: relative;
   border: 1px solid var(--set-border-color, transparent);
@@ -9637,8 +9641,9 @@ a.cms-breadcrumb {
   padding: 2px;
   border-radius: 999px;
   justify-content: flex-start;
-  background: color-mix(in srgb, var(--set-background-color, var(--cms-surface-2)) 28%, white);
+  background: color-mix(in srgb, var(--set-background-color, var(--cms-surface-2)) 28%, var(--cms-theme-color-1));
   filter: grayscale(.5);
+  box-sizing: content-box;
 }
 
 .cms-toggle-wrap .cms-toggle-thumb {
@@ -10196,7 +10201,7 @@ a.cms-breadcrumb {
   --set-color-0: var(--cms-gray-50);
   --set-color-1: var(--cms-gray-100);
   --set-color-2: var(--cms-gray-400);
-  --set-color-3: var(--cms-gray-700);
+  --set-color-3: var(--cms-gray-500);
   --set-color-4: var(--cms-gray-900);
 }
 

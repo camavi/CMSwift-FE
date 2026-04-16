@@ -175,6 +175,37 @@ test("store.watch callbacks run untracked and do not trigger reactive loop guard
   assert.equal(getHits(), 1);
 });
 
+test("theme helpers persist theme values and cycle custom theme lists", async () => {
+  const CMS = await loadCMS();
+
+  assert.equal(CMS.getTheme(), null);
+
+  CMS.setTheme("midnight");
+
+  assert.equal(document.documentElement.getAttribute("data-theme"), "midnight");
+  assert.equal(window.localStorage.getItem("cmswift:theme"), "midnight");
+  assert.equal(CMS.getTheme(), "midnight");
+
+  const nextTheme = CMS.toggleTheme(["light", "dark", "midnight"]);
+  assert.equal(nextTheme, "light");
+  assert.equal(CMS.getTheme(), "light");
+  assert.equal(window.localStorage.getItem("cmswift:theme"), "light");
+
+  const nextAfterLight = CMS.toggleTheme(["light", "dark", "midnight"]);
+  assert.equal(nextAfterLight, "dark");
+  assert.equal(CMS.getTheme(), "dark");
+});
+
+test("getTheme restores saved theme from localStorage when DOM has no theme", async () => {
+  const CMS = await loadCMS();
+
+  window.localStorage.setItem("cmswift:theme", "sepia");
+  document.documentElement.removeAttribute("data-theme");
+
+  assert.equal(CMS.getTheme(), "sepia");
+  assert.equal(document.documentElement.getAttribute("data-theme"), "sepia");
+});
+
 test("http request exposes public API, hooks and state surface", async () => {
   const CMS = await loadCMS();
   const calls = [];

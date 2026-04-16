@@ -1,6 +1,6 @@
 {
   "name": "@cmswift/ui",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "CMSwift UI layer built on top of @cmswift/core",
   "license": "MIT",
   "type": "module",
@@ -24,6 +24,6 @@
     "src"
   ],
   "peerDependencies": {
-    "@cmswift/core": "^1.0.3"
+    "@cmswift/core": "^1.0.4"
   }
 }

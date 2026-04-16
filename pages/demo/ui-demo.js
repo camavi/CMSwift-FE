@@ -7,12 +7,21 @@ CMSwift.ready(() => {
   const nameModel = _.rod("Carlos");
   const roleModel = _.rod("developer");
   const [getUpdates, setUpdates] = _.signal(true);
-
+  const Themes = _.rod(_.getTheme() === "dark");
+  Themes.action((v) => {
+    _.setTheme(v ? "dark" : "light");
+  });
   _.mount(
     root,
     _.div(
       _.Card(
         _.cardBody(
+          _.Row(
+            _.Spacer(),
+            _.div({ class: "cms-text-right" },
+              _.Toggle({ color: "success", model: Themes, uncheckedIcon: "light_mode", checkedIcon: "brightness_6", }, () => Themes.value ? "Theme dark" : "Theme light"),
+            )
+          ),
           _.Input({
             label: t("nameLabel"),
             model: nameModel,
@@ -25,17 +34,11 @@ CMSwift.ready(() => {
           }),
           _.Checkbox({ model: [getUpdates, setUpdates] }, t("updatesLabel")),
           _.div(
-            {
-              style: {
-                display: "flex",
-                gap: "10px",
-                flexWrap: "wrap",
-                marginTop: "12px",
-              },
-            },
+
             _.Btn(
               {
-                color: "primary",
+                color: "secondary",
+                outline: true,
                 onClick: () => _.Notify?.success?.(t("actionToast")),
               },
               t("actionButton"),

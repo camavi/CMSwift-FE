@@ -179,6 +179,7 @@ This group includes:
 - auth
 - http
 - router
+- theme helper
 - `CMSwift.ui.meta`
 
 Current status:
@@ -192,9 +193,31 @@ Module notes:
 - `store`: scope, persistence, and watcher behavior are substantially cleaner
 - `router`: path, query, and history helpers are better isolated
 - `http`: request normalization and state surface are clearer
+- `setTheme`: sets `data-theme` on the root `html` element through `CMSwift.setTheme(theme)`
+- `getTheme`: reads the active theme from the root element with storage fallback
+- `toggleTheme`: cycles through a provided or configured theme list and persists the result
 - `overlay`: anchored and stacked behavior is more stable
 - `auth`: permission and route-protection behavior is workable, though still sensitive
 - `ui.meta`: machine-readable UI metadata is available, but still not a stable public contract
+
+Theme helper contract:
+
+- `CMSwift.setTheme(theme)` finds the root `html` element, sets `data-theme="<theme>"`, and persists the value in `localStorage`
+- `CMSwift.getTheme()` reads the current `html[data-theme]`; if missing, it falls back to the saved theme and syncs the DOM
+- `CMSwift.toggleTheme(themes)` cycles through a theme list; the list can contain any number of themes
+- returns the `html` element when available, otherwise `null`
+- `CMSwift.theme.themes` can hold the default cycle order for `toggleTheme()`
+- default storage key: `cmswift:theme`
+- on startup, the core restores the saved theme automatically if present
+- intended for simple runtime theme switching without introducing extra framework state manager
+
+Example:
+
+```js
+CMSwift.setTheme("dark");
+CMSwift.getTheme();
+CMSwift.toggleTheme(["light", "dark", "sepia"]);
+```
 
 Known limits:
 

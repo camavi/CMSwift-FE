@@ -19,7 +19,9 @@
   --demo-bg: #f5f3ec;
   --demo-bg-soft: #fbfaf7;
   --demo-panel: rgba(255, 255, 255, 0.9);
+  --cms-bg-default: var(--demo-panel);
   --demo-text: #1d2a1f;
+  --demo-text-active: #e0e0e0;
   --demo-muted: #56655a;
   --demo-border: rgba(29, 42, 31, 0.1);
   --demo-shadow: 0 22px 60px rgba(29, 42, 31, 0.08);
@@ -28,6 +30,28 @@
   --demo-ui: #b7d9c7;
   --demo-core: #f1d9a5;
   --demo-dev: #d8c3ef;
+  --gdt1: rgba(183, 217, 199, 0.75);
+  --gdt2: rgba(241, 217, 165, 0.5);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --demo-bg: #121212;
+  --demo-bg-soft: #1c1c1c;
+  --demo-panel: #10141e;
+  --cms-bg-default: var(--demo-panel);
+  --demo-text: #ffffff;
+  --demo-muted: #a5a5a5;
+  --demo-border: rgba(255, 255, 255, 0.1);
+  --demo-shadow: 0 22px 60px rgba(255, 255, 255, 0.08);
+  --demo-primary: #00aa52;
+  --demo-primary-strong: #f1d9a5;
+  --demo-ui: #1c1c1c;
+  --demo-core: #584f62;
+  --demo-dev: #b7d9c7;
+
+  --gdt1: rgba(0, 100, 249, 0.243);
+  --gdt2: rgba(254, 127, 0, 0.243);
 }
 
 * {
@@ -39,8 +63,8 @@ body {
   font-family: "Nunito", system-ui, sans-serif;
   color: var(--demo-text);
   background:
-    radial-gradient(circle at top left, rgba(183, 217, 199, 0.75), transparent 32%),
-    radial-gradient(circle at top right, rgba(241, 217, 165, 0.5), transparent 28%),
+    radial-gradient(circle at top left, var(--gdt1), transparent 32%),
+    radial-gradient(circle at top right, var(--gdt2), transparent 28%),
     linear-gradient(180deg, var(--demo-bg-soft) 0%, var(--demo-bg) 100%);
 }
 
@@ -91,13 +115,14 @@ pre {
   text-decoration: none;
   padding: 10px 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--demo-panel);
   border: 1px solid var(--demo-border);
+  color: var(--demo-text);
 }
 
 .top-nav a.active {
   background: var(--demo-primary);
-  color: white;
+  color: var(--demo-text-active);
   border-color: var(--demo-primary);
 }
 
@@ -107,7 +132,7 @@ pre {
   gap: 10px;
   padding: 10px 14px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--demo-panel);
   border: 1px solid var(--demo-border);
   color: var(--demo-muted);
   font-size: 14px;
@@ -117,7 +142,7 @@ pre {
 .language-switcher select {
   border: 1px solid var(--demo-border);
   border-radius: 10px;
-  background: white;
+  background: var(--demo-panel);
   color: var(--demo-text);
   min-height: 36px;
   padding: 0 10px;
@@ -127,7 +152,7 @@ pre {
 .hero {
   padding: 32px;
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.74);
+  background: var(--demo-panel);
   border: 1px solid var(--demo-border);
   box-shadow: var(--demo-shadow);
 }
@@ -248,12 +273,12 @@ pre {
   padding: 0 16px;
   border-radius: 14px;
   border: 1px solid var(--demo-border);
-  background: white;
+  background: var(--demo-panel);
 }
 
 .button.primary {
   background: var(--demo-primary);
-  color: white;
+  color: var(--demo-text-active);
   border-color: var(--demo-primary);
 }
 
@@ -266,7 +291,7 @@ pre {
 .code-card pre {
   padding: 16px;
   border-radius: 18px;
-  background: #f0ede5;
+  background: var(--demo-panel);
   border: 1px solid rgba(29, 42, 31, 0.08);
 }
 

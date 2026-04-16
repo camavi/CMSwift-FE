@@ -41,7 +41,7 @@
   CMSwift.uiSizes = ["xxs", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl"];
   CMSwift.uiColors = ["primary", "secondary", "success", "warning", "danger", "info", "light", "dark"];
   CMSwift.meta = CMSwift.meta || {
-    version: "1.0.3",
+    version: "1.0.4",
     policy: {
       sourceOfTruth: "docs/reference/core.md",
       syncRule: "Quando cambia un modulo core, aggiornare sia questo meta sia docs/reference/core.md."

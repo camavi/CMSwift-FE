@@ -9,6 +9,29 @@ The format is kept intentionally simple:
 - Fixed
 - Docs
 
+## [1.0.4] - 2026-04-16
+
+### Added
+
+- `CMSwift.getTheme()` to read the active theme from `html[data-theme]` with storage fallback
+- `CMSwift.toggleTheme()` to cycle through any number of themes instead of assuming only `light/dark`
+- automatic theme restore from `localStorage` during core bootstrap
+- core tests for theme persistence and multi-theme toggling
+
+### Changed
+
+- `CMSwift.setTheme()` now persists the selected theme in `localStorage`
+- theme helpers are now documented in the public README and core technical reference
+- demo theme switching was aligned with the updated runtime helper behavior
+
+### Fixed
+
+- UI toggle styling was adjusted for better consistency in dark theme usage
+
+### Docs
+
+- added `v1.0.4` release notes
+
 ## [1.0.3] - 2026-04-15
 
 ### Removed
