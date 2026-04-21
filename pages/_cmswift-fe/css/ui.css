@@ -2587,13 +2587,20 @@
 /* >>> ui-components.css */
 /* - NATIVE */
 
-input {
+input,
+select,
+button {
   background-color: var(--cms-theme-color-1);
   border-color: var(--cms-theme-color-2);
   border-width: 1px;
   border-radius: var(--cms-b-radius-default, 4px);
   padding: 2px 8px;
   min-height: calc(var(--cms-input-height-default, 32px) + 5px);
+  color: var(--cms-text);
+}
+
+select {
+  min-height: calc(var(--cms-input-height-default, 32px) + 9px);
 }
 
 /* - CSS BASE */
@@ -2767,7 +2774,7 @@ input {
 .cms-menu-entry-shortcut {
   font-size: 12px;
   line-height: 1.4;
-  color: var(--cms-muted);
+  color: color-mix(in srgb, var(--set-color-2) 50%, var(--cms-text));
 }
 
 .cms-menu-items,
@@ -3183,7 +3190,7 @@ input {
 }
 
 .cms-muted {
-  color: var(--cms-muted);
+  color: color-mix(in srgb, var(--cms-text) 70%, var(--set-color-2));
 }
 
 .cms-header.stack,
@@ -7987,9 +7994,6 @@ input {
   width: 100%;
   min-width: 0;
   padding: 10px 12px;
-  border: 1px solid var(--cms-alert-border);
-  border-radius: var(--set-border-radius, var(--cms-r-md));
-  background: var(--cms-alert-bg);
   position: relative;
 }
 
@@ -7999,18 +8003,6 @@ input {
   inset: 0 auto 0 0;
   width: 3px;
   background: var(--cms-alert-accent);
-}
-
-.cms-alert-icon {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  color: var(--cms-alert-accent);
-  background: color-mix(in srgb, var(--cms-alert-accent) 14%, transparent);
 }
 
 .cms-alert-body {
@@ -8034,7 +8026,7 @@ input {
 
 .cms-alert-description,
 .cms-alert-meta {
-  color: var(--cms-muted);
+  color: var(--cms-theme-color-5);
 }
 
 .cms-alert-side,
@@ -8059,41 +8051,52 @@ input {
 .cms-alert.cms-state-success {
   --cms-alert-accent: var(--cms-success);
   --cms-alert-border: color-mix(in srgb, var(--cms-success) 32%, var(--cms-border-color));
-  --cms-alert-bg: var(--cms-success-soft);
+  --set-background-color: color-mix(in srgb, var(--cms-success) 32%, var(--cms-theme-color-1));
 }
 
 .cms-alert.cms-state-warning {
   --cms-alert-accent: var(--cms-warning);
-  --cms-alert-border: color-mix(in srgb, var(--cms-warning) 32%, var(--cms-border-color));
-  --cms-alert-bg: var(--cms-warning-soft);
+  --cms-alert-border: color-mix(in srgb, var(--cms-warning) 50%, var(--cms-border-color));
+  --set-background-color: color-mix(in srgb, var(--cms-warning) 50%, var(--cms-theme-color-1));
 }
 
 .cms-alert.cms-state-danger {
   --cms-alert-accent: var(--cms-danger);
-  --cms-alert-border: color-mix(in srgb, var(--cms-danger) 32%, var(--cms-border-color));
-  --cms-alert-bg: var(--cms-danger-soft);
+  --cms-alert-border: color-mix(in srgb, var(--cms-danger) 50%, var(--cms-border-color));
+  --set-background-color: color-mix(in srgb, var(--cms-danger) 50%, var(--cms-theme-color-1));
 }
 
 .cms-alert.cms-state-info {
   --cms-alert-accent: var(--cms-info);
-  --cms-alert-border: color-mix(in srgb, var(--cms-info) 32%, var(--cms-border-color));
-  --cms-alert-bg: var(--cms-info-soft);
+  --cms-alert-border: color-mix(in srgb, var(--cms-info) 50%, var(--cms-border-color));
+  --set-background-color: color-mix(in srgb, var(--cms-info) 50%, var(--cms-theme-color-1));
 }
 
 .cms-alert.cms-state-primary {
   --cms-alert-accent: var(--cms-primary);
-  --cms-alert-border: color-mix(in srgb, var(--cms-primary) 32%, var(--cms-border-color));
-  --cms-alert-bg: var(--cms-primary-soft);
+  --cms-alert-border: color-mix(in srgb, var(--cms-primary) 50%, var(--cms-border-color));
+  --set-background-color: color-mix(in srgb, var(--cms-primary) 50%, var(--cms-theme-color-1));
 }
 
 .cms-alert.cms-state-secondary {
   --cms-alert-accent: var(--cms-secondary);
-  --cms-alert-border: color-mix(in srgb, var(--cms-secondary) 32%, var(--cms-border-color));
-  --cms-alert-bg: var(--cms-secondary-soft);
+  --cms-alert-border: color-mix(in srgb, var(--cms-secondary) 50%, var(--cms-border-color));
+  --set-background-color: color-mix(in srgb, var(--cms-secondary) 50%, var(--cms-theme-color-1));
+}
+
+.cms-alert.cms-state-dark {
+  --cms-alert-accent: var(--cms-dark);
+  --cms-alert-border: color-mix(in srgb, var(--cms-dark) 50%, var(--cms-border-color));
+  --set-background-color: color-mix(in srgb, var(--cms-dark) 50%, var(--cms-theme-color-1));
+}
+
+.cms-alert.cms-state-light {
+  --cms-alert-accent: var(--cms-light);
+  --cms-alert-border: color-mix(in srgb, var(--cms-light) 50%, var(--cms-border-color));
+  --set-background-color: color-mix(in srgb, var(--cms-light) 50%, var(--cms-theme-color-1));
 }
 
 .cms-empty-state {
-  --cms-empty-accent: color-mix(in srgb, var(--cms-border-color) 70%, white);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -8102,9 +8105,7 @@ input {
   width: 100%;
   min-width: 0;
   padding: 28px 18px;
-  border: 1px dashed color-mix(in srgb, var(--cms-empty-accent) 38%, var(--cms-border-color));
-  border-radius: var(--set-border-radius, var(--cms-r-lg));
-  background: color-mix(in srgb, var(--cms-panel) 92%, white 4%);
+  box-sizing: border-box;
 }
 
 .cms-empty-state.inline {
@@ -8164,27 +8165,35 @@ input {
 }
 
 .cms-empty-state.cms-state-success {
-  --cms-empty-accent: var(--cms-success);
+  --set-background-color: color-mix(in srgb, var(--cms-success) 50%, var(--cms-theme-color-1));
 }
 
 .cms-empty-state.cms-state-warning {
-  --cms-empty-accent: var(--cms-warning);
+  --set-background-color: color-mix(in srgb, var(--cms-warning) 50%, var(--cms-theme-color-1));
 }
 
 .cms-empty-state.cms-state-danger {
-  --cms-empty-accent: var(--cms-danger);
+  --set-background-color: color-mix(in srgb, var(--cms-danger) 50%, var(--cms-theme-color-1));
 }
 
 .cms-empty-state.cms-state-info {
-  --cms-empty-accent: var(--cms-info);
+  --set-background-color: color-mix(in srgb, var(--cms-info) 50%, var(--cms-theme-color-1));
 }
 
 .cms-empty-state.cms-state-primary {
-  --cms-empty-accent: var(--cms-primary);
+  --set-background-color: color-mix(in srgb, var(--cms-primary) 50%, var(--cms-theme-color-1));
 }
 
 .cms-empty-state.cms-state-secondary {
-  --cms-empty-accent: var(--cms-secondary);
+  --set-background-color: color-mix(in srgb, var(--cms-secondary) 50%, var(--cms-theme-color-1));
+}
+
+.cms-empty-state.cms-state-dark {
+  --set-background-color: color-mix(in srgb, var(--cms-dark) 50%, var(--cms-theme-color-1));
+}
+
+.cms-empty-state.cms-state-light {
+  --set-background-color: color-mix(in srgb, var(--cms-light) 50%, var(--cms-theme-color-1));
 }
 
 .cms-t-nowrap {
@@ -8324,7 +8333,7 @@ input {
 
 .cms-field>.cms-control {
   --set-border-color: var(--cms-border-color, #7a7a7a3d);
-  --set-background-color: var(--cms-theme-color-4);
+  --set-background-color: var(--cms-panel);
 }
 
 .cms-grid-col-surface {
@@ -8341,6 +8350,10 @@ input {
   padding: var(--cms-grid-col-panel-padding, var(--cms-s-lg));
 }
 
+.cms-outline {
+  --set-border-color: var(--cms-theme-color-4);
+}
+
 /* COMPONENTS */
 .cms-tabs {
   --cms-tabs-gap: 12px;
@@ -8352,6 +8365,7 @@ input {
   display: flex;
   gap: var(--cms-tabs-gap);
   min-width: 0;
+  background-color: color-mix(in srgb, var(--set-background-color) 60%, var(--cms-theme-color-1));
 }
 
 .cms-tabs.horizontal .cms-tabs-bar {
@@ -8366,9 +8380,7 @@ input {
   display: flex;
   gap: var(--cms-tabs-tab-gap);
   padding: var(--cms-s-sm);
-  border: 1px solid var(--cms-border-color);
-  background-color: color-mix(in srgb, var(--cms-gray-500), transparent 80%);
-  border-radius: var(--set-border-radius, var(--cms-b-radius-default, 2px));
+  background-color: color-mix(in srgb, var(--set-background-color) 60%, var(--cms-theme-color-1));
   min-width: 0;
   overflow: auto;
   flex: 1 1 auto;
@@ -8429,8 +8441,7 @@ input {
 }
 
 .cms-tabs-tab.active {
-  background: color-mix(in srgb, var(--cms-tabs-item-accent) 10%, transparent);
-  color: color-mix(in srgb, var(--cms-tabs-item-accent) 78%, var(--cms-text) 22%);
+  background: color-mix(in srgb, var(--cms-tabs-item-accent) 30%, transparent);
   border-color: color-mix(in srgb, var(--cms-tabs-item-accent) 28%, var(--cms-border-color));
 }
 
@@ -8462,13 +8473,13 @@ input {
 
 .cms-tabs-tab-note {
   display: block;
-  color: var(--cms-muted);
+  color: var(--cms-text);
   font-size: 12px;
   line-height: 1.25;
 }
 
 .cms-tabs-tab.active .cms-tabs-tab-note {
-  color: color-mix(in srgb, var(--cms-tabs-item-accent) 68%, var(--cms-text) 32%);
+  color: var(--set-color-2);
 }
 
 .cms-tabs-tab-icon,
@@ -8524,7 +8535,7 @@ input {
 
 .cms-tabs.variant-soft .cms-tabs-nav {
   background-color: transparent;
-  border-style: dashed;
+  border: 1px dashed var(--set-color-2);
 }
 
 .cms-tabs.dense .cms-tabs-nav {
@@ -9293,6 +9304,7 @@ a.cms-breadcrumb {
 .cms-chip .cms-chip-remove {
   padding: 1px 2px;
   aspect-ratio: 1/1;
+  min-height: 0;
 }
 
 @keyframes cms-spinner-rotate {
@@ -9425,7 +9437,8 @@ a.cms-breadcrumb {
   justify-content: center;
   padding: 2px 8px;
   font-size: var(--cms-font-size, 12px);
-  --set-background-color: var(--cms-gray-300);
+  --set-background-color: color-mix(in srgb, var(--cms-panel) 60%, var(--cms-theme-color-4));
+  --set-color: var(--cms-text-2);
   gap: 6px;
   overflow: visible;
   transition: transform 180ms ease, background-color 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
@@ -10187,7 +10200,8 @@ a.cms-breadcrumb {
   box-shadow: var(--cms-shadow-lg);
 }
 
-.cms-state-primary {
+.cms-state-primary,
+.cms-state-primary>.cms-control {
   --set-border-color: var(--cms-primary-hover);
   --set-color: var(--cms-primary-text);
   --set-background-color: var(--cms-primary);
@@ -10204,7 +10218,8 @@ a.cms-breadcrumb {
   color: var(--cms-primary-text);
 }
 
-.cms-state-secondary {
+.cms-state-secondary,
+.cms-state-secondary>.cms-control {
   --set-border-color: var(--cms-secondary-hover);
   --set-color: var(--cms-secondary-text);
   --set-background-color: var(--cms-secondary);
@@ -10221,7 +10236,8 @@ a.cms-breadcrumb {
   color: var(--cms-secondary-text);
 }
 
-.cms-state-success {
+.cms-state-success,
+.cms-state-success>.cms-control {
   --set-color: var(--cms-success-text);
   --set-border-color: var(--cms-success-hover);
   --set-background-color: var(--cms-success);
@@ -10238,7 +10254,8 @@ a.cms-breadcrumb {
   color: var(--cms-success-text);
 }
 
-.cms-state-warning {
+.cms-state-warning,
+.cms-state-warning>.cms-control {
   --set-border-color: var(--cms-warning-hover);
   --set-color: var(--cms-warning-text);
   --set-background-color: var(--cms-warning);
@@ -10255,7 +10272,8 @@ a.cms-breadcrumb {
   color: var(--cms-warning-text);
 }
 
-.cms-state-danger {
+.cms-state-danger,
+.cms-state-danger>.cms-control {
   --set-border-color: var(--cms-danger-hover);
   --set-color: var(--cms-danger-text);
   --set-background-color: var(--cms-danger);
@@ -10272,7 +10290,8 @@ a.cms-breadcrumb {
   color: var(--cms-danger-text);
 }
 
-.cms-state-info {
+.cms-state-info,
+.cms-state-info>.cms-control {
   --set-border-color: var(--cms-info-hover);
   --set-color: var(--cms-info-text);
   --set-background-color: var(--cms-info);
@@ -10289,7 +10308,8 @@ a.cms-breadcrumb {
   color: var(--cms-info-text);
 }
 
-.cms-state-light {
+.cms-state-light,
+.cms-state-light>.cms-control {
   --set-border-color: var(--cms-light);
   --set-color: var(--cms-light-text);
   --set-background-color: var(--cms-light-soft);
@@ -10306,7 +10326,8 @@ a.cms-breadcrumb {
   color: var(--cms-light-text);
 }
 
-.cms-state-dark {
+.cms-state-dark,
+.cms-state-dark>.cms-control {
   --set-border-color: var(--cms-dark-hover);
   --set-color: var(--cms-dark-text);
   --set-background-color: var(--cms-dark);
@@ -10348,7 +10369,9 @@ a.cms-breadcrumb {
 }
 
 .cms-glow {
-  --set-glow-active: inset 0 0 5px 0 color-mix(in srgb, var(--set-color-1) 70%, transparent), 0 0 3px 3px var(--set-color-1), 0 0 15px 2px var(--set-color-2);
+  --set-sc-inset: inset 0 0 5px 0 color-mix(in srgb, var(--set-color-2) 70%, var(--cms-theme-color-1));
+  --set-sc-borde: 0 0 1px 1px color-mix(in srgb, var(--set-border-color) 50%, transparent), 0 0 3px 3px color-mix(in srgb, var(--set-color-2) 50%, transparent);
+  --set-glow-active: var(--set-sc-inset), var(--set-sc-borde), 0 0 15px 2px var(--set-color-2);
   text-shadow: 0 0 3px color-mix(in srgb, var(--set-color-1) 70%, transparent);
 }
 
@@ -10358,19 +10381,19 @@ a.cms-breadcrumb {
   position: relative;
   backdrop-filter: blur(1px);
   --set-background-color: color-mix(in srgb, var(--set-background-color) 40%, transparent);
-  --set-color: var(--set-border-color);
+  --set-color: var(--cms-theme-color-6);
 }
 
 .cms-singularity-menu-select.cms-glass {
   backdrop-filter: blur(1px);
   --set-background-color: color-mix(in srgb, var(--set-background-color) 40%, transparent);
-  --set-color: var(--set-border-color);
+  --set-color: var(--cms-theme-color-6);
 }
 
 .cms-singularity.cms-glass .cms-btn,
 .cms-singularity-field.cms-glass>.cms-control .cms-btn {
-  color: var(--set-border-color);
-  border-color: var(--set-border-color);
+  color: var(--cms-theme-color-6);
+  border-color: var(--cms-theme-color-6);
 }
 
 .cms-glass.cms-singularity-menu-select>.cms-select-options>.cms-select-option.selected::before,
@@ -10384,10 +10407,11 @@ a.cms-breadcrumb {
   right: 0;
   bottom: 0;
   content: "";
-  box-shadow: inset 0 0 3px 2px color-mix(in srgb, var(--set-color-3) 40%, transparent);
-  --set-s-effect-1: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-1) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 40%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 100%);
-  --set-s-effect-2: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-2) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 20%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 80%);
-  --set-s-effect-3: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-2) 60%, transparent) 0%, color-mix(in srgb, var(--set-color-1) 20%, transparent) 20%, color-mix(in srgb, var(--set-color-1) 0%, transparent) 80%);
+  --set-sec-color: color-mix(in srgb, var(--cms-theme-color-1) 40%, transparent);
+  box-shadow: inset 0 0 3px 2px color-mix(in srgb, var(--set-color-3) 40%, var(--set-sec-color));
+  --set-s-effect-1: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-1) 60%, var(--set-sec-color)) 0%, color-mix(in srgb, var(--set-color-1) 20%, var(--set-sec-color)) 40%, color-mix(in srgb, var(--set-color-1) 0%, var(--set-sec-color)) 100%);
+  --set-s-effect-2: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-2) 60%, var(--set-sec-color)) 0%, color-mix(in srgb, var(--set-color-1) 20%, var(--set-sec-color)) 20%, color-mix(in srgb, var(--set-color-1) 0%, var(--set-sec-color)) 80%);
+  --set-s-effect-3: radial-gradient(ellipse at center, color-mix(in srgb, var(--set-color-2) 60%, var(--set-sec-color)) 0%, color-mix(in srgb, var(--set-color-1) 20%, var(--set-sec-color)) 20%, color-mix(in srgb, var(--set-color-1) 0%, var(--set-sec-color)) 80%);
   background: var(--set-s-effect-1), var(--set-s-effect-2), var(--set-s-effect-3);
   background-position: 50% 20%, 50% 70%, 50% 75%;
   background-size: 150% 400%, 80% 400%, 600% 200%;
@@ -10398,9 +10422,9 @@ a.cms-breadcrumb {
 }
 
 .cms-outline {
+  border-style: solid;
   border-width: 1px;
   --set-background-color: transparent;
-  --set-color: var(--set-color-3);
 }
 
 .cms-outline .cms-btn {
@@ -10464,7 +10488,7 @@ a.cms-breadcrumb {
 }
 
 .cms-clickable:hover {
-  --set-background-color: var(--set-hover);
+  --set-background-color: color-mix(in srgb, var(--set-hover) 40%, transparent);
 }
 
 .cms-clickable.cms-gradient:hover {
@@ -10557,18 +10581,18 @@ a.cms-breadcrumb {
 }
 
 .cms-singularity-field>.cms-control .cms-addon {
-  background-color: color-mix(in srgb, var(--set-background-color) 80%, transparent);
+  background-color: color-mix(in srgb, var(--set-background-color) 80%, var(--cms-theme-color-2));
   background-image: var(--set-glossy-active, none), var(--set-gradient-active, none);
   color: var(--set-color);
 }
 
 .cms-singularity-field>.cms-control>.cms-mid,
 .cms-singularity-field>.cms-control>.cms-mid input {
-  color: var(--set-color-4);
+  color: color-mix(in srgb, var(--set-color-4) 70%, var(--cms-theme-color-9));
 }
 
 .cms-singularity-field>.cms-control>.cms-mid>.cms-float-label {
-  color: color-mix(in srgb, var(--set-color-4) 70%, transparent);
+  color: color-mix(in srgb, var(--set-color-4) 70%, var(--cms-theme-color-5));
 }
 
 .cms-singularity-field.cms-field-fill>.cms-control>.cms-mid>.cms-select>.cms-select-control {
