@@ -15,7 +15,8 @@
       "icon", "iconOn", "iconOff", "iconStandby", "checkedIcon", "uncheckedIcon", "standbyIcon",
       "indeterminateIcon", "inputClass", "iconSize", "color", "size", "outline", "behavior", "mode",
       "flat", "glossy", "glow", "glass", "gradient", "textGradient", "lightShadow", "shadow",
-      "rounded", "radius", "textColor", "clickable", "border"
+      "rounded", "radius", "textColor", "clickable", "border",
+      "shortcode", "shortcut", "hotkey", "showShortcode", "showShortcut"
     ]);
     inputProps.type = type;
     inputProps.id = id;
@@ -25,6 +26,8 @@
 
     const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
     const labelContent = labelNodes.length ? labelNodes : renderSlotToArray(slots, "default", {}, children);
+    const shortcodeHint = uiCreateShortcodeHint(props, { className: "cms-shortcode cms-choice-shortcode" });
+    const finalLabelContent = shortcodeHint ? [...labelContent, shortcodeHint] : labelContent;
 
     const wrapProps = CMSwift.omit(props, [
       "model", "label", "checked", "onChange", "onInput", "value", "name", "id", "type", "dense",
@@ -32,7 +35,8 @@
       "uncheckedIcon", "standbyIcon", "indeterminateIcon", "iconSize", "color", "size", "behavior",
       "mode",
       "outline", "flat", "glossy", "glow", "glass", "gradient", "textGradient", "lightShadow",
-      "shadow", "rounded", "radius", "textColor", "clickable", "border"
+      "shadow", "rounded", "radius", "textColor", "clickable", "border",
+      "shortcode", "shortcut", "hotkey", "showShortcode", "showShortcut"
     ]);
     wrapProps.class = uiClass([
       "cms-clear-set",
@@ -61,7 +65,7 @@
     });
     const indicatorHost = isToggle ? _.span({ class: "cms-toggle-thumb" }) : marker;
     if (isToggle) marker.appendChild(indicatorHost);
-    const labelNode = labelContent.length ? _.span({ class: "cms-choice-label" }, ...labelContent) : null;
+    const labelNode = finalLabelContent.length ? _.span({ class: "cms-choice-label" }, ...finalLabelContent) : null;
 
     const wrap = _.label(
       wrapProps,
@@ -198,6 +202,14 @@
     }
 
     syncIndicator();
+    uiRegisterShortcode(wrap, props, {
+      isEnabled: () => !input.disabled,
+      action: () => {
+        if (input.disabled) return false;
+        uiFocusShortcutTarget(input);
+        input.click();
+      }
+    });
     return wrap;
   };
 
@@ -220,6 +232,8 @@
         size: "string|number",
         outline: "boolean",
         dense: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
         slots: "{ label?, default? }",
         class: "string",
         style: "object"
@@ -262,6 +276,8 @@
         size: "string|number",
         outline: "boolean",
         dense: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
         slots: "{ label?, default? }",
         class: "string",
         style: "object"
@@ -316,6 +332,8 @@
         color: "string",
         size: "string|number",
         dense: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
         slots: "{ label?, default? }",
         class: "string",
         style: "object"

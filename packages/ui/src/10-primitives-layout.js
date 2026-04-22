@@ -1085,7 +1085,8 @@
     const cls = uiClass(["cms-clear-set", "cms-btn", "cms-singularity", "cms-clickable", state, uiWhen(props.outline, "outline"), props.class]);
 
     const p = CMSwift.omit(props, [
-      "icon", "iconRight", "label", "loading", "outline", "iconAlign", "slots"
+      "icon", "iconRight", "label", "loading", "outline", "iconAlign", "slots",
+      "shortcode", "shortcut", "hotkey", "showShortcode", "showShortcut"
     ]);
     p.class = cls;
 
@@ -1120,6 +1121,7 @@
       if (slotChildren.length) content.push(...slotChildren);
     }
     pushAll(iconRight);
+    pushAll(uiCreateShortcodeHint(props, { className: "cms-shortcode cms-btn-shortcode" }));
 
     if (content.length === 0) content.push(_.span("Button"));
 
@@ -1155,6 +1157,13 @@
     }, ...content);
 
     setPropertyProps(btn, props);
+    uiRegisterShortcode(btn, props, {
+      isEnabled: () => !disabled,
+      action: () => {
+        if (disabled) return false;
+        btn.click();
+      }
+    });
     return btn;
   }
   if (CMSwift.isDev?.()) {
@@ -1169,6 +1178,8 @@
         outline: "boolean",
         loading: "boolean",
         disabled: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
         slots: "{ icon?, label?, default? }",
         class: "string",
         style: "object"
@@ -1295,8 +1306,10 @@
         : null;
       const iconRightNode = CMSwift.ui.renderSlot(slots, "iconRight", {}, iconRightFallback);
       const suffixNode = CMSwift.ui.renderSlot(slots, "suffix", {}, props.suffix);
+      const shortcodeNode = CMSwift.ui.renderSlot(slots, "shortcode", { props }, uiCreateShortcodeHint(props, { className: "cms-shortcode cms-field-shortcode" }));
       renderSlotToArray(null, "default", {}, suffixNode).forEach(n => right.appendChild(n));
       renderSlotToArray(null, "default", {}, iconRightNode).forEach(n => right.appendChild(n));
+      renderSlotToArray(null, "default", {}, shortcodeNode).forEach(n => right.appendChild(n));
       if (right.childNodes.length) {
         control.appendChild(right);
         mid.classList.add("cms-with-right");
@@ -1422,6 +1435,8 @@
         prefix: "String|Node|Function",
         suffix: "String|Node|Function",
         clearable: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
         disabled: "boolean",
         readonly: "boolean",
         control: "Node|Function",
@@ -1429,7 +1444,7 @@
         onClear: "() => void",
         onFocus: "() => void",
         wrapClass: "string",
-        slots: "{ label?, topLabel?, prefix?, suffix?, icon?, iconRight?, clear?, hint?, error?, control? }"
+        slots: "{ label?, topLabel?, prefix?, suffix?, shortcode?, icon?, iconRight?, clear?, hint?, error?, control? }"
       },
       slots: {
         label: "Floating label content",
@@ -1438,6 +1453,7 @@
         suffix: "Right addon content",
         icon: "Left icon content",
         iconRight: "Right icon content",
+        shortcode: "Shortcut badge content",
         clear: "Clear button slot (ctx: { clear, disabled, readonly, hasValue })",
         hint: "Hint content",
         errorMessage: "Error content",
@@ -1534,6 +1550,10 @@
         // NOTE: se vuoi cleanup automatico qui, lo facciamo nel layer component (v2)
       }
     }
+    uiRegisterShortcode(el, props, {
+      isEnabled: () => !el.disabled,
+      action: () => uiFocusShortcutTarget(el, { selectText: !!props.selectOnShortcode })
+    });
     return el;
   };
 
@@ -1692,6 +1712,10 @@
 
     // expose reference
     field._input = input;
+    uiRegisterShortcode(input, props, {
+      isEnabled: () => !input.disabled,
+      action: () => uiFocusShortcutTarget(input, { selectText: !!props.selectOnShortcode })
+    });
 
     return field;
   }
@@ -1713,6 +1737,8 @@
         inputmode: "string",
         disabled: "boolean",
         readonly: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
 
         // UI / UX
         label: "String|Node|Function (floating label)",
@@ -1748,6 +1774,7 @@
         topLabel: "Top label (via FormField slots.topLabel)",
         prefix: "Addon a sinistra (via FormField slots.prefix)",
         suffix: "Addon a destra (via FormField slots.suffix)",
+        shortcode: "Shortcut badge (via FormField slots.shortcode)",
         icon: "Icona a sinistra (via FormField slots.icon)",
         iconRight: "Icona a destra (via FormField slots.iconRight)",
         clear: "Clear button (via FormField slots.clear)",
@@ -2440,6 +2467,14 @@
 
     field._select = root;
     field._dispose = root._dispose;
+    uiRegisterShortcode(field, props, {
+      isEnabled: () => !isDisabled(),
+      action: () => {
+        if (isDisabled()) return false;
+        uiFocusShortcutTarget(root);
+        open();
+      }
+    });
 
     loadOptions();
 
@@ -2472,6 +2507,8 @@
         allowCustomValue: "boolean (alias allowCustom)",
         filterPlaceholder: "string",
         emptyText: "string",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
 
         icon: "String|Node|Function",
         iconRight: "String|Node|Function",
@@ -2499,6 +2536,7 @@
         topLabel: "Top label (via FormField slots.topLabel)",
         prefix: "Left addon (via FormField slots.prefix)",
         suffix: "Right addon (via FormField slots.suffix)",
+        shortcode: "Shortcut badge (via FormField slots.shortcode)",
         icon: "Left icon (via FormField slots.icon)",
         iconRight: "Right icon (via FormField slots.iconRight)",
         hint: "Hint content (via FormField slots.hint)",

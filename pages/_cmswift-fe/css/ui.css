@@ -4692,6 +4692,36 @@ select {
   cursor: not-allowed;
 }
 
+.cms-shortcode {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.75em;
+  padding: 0.2em 0.55em;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--cms-border-color) 85%, transparent);
+  background: color-mix(in srgb, var(--cms-panel) 88%, transparent);
+  color: color-mix(in srgb, var(--cms-text) 82%, var(--cms-muted) 18%);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.cms-btn-shortcode {
+  margin-left: 8px;
+}
+
+.cms-field-shortcode {
+  margin-left: 4px;
+}
+
+.cms-choice-shortcode {
+  margin-left: 6px;
+}
+
 .cms-input-raw {
   width: 100%;
   padding: 10px 12px;
@@ -9713,6 +9743,10 @@ a.cms-breadcrumb {
 }
 
 .cms-choice-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
   line-height: calc(var(--cms-font-size, 16px) + 6px);
 }
 

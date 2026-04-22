@@ -642,6 +642,8 @@ const META_PROP_DESCRIPTIONS = {
   radius: "Border radius token or CSS length applied to the component.",
   borderRadius: "Border radius token or CSS length applied to the component.",
   separator: "Separator string/node between items.",
+  shortcode: "Keyboard shortcut string, object, or array bound to the component action.",
+  showShortcode: "Displays the configured keyboard shortcut badge when the component supports it.",
   showLabel: "Whether to render the label text.",
   size: "Size token, number, or CSS length for sizing.",
   slots: "Named slots map for render overrides.",
@@ -1036,6 +1038,260 @@ const renderSlotToArray = (slots, name, ctx, fallback) => {
   const v = CMSwift.ui.renderSlot(slots, name, ctx, fallback);
   if (!v) return [];
   return Array.isArray(v) ? v : [v];
+};
+
+const UI_SHORTCODE_REGISTRY = new Set();
+let uiShortcodeListenerAttached = false;
+const UI_SHORTCODE_MODIFIERS = new Set(["ctrl", "alt", "shift", "meta"]);
+const UI_SHORTCODE_ALIASES = {
+  control: "ctrl",
+  ctl: "ctrl",
+  option: "alt",
+  opt: "alt",
+  command: "meta",
+  cmd: "meta",
+  "⌘": "meta",
+  "⌃": "ctrl",
+  "⌥": "alt",
+  "⇧": "shift",
+  esc: "escape",
+  return: "enter",
+  plus: "+",
+  spacebar: "space",
+  up: "arrowup",
+  down: "arrowdown",
+  left: "arrowleft",
+  right: "arrowright",
+  del: "delete"
+};
+const UI_SHORTCODE_DISPLAY = {
+  ctrl: "Ctrl",
+  alt: "Alt",
+  shift: "Shift",
+  meta: "Meta",
+  escape: "Esc",
+  enter: "Enter",
+  tab: "Tab",
+  space: "Space",
+  backspace: "Backspace",
+  delete: "Del",
+  arrowup: "Up",
+  arrowdown: "Down",
+  arrowleft: "Left",
+  arrowright: "Right",
+  pageup: "PgUp",
+  pagedown: "PgDn"
+};
+
+const uiIsApplePlatform = () => {
+  if (typeof navigator === "undefined") return false;
+  const platform = String(navigator.platform || navigator.userAgent || "");
+  return /(mac|iphone|ipad|ipod)/i.test(platform);
+};
+
+const uiNormalizeShortcodeToken = (token) => {
+  if (token == null) return "";
+  const raw = String(token).trim().toLowerCase();
+  if (!raw) return "";
+  return UI_SHORTCODE_ALIASES[raw] || raw;
+};
+
+const uiParseShortcode = (rawValue) => {
+  if (rawValue == null || rawValue === false) return null;
+  const source = String(rawValue).trim();
+  if (!source) return null;
+
+  const parts = source
+    .split("+")
+    .map(uiNormalizeShortcodeToken)
+    .filter(Boolean);
+
+  if (!parts.length) return null;
+
+  const spec = {
+    raw: source,
+    key: "",
+    ctrl: false,
+    alt: false,
+    shift: false,
+    meta: false
+  };
+
+  parts.forEach((part) => {
+    if (part === "mod") {
+      if (uiIsApplePlatform()) spec.meta = true;
+      else spec.ctrl = true;
+      return;
+    }
+    if (UI_SHORTCODE_MODIFIERS.has(part)) {
+      spec[part] = true;
+      return;
+    }
+    spec.key = part;
+  });
+
+  if (!spec.key) return null;
+  return spec;
+};
+
+const uiNormalizeShortcodeList = (rawValue) => {
+  if (rawValue == null || rawValue === false) return [];
+  const list = Array.isArray(rawValue) ? rawValue : [rawValue];
+  return list.map((item) => {
+    if (item == null || item === false) return null;
+    if (typeof item === "object" && !Array.isArray(item)) {
+      const parsed = uiParseShortcode(item.shortcode ?? item.shortcut ?? item.keys ?? item.key);
+      return parsed ? { ...item, ...parsed } : null;
+    }
+    const parsed = uiParseShortcode(item);
+    return parsed ? { ...parsed } : null;
+  }).filter(Boolean);
+};
+
+const uiResolveShortcodeList = (props = {}) =>
+  uiNormalizeShortcodeList(props.shortcode ?? props.shortcut ?? props.hotkey ?? props.keys);
+
+const uiIsShortcodeVisible = (props = {}) =>
+  props.showShortcode === true || props.showShortcut === true;
+
+const uiFormatShortcodeKey = (key) => {
+  const normalized = uiNormalizeShortcodeToken(key);
+  if (!normalized) return "";
+  const display = { ...UI_SHORTCODE_DISPLAY };
+  if (uiIsApplePlatform()) {
+    display.alt = "Option";
+    display.meta = "Cmd";
+  }
+  if (display[normalized]) return display[normalized];
+  if (normalized.length === 1) return normalized.toUpperCase();
+  return normalized.replace(/(^|[-_ ])(\w)/g, (_, prefix, char) => `${prefix}${char.toUpperCase()}`);
+};
+
+const uiFormatShortcode = (spec) => {
+  if (!spec) return "";
+  const parts = [];
+  if (spec.ctrl) parts.push(uiFormatShortcodeKey("ctrl"));
+  if (spec.alt) parts.push(uiFormatShortcodeKey("alt"));
+  if (spec.shift) parts.push(uiFormatShortcodeKey("shift"));
+  if (spec.meta) parts.push(uiFormatShortcodeKey("meta"));
+  parts.push(uiFormatShortcodeKey(spec.key));
+  return parts.filter(Boolean).join("+");
+};
+
+const uiFormatShortcodeList = (specs) =>
+  (Array.isArray(specs) ? specs : []).map(uiFormatShortcode).filter(Boolean).join(" / ");
+
+const uiCreateShortcodeHint = (props = {}, options = {}) => {
+  const specs = uiResolveShortcodeList(props);
+  if (!uiIsShortcodeVisible(props) || !specs.length || typeof document === "undefined") return null;
+  const node = document.createElement("span");
+  node.className = options.className || "cms-shortcode";
+  node.setAttribute("aria-hidden", "true");
+  node.textContent = uiFormatShortcodeList(specs);
+  return node;
+};
+
+const uiIsEditableEventTarget = (target) => {
+  const el = target?.nodeType === 1 ? target : target?.parentElement;
+  if (!el || typeof el.closest !== "function") return false;
+  if (el.isContentEditable) return true;
+  const editable = el.closest("input, textarea, select, [contenteditable], [contenteditable='true'], [contenteditable='plaintext-only']");
+  if (!editable) return false;
+  if ("disabled" in editable && editable.disabled) return false;
+  return true;
+};
+
+const uiEventMatchesShortcode = (event, spec) => {
+  if (!event || !spec) return false;
+  if (!!event.ctrlKey !== !!spec.ctrl) return false;
+  if (!!event.altKey !== !!spec.alt) return false;
+  if (!!event.shiftKey !== !!spec.shift) return false;
+  if (!!event.metaKey !== !!spec.meta) return false;
+  return uiNormalizeShortcodeToken(event.key) === spec.key;
+};
+
+const uiDetachShortcodeListenerIfEmpty = () => {
+  if (UI_SHORTCODE_REGISTRY.size || !uiShortcodeListenerAttached || typeof document === "undefined") return;
+  document.removeEventListener("keydown", uiHandleShortcodeKeydown, true);
+  uiShortcodeListenerAttached = false;
+};
+
+function uiHandleShortcodeKeydown(event) {
+  if (!UI_SHORTCODE_REGISTRY.size || !event || event.defaultPrevented || event.isComposing) return;
+
+  const isEditable = uiIsEditableEventTarget(event.target);
+  const bindings = Array.from(UI_SHORTCODE_REGISTRY);
+
+  for (let index = bindings.length - 1; index >= 0; index -= 1) {
+    const binding = bindings[index];
+    const anchor = binding?.anchor;
+    if (!anchor || !anchor.isConnected) {
+      UI_SHORTCODE_REGISTRY.delete(binding);
+      continue;
+    }
+    if (binding.isEnabled?.() === false) continue;
+
+    const matched = binding.specs.find((spec) => {
+      const allowInEditable = spec.allowInEditable ?? binding.allowInEditable ?? false;
+      if (isEditable && !allowInEditable) return false;
+      return uiEventMatchesShortcode(event, spec);
+    });
+
+    if (!matched) continue;
+
+    const shouldPreventDefault = matched.preventDefault ?? binding.preventDefault ?? true;
+    const shouldStopPropagation = matched.stopPropagation ?? binding.stopPropagation ?? true;
+    if (shouldPreventDefault) event.preventDefault();
+    if (shouldStopPropagation) event.stopPropagation();
+
+    const result = binding.action?.(event, matched, anchor);
+    if (result !== false) break;
+  }
+
+  uiDetachShortcodeListenerIfEmpty();
+}
+
+const uiRegisterShortcode = (anchor, props = {}, options = {}) => {
+  const specs = uiResolveShortcodeList(props);
+  if (!anchor || !specs.length || typeof document === "undefined") return null;
+
+  const binding = {
+    anchor,
+    specs,
+    action: typeof options.action === "function" ? options.action : () => anchor.click?.(),
+    isEnabled: typeof options.isEnabled === "function" ? options.isEnabled : null,
+    allowInEditable: !!options.allowInEditable,
+    preventDefault: options.preventDefault ?? true,
+    stopPropagation: options.stopPropagation ?? true
+  };
+
+  UI_SHORTCODE_REGISTRY.add(binding);
+
+  if (!uiShortcodeListenerAttached) {
+    document.addEventListener("keydown", uiHandleShortcodeKeydown, true);
+    uiShortcodeListenerAttached = true;
+  }
+
+  const dispose = () => {
+    UI_SHORTCODE_REGISTRY.delete(binding);
+    uiDetachShortcodeListenerIfEmpty();
+  };
+
+  CMSwift._registerCleanup(anchor, dispose);
+  return dispose;
+};
+
+const uiFocusShortcutTarget = (target, options = {}) => {
+  if (!target || typeof target.focus !== "function") return false;
+  try {
+    target.focus({ preventScroll: options.preventScroll ?? true });
+  } catch {
+    target.focus();
+  }
+  if (options.selectText && typeof target.select === "function") {
+    try { target.select(); } catch { }
+  }
+  return true;
 };
 
 const unitCover = (v, name = 'size') => {
@@ -2132,7 +2388,8 @@ const unitCover = (v, name = 'size') => {
     const cls = uiClass(["cms-clear-set", "cms-btn", "cms-singularity", "cms-clickable", state, uiWhen(props.outline, "outline"), props.class]);
 
     const p = CMSwift.omit(props, [
-      "icon", "iconRight", "label", "loading", "outline", "iconAlign", "slots"
+      "icon", "iconRight", "label", "loading", "outline", "iconAlign", "slots",
+      "shortcode", "shortcut", "hotkey", "showShortcode", "showShortcut"
     ]);
     p.class = cls;
 
@@ -2167,6 +2424,7 @@ const unitCover = (v, name = 'size') => {
       if (slotChildren.length) content.push(...slotChildren);
     }
     pushAll(iconRight);
+    pushAll(uiCreateShortcodeHint(props, { className: "cms-shortcode cms-btn-shortcode" }));
 
     if (content.length === 0) content.push(_.span("Button"));
 
@@ -2202,6 +2460,13 @@ const unitCover = (v, name = 'size') => {
     }, ...content);
 
     setPropertyProps(btn, props);
+    uiRegisterShortcode(btn, props, {
+      isEnabled: () => !disabled,
+      action: () => {
+        if (disabled) return false;
+        btn.click();
+      }
+    });
     return btn;
   }
   if (CMSwift.isDev?.()) {
@@ -2216,6 +2481,8 @@ const unitCover = (v, name = 'size') => {
         outline: "boolean",
         loading: "boolean",
         disabled: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
         slots: "{ icon?, label?, default? }",
         class: "string",
         style: "object"
@@ -2342,8 +2609,10 @@ const unitCover = (v, name = 'size') => {
         : null;
       const iconRightNode = CMSwift.ui.renderSlot(slots, "iconRight", {}, iconRightFallback);
       const suffixNode = CMSwift.ui.renderSlot(slots, "suffix", {}, props.suffix);
+      const shortcodeNode = CMSwift.ui.renderSlot(slots, "shortcode", { props }, uiCreateShortcodeHint(props, { className: "cms-shortcode cms-field-shortcode" }));
       renderSlotToArray(null, "default", {}, suffixNode).forEach(n => right.appendChild(n));
       renderSlotToArray(null, "default", {}, iconRightNode).forEach(n => right.appendChild(n));
+      renderSlotToArray(null, "default", {}, shortcodeNode).forEach(n => right.appendChild(n));
       if (right.childNodes.length) {
         control.appendChild(right);
         mid.classList.add("cms-with-right");
@@ -2469,6 +2738,8 @@ const unitCover = (v, name = 'size') => {
         prefix: "String|Node|Function",
         suffix: "String|Node|Function",
         clearable: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
         disabled: "boolean",
         readonly: "boolean",
         control: "Node|Function",
@@ -2476,7 +2747,7 @@ const unitCover = (v, name = 'size') => {
         onClear: "() => void",
         onFocus: "() => void",
         wrapClass: "string",
-        slots: "{ label?, topLabel?, prefix?, suffix?, icon?, iconRight?, clear?, hint?, error?, control? }"
+        slots: "{ label?, topLabel?, prefix?, suffix?, shortcode?, icon?, iconRight?, clear?, hint?, error?, control? }"
       },
       slots: {
         label: "Floating label content",
@@ -2485,6 +2756,7 @@ const unitCover = (v, name = 'size') => {
         suffix: "Right addon content",
         icon: "Left icon content",
         iconRight: "Right icon content",
+        shortcode: "Shortcut badge content",
         clear: "Clear button slot (ctx: { clear, disabled, readonly, hasValue })",
         hint: "Hint content",
         errorMessage: "Error content",
@@ -2581,6 +2853,10 @@ const unitCover = (v, name = 'size') => {
         // NOTE: se vuoi cleanup automatico qui, lo facciamo nel layer component (v2)
       }
     }
+    uiRegisterShortcode(el, props, {
+      isEnabled: () => !el.disabled,
+      action: () => uiFocusShortcutTarget(el, { selectText: !!props.selectOnShortcode })
+    });
     return el;
   };
 
@@ -2739,6 +3015,10 @@ const unitCover = (v, name = 'size') => {
 
     // expose reference
     field._input = input;
+    uiRegisterShortcode(input, props, {
+      isEnabled: () => !input.disabled,
+      action: () => uiFocusShortcutTarget(input, { selectText: !!props.selectOnShortcode })
+    });
 
     return field;
   }
@@ -2760,6 +3040,8 @@ const unitCover = (v, name = 'size') => {
         inputmode: "string",
         disabled: "boolean",
         readonly: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
 
         // UI / UX
         label: "String|Node|Function (floating label)",
@@ -2795,6 +3077,7 @@ const unitCover = (v, name = 'size') => {
         topLabel: "Top label (via FormField slots.topLabel)",
         prefix: "Addon a sinistra (via FormField slots.prefix)",
         suffix: "Addon a destra (via FormField slots.suffix)",
+        shortcode: "Shortcut badge (via FormField slots.shortcode)",
         icon: "Icona a sinistra (via FormField slots.icon)",
         iconRight: "Icona a destra (via FormField slots.iconRight)",
         clear: "Clear button (via FormField slots.clear)",
@@ -3487,6 +3770,14 @@ const unitCover = (v, name = 'size') => {
 
     field._select = root;
     field._dispose = root._dispose;
+    uiRegisterShortcode(field, props, {
+      isEnabled: () => !isDisabled(),
+      action: () => {
+        if (isDisabled()) return false;
+        uiFocusShortcutTarget(root);
+        open();
+      }
+    });
 
     loadOptions();
 
@@ -3519,6 +3810,8 @@ const unitCover = (v, name = 'size') => {
         allowCustomValue: "boolean (alias allowCustom)",
         filterPlaceholder: "string",
         emptyText: "string",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
 
         icon: "String|Node|Function",
         iconRight: "String|Node|Function",
@@ -3546,6 +3839,7 @@ const unitCover = (v, name = 'size') => {
         topLabel: "Top label (via FormField slots.topLabel)",
         prefix: "Left addon (via FormField slots.prefix)",
         suffix: "Right addon (via FormField slots.suffix)",
+        shortcode: "Shortcut badge (via FormField slots.shortcode)",
         icon: "Left icon (via FormField slots.icon)",
         iconRight: "Right icon (via FormField slots.iconRight)",
         hint: "Hint content (via FormField slots.hint)",
@@ -7260,7 +7554,8 @@ const setDrawerOpen = (open, key = drawerStateKey) => {
       "icon", "iconOn", "iconOff", "iconStandby", "checkedIcon", "uncheckedIcon", "standbyIcon",
       "indeterminateIcon", "inputClass", "iconSize", "color", "size", "outline", "behavior", "mode",
       "flat", "glossy", "glow", "glass", "gradient", "textGradient", "lightShadow", "shadow",
-      "rounded", "radius", "textColor", "clickable", "border"
+      "rounded", "radius", "textColor", "clickable", "border",
+      "shortcode", "shortcut", "hotkey", "showShortcode", "showShortcut"
     ]);
     inputProps.type = type;
     inputProps.id = id;
@@ -7270,6 +7565,8 @@ const setDrawerOpen = (open, key = drawerStateKey) => {
 
     const labelNodes = renderSlotToArray(slots, "label", {}, props.label);
     const labelContent = labelNodes.length ? labelNodes : renderSlotToArray(slots, "default", {}, children);
+    const shortcodeHint = uiCreateShortcodeHint(props, { className: "cms-shortcode cms-choice-shortcode" });
+    const finalLabelContent = shortcodeHint ? [...labelContent, shortcodeHint] : labelContent;
 
     const wrapProps = CMSwift.omit(props, [
       "model", "label", "checked", "onChange", "onInput", "value", "name", "id", "type", "dense",
@@ -7277,7 +7574,8 @@ const setDrawerOpen = (open, key = drawerStateKey) => {
       "uncheckedIcon", "standbyIcon", "indeterminateIcon", "iconSize", "color", "size", "behavior",
       "mode",
       "outline", "flat", "glossy", "glow", "glass", "gradient", "textGradient", "lightShadow",
-      "shadow", "rounded", "radius", "textColor", "clickable", "border"
+      "shadow", "rounded", "radius", "textColor", "clickable", "border",
+      "shortcode", "shortcut", "hotkey", "showShortcode", "showShortcut"
     ]);
     wrapProps.class = uiClass([
       "cms-clear-set",
@@ -7306,7 +7604,7 @@ const setDrawerOpen = (open, key = drawerStateKey) => {
     });
     const indicatorHost = isToggle ? _.span({ class: "cms-toggle-thumb" }) : marker;
     if (isToggle) marker.appendChild(indicatorHost);
-    const labelNode = labelContent.length ? _.span({ class: "cms-choice-label" }, ...labelContent) : null;
+    const labelNode = finalLabelContent.length ? _.span({ class: "cms-choice-label" }, ...finalLabelContent) : null;
 
     const wrap = _.label(
       wrapProps,
@@ -7443,6 +7741,14 @@ const setDrawerOpen = (open, key = drawerStateKey) => {
     }
 
     syncIndicator();
+    uiRegisterShortcode(wrap, props, {
+      isEnabled: () => !input.disabled,
+      action: () => {
+        if (input.disabled) return false;
+        uiFocusShortcutTarget(input);
+        input.click();
+      }
+    });
     return wrap;
   };
 
@@ -7465,6 +7771,8 @@ const setDrawerOpen = (open, key = drawerStateKey) => {
         size: "string|number",
         outline: "boolean",
         dense: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
         slots: "{ label?, default? }",
         class: "string",
         style: "object"
@@ -7507,6 +7815,8 @@ const setDrawerOpen = (open, key = drawerStateKey) => {
         size: "string|number",
         outline: "boolean",
         dense: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
         slots: "{ label?, default? }",
         class: "string",
         style: "object"
@@ -7561,6 +7871,8 @@ const setDrawerOpen = (open, key = drawerStateKey) => {
         color: "string",
         size: "string|number",
         dense: "boolean",
+        shortcode: "string|Array<string>|object",
+        showShortcode: "boolean",
         slots: "{ label?, default? }",
         class: "string",
         style: "object"

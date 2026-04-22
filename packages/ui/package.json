@@ -1,6 +1,6 @@
 {
   "name": "@cmswift/ui",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "CMSwift UI layer built on top of @cmswift/core",
   "license": "MIT",
   "type": "module",
