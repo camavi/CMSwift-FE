@@ -1,6 +1,6 @@
 {
   "name": "@cmswift/ui",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "CMSwift UI layer built on top of @cmswift/core",
   "license": "MIT",
   "type": "module",
@@ -10,6 +10,7 @@
     ".": "./dist/ui.js",
     "./min": "./dist/min-ui.js",
     "./ui.min.js": "./dist/ui.min.js",
+    "./img/logo.svg": "./dist/img/logo.svg",
     "./css/base.css": "./dist/css/base.css",
     "./css/ui.css": "./dist/css/ui.css",
     "./css/min-ui.css": "./dist/css/min-ui.css",
@@ -24,6 +25,6 @@
     "src"
   ],
   "peerDependencies": {
-    "@cmswift/core": "^1.0.6"
+    "@cmswift/core": "^1.0.7"
   }
 }

@@ -104,6 +104,39 @@ pre {
   justify-content: flex-end;
 }
 
+.demo-toolbar-start {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 18px;
+  text-decoration: none;
+  background: var(--demo-panel);
+  border: 1px solid var(--demo-border);
+  box-shadow: var(--demo-shadow);
+}
+
+.brand-logo {
+  display: block;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.brand-wordmark {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--demo-text);
+}
+
 .top-nav {
   display: flex;
   gap: 10px;

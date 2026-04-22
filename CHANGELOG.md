@@ -9,6 +9,24 @@ The format is kept intentionally simple:
 - Fixed
 - Docs
 
+## [1.0.7] - 2026-04-22
+
+### Added
+
+- official CMSwift SVG logo added as a local runtime asset
+- package exports for `@cmswift/ui/img/logo.svg` and `cmswift/img/logo.svg`
+- demo header branding and SVG favicon coverage across the local pages
+
+### Changed
+
+- demo/runtime settings now point to the local SVG logo instead of remote PNG/ICO assets
+- package versions bumped to `1.0.7`
+
+### Docs
+
+- README now shows the official logo and documents the brand asset entry points
+- added `v1.0.7` release notes
+
 ## [1.0.5] - 2026-04-17
 
 ### Added

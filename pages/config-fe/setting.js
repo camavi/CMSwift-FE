@@ -4,8 +4,8 @@ const CMSwift_setting = {
   "author": "CMSwift",
   "version": "1.0.0",
   "url": "https://cmswift.com",
-  "logo": "https://cmswift.com/logo.png",
-  "favicon": "https://cmswift.com/favicon.ico",
+  "logo": "/_cmswift-fe/img/logo.svg",
+  "favicon": "/_cmswift-fe/img/logo.svg",
   "theme": {
     "primary": "#007BFF",
     "secondary": "#6C757D",

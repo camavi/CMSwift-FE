@@ -1,5 +1,9 @@
 # CMSwift
 
+<p align="center">
+  <img src="pages/_cmswift-fe/img/logo.svg" alt="CMSwift logo" width="112" />
+</p>
+
 CMSwift is a lightweight, browser-first web framework with:
 
 - a custom DOM and reactivity core
@@ -203,6 +207,14 @@ With `cmswift`:
 - `cmswift/css/ui-components.css`
 - `cmswift/css/docs.css`
 
+## Brand Asset
+
+The official CMSwift logo is available as a lightweight SVG:
+
+- local demo/runtime asset: `/_cmswift-fe/img/logo.svg`
+- published UI package asset: `@cmswift/ui/img/logo.svg`
+- published umbrella package asset: `cmswift/img/logo.svg`
+
 ## Repository Structure
 
 - `packages/core`
@@ -263,6 +275,7 @@ npm run gen:ui-dts
 - [Core Reference](docs/reference/core.md)
 - [UI Reference](docs/reference/ui.md)
 - [Stability Policy](docs/policy/stability.md)
+- [Release Notes v1.0.7](docs/release/release-notes-v1.0.7.md)
 - [Release Notes v1.0.5](docs/release/release-notes-v1.0.5.md)
 - [Release Notes v1.0.4](docs/release/release-notes-v1.0.4.md)
 - [Release Notes v1.0.3](docs/release/release-notes-v1.0.3.md)

@@ -280,7 +280,7 @@
   --cms-primary-focus: var(--cms-primary-600);
   --cms-primary-disabled: var(--cms-primary-300);
   --cms-primary-soft: var(--cms-primary-500);
-  --cms-primary-text: var(--cms-primary-50);
+  --cms-primary-text: var(--cms-primary-500);
 
   --cms-secondary: var(--cms-gray-600);
   --cms-secondary-hover: var(--cms-gray-400);
@@ -288,7 +288,7 @@
   --cms-secondary-focus: var(--cms-gray-600);
   --cms-secondary-disabled: var(--cms-gray-300);
   --cms-secondary-soft: var(--cms-gray-500);
-  --cms-secondary-text: var(--cms-gray-50);
+  --cms-secondary-text: var(--cms-gray-500);
 
   --cms-danger: var(--cms-danger-600);
   --cms-danger-hover: var(--cms-danger-400);
@@ -296,7 +296,7 @@
   --cms-danger-focus: var(--cms-danger-600);
   --cms-danger-disabled: var(--cms-danger-300);
   --cms-danger-soft: var(--cms-danger-400);
-  --cms-danger-text: var(--cms-danger-50);
+  --cms-danger-text: var(--cms-danger-500);
 
   --cms-warning: var(--cms-warning-500);
   --cms-warning-hover: var(--cms-warning-400);
@@ -304,7 +304,7 @@
   --cms-warning-focus: var(--cms-warning-600);
   --cms-warning-disabled: var(--cms-warning-700);
   --cms-warning-soft: var(--cms-warning-400);
-  --cms-warning-text: var(--cms-warning-50);
+  --cms-warning-text: var(--cms-warning-500);
 
   --cms-success: var(--cms-success-600);
   --cms-success-hover: var(--cms-success-500);
@@ -312,7 +312,7 @@
   --cms-success-focus: var(--cms-success-600);
   --cms-success-disabled: var(--cms-success-300);
   --cms-success-soft: var(--cms-success-600);
-  --cms-success-text: var(--cms-success-50);
+  --cms-success-text: var(--cms-success-500);
 
   --cms-info: var(--cms-info-600);
   --cms-info-hover: var(--cms-info-400);
@@ -320,7 +320,7 @@
   --cms-info-focus: var(--cms-info-600);
   --cms-info-disabled: var(--cms-info-300);
   --cms-info-soft: var(--cms-info-500);
-  --cms-info-text: var(--cms-info-50);
+  --cms-info-text: var(--cms-info-500);
 
   --cms-dark: var(--cms-gray-800);
   --cms-dark-hover: var(--cms-gray-600);
@@ -10545,6 +10545,15 @@ a.cms-breadcrumb {
   color: var(--set-color);
   border-color: var(--set-border-color);
   transition: all 0.2s ease-in-out;
+}
+
+/*tutti che iniziano con cms-state-*/
+[class*='cms-state-']:not(.cms-outline, .cms-state-secondary) {
+  --set-color: var(--set-color-1);
+}
+
+.cms-state-secondary:not(.cms-outline) {
+  --set-color: var(--set-color-1);
 }
 
 .cms-singularity-check.cms-choice-wrap.is-checked .cms-choice-mark {}
