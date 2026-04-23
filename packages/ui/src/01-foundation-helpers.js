@@ -128,6 +128,9 @@ const uiResponsiveSetStyle = (style, name, value) => {
   if (typeof style.setProperty === "function") style.setProperty(name, value);
   else style[name] = value;
 };
+const uiResponsiveVarClass = (deviceKey, varName) => {
+  return deviceKey === "mobile" ? `cms-rsp-${varName}` : `cms-rsp-${deviceKey}-${varName}`;
+};
 const uiResponsiveAddClass = (target, className) => {
   if (!target || !className) return;
   if (target.classList?.add) {
@@ -147,8 +150,10 @@ const uiApplyResponsiveProps = (target, props = {}, rules = []) => {
       const rawValue = uiResponsiveFirstValue(sourceProps, propNames);
       const value = uiResponsiveDefaultValue(rawValue, rule);
       if (!value) return;
+      const varName = rule.var || rule.css;
       const prefix = deviceKey === "mobile" ? "--cms-rsp-" : `--cms-rsp-${deviceKey}-`;
-      uiResponsiveSetStyle(style, `${prefix}${rule.var || rule.css}`, value);
+      uiResponsiveSetStyle(style, `${prefix}${varName}`, value);
+      uiResponsiveAddClass(target, uiResponsiveVarClass(deviceKey, varName));
       hasResponsiveVars = true;
     };
 
@@ -169,6 +174,7 @@ const uiApplyResponsiveProps = (target, props = {}, rules = []) => {
 CMSwift.uiResponsiveDevices = UI_RESPONSIVE_DEVICES;
 CMSwift.uiResponsiveOmitProps = UI_RESPONSIVE_PROP_KEYS;
 CMSwift.uiResponsivePropsFor = uiResponsivePropsFor;
+CMSwift.uiResponsiveHasConfig = uiResponsiveHasConfig;
 CMSwift.uiResponsiveHasProp = uiResponsiveHasProp;
 CMSwift.uiResponsiveClasses = uiResponsiveClassList;
 CMSwift.uiApplyResponsiveProps = uiApplyResponsiveProps;

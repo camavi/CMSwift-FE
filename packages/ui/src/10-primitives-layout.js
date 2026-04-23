@@ -3771,6 +3771,14 @@
     p.class = cls;
 
     const style = { ...(rawProps.style || {}) };
+    if (
+      CMSwift.uiResponsiveHasConfig?.(rawProps)
+      && rawProps.display == null
+      && !uiHasResponsiveOverride(rawProps, "display")
+      && style.display == null
+    ) {
+      style.display = rawProps.inline ? "inline-grid" : "grid";
+    }
     const gap = uiStyleValue(rawProps.gap, toCssSize);
     if (gap != null && !uiHasResponsiveOverride(rawProps, "gap")) {
       style["--cms-grid-gap"] = gap;

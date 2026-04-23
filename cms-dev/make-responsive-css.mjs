@@ -557,24 +557,21 @@ function addGridColResponsiveLines(lines, breakpoint, indent) {
   lines.push(`${indent}.cms-grid.cms-grid > .cms-grid-col { grid-column: var(--cms-grid-col-${breakpoint.key}, ${fallback}); }`);
 }
 function addResponsiveStyleLines(lines) {
-  const selector = ".cms-rsp.cms-rsp.cms-rsp";
-  lines.push(`${selector} {`);
+  const selectorFor = (key, deviceKey = "") => {
+    const className = deviceKey ? `cms-rsp-${deviceKey}-${key}` : `cms-rsp-${key}`;
+    return `.cms-rsp.${className}.${className}`;
+  };
+
   for (const [prop, key] of RESPONSIVE_STYLE_PROPS) {
-    lines.push(`  ${prop}: var(--cms-rsp-${key});`);
+    lines.push(`${selectorFor(key)} { ${prop}: var(--cms-rsp-${key}); }`);
   }
-  lines.push("}");
   lines.push("");
 
   for (const breakpoint of PRIMARY_MEDIA_BREAKPOINTS) {
     lines.push(`@media (min-width: ${breakpoint.size}px) {`);
-    lines.push(`  ${selector} {`);
     for (const [prop, key] of RESPONSIVE_STYLE_PROPS) {
-      const fallback = breakpoint.key === "tablet"
-        ? `var(--cms-rsp-${key})`
-        : `var(--cms-rsp-tablet-${key}, var(--cms-rsp-${key}))`;
-      lines.push(`    ${prop}: var(--cms-rsp-${breakpoint.key}-${key}, ${fallback});`);
+      lines.push(`  ${selectorFor(key, breakpoint.key)} { ${prop}: var(--cms-rsp-${breakpoint.key}-${key}); }`);
     }
-    lines.push("  }");
     lines.push("}");
     lines.push("");
   }

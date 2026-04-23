@@ -80,9 +80,9 @@ Implementation notes:
   `cms-pc-col-6`, or `cms-tablet-gap-md`
 - arbitrary values become `.cms-rsp` custom properties such as
   `--cms-rsp-tablet-width`
-- `.cms-rsp.cms-rsp.cms-rsp` selectors intentionally have enough specificity to
-  override defaults from `ui-components.css` even when responsive CSS is bundled
-  before component CSS
+- `.cms-rsp-*` activation classes are emitted per property and breakpoint; this
+  keeps undefined custom properties out of the cascade and still lets responsive
+  values override defaults from `ui-components.css`
 - grid child rules use `.cms-grid.cms-grid > .cms-grid-col` for the same reason
 - layout primitives use `CMSwift.uiResponsiveStyleRules`
 - generic/shared props use `CMSwift.uiResponsiveCommonStyleRules` through

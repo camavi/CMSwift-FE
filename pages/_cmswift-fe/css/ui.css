@@ -766,143 +766,137 @@
 [class*="cms-col"] .cms-col-start, [class*="cms-col"] .cms-col-body, [class*="cms-col"] .cms-col-end { display: flex; min-width: 0; flex-direction: column; gap: inherit; }
 [class*="cms-col"] .cms-col-body { flex: 1 1 auto; }
 
-.cms-rsp.cms-rsp.cms-rsp {
-  display: var(--cms-rsp-display);
-  flex-direction: var(--cms-rsp-flex-direction);
-  flex-wrap: var(--cms-rsp-flex-wrap);
-  align-items: var(--cms-rsp-align-items);
-  justify-content: var(--cms-rsp-justify-content);
-  align-self: var(--cms-rsp-align-self);
-  justify-self: var(--cms-rsp-justify-self);
-  place-items: var(--cms-rsp-place-items);
-  place-self: var(--cms-rsp-place-self);
-  grid-template-columns: var(--cms-rsp-grid-template-columns);
-  grid-template-rows: var(--cms-rsp-grid-template-rows);
-  grid-auto-flow: var(--cms-rsp-grid-auto-flow);
-  grid-auto-rows: var(--cms-rsp-grid-auto-rows);
-  grid-column: var(--cms-rsp-grid-column);
-  grid-row: var(--cms-rsp-grid-row);
-  grid-area: var(--cms-rsp-grid-area);
-  gap: var(--cms-rsp-gap);
-  row-gap: var(--cms-rsp-row-gap);
-  column-gap: var(--cms-rsp-column-gap);
-  width: var(--cms-rsp-width);
-  min-width: var(--cms-rsp-min-width);
-  max-width: var(--cms-rsp-max-width);
-  height: var(--cms-rsp-height);
-  min-height: var(--cms-rsp-min-height);
-  max-height: var(--cms-rsp-max-height);
-  padding: var(--cms-rsp-padding);
-  padding-left: var(--cms-rsp-padding-left);
-  padding-right: var(--cms-rsp-padding-right);
-  padding-top: var(--cms-rsp-padding-top);
-  padding-bottom: var(--cms-rsp-padding-bottom);
-  margin: var(--cms-rsp-margin);
-  margin-left: var(--cms-rsp-margin-left);
-  margin-right: var(--cms-rsp-margin-right);
-  margin-top: var(--cms-rsp-margin-top);
-  margin-bottom: var(--cms-rsp-margin-bottom);
-  font-size: var(--cms-rsp-font-size);
-  font-weight: var(--cms-rsp-font-weight);
-  line-height: var(--cms-rsp-line-height);
-  letter-spacing: var(--cms-rsp-letter-spacing);
-  border-radius: var(--cms-rsp-border-radius);
-  overflow: var(--cms-rsp-overflow);
-  order: var(--cms-rsp-order);
-}
+.cms-rsp.cms-rsp-display.cms-rsp-display { display: var(--cms-rsp-display); }
+.cms-rsp.cms-rsp-flex-direction.cms-rsp-flex-direction { flex-direction: var(--cms-rsp-flex-direction); }
+.cms-rsp.cms-rsp-flex-wrap.cms-rsp-flex-wrap { flex-wrap: var(--cms-rsp-flex-wrap); }
+.cms-rsp.cms-rsp-align-items.cms-rsp-align-items { align-items: var(--cms-rsp-align-items); }
+.cms-rsp.cms-rsp-justify-content.cms-rsp-justify-content { justify-content: var(--cms-rsp-justify-content); }
+.cms-rsp.cms-rsp-align-self.cms-rsp-align-self { align-self: var(--cms-rsp-align-self); }
+.cms-rsp.cms-rsp-justify-self.cms-rsp-justify-self { justify-self: var(--cms-rsp-justify-self); }
+.cms-rsp.cms-rsp-place-items.cms-rsp-place-items { place-items: var(--cms-rsp-place-items); }
+.cms-rsp.cms-rsp-place-self.cms-rsp-place-self { place-self: var(--cms-rsp-place-self); }
+.cms-rsp.cms-rsp-grid-template-columns.cms-rsp-grid-template-columns { grid-template-columns: var(--cms-rsp-grid-template-columns); }
+.cms-rsp.cms-rsp-grid-template-rows.cms-rsp-grid-template-rows { grid-template-rows: var(--cms-rsp-grid-template-rows); }
+.cms-rsp.cms-rsp-grid-auto-flow.cms-rsp-grid-auto-flow { grid-auto-flow: var(--cms-rsp-grid-auto-flow); }
+.cms-rsp.cms-rsp-grid-auto-rows.cms-rsp-grid-auto-rows { grid-auto-rows: var(--cms-rsp-grid-auto-rows); }
+.cms-rsp.cms-rsp-grid-column.cms-rsp-grid-column { grid-column: var(--cms-rsp-grid-column); }
+.cms-rsp.cms-rsp-grid-row.cms-rsp-grid-row { grid-row: var(--cms-rsp-grid-row); }
+.cms-rsp.cms-rsp-grid-area.cms-rsp-grid-area { grid-area: var(--cms-rsp-grid-area); }
+.cms-rsp.cms-rsp-gap.cms-rsp-gap { gap: var(--cms-rsp-gap); }
+.cms-rsp.cms-rsp-row-gap.cms-rsp-row-gap { row-gap: var(--cms-rsp-row-gap); }
+.cms-rsp.cms-rsp-column-gap.cms-rsp-column-gap { column-gap: var(--cms-rsp-column-gap); }
+.cms-rsp.cms-rsp-width.cms-rsp-width { width: var(--cms-rsp-width); }
+.cms-rsp.cms-rsp-min-width.cms-rsp-min-width { min-width: var(--cms-rsp-min-width); }
+.cms-rsp.cms-rsp-max-width.cms-rsp-max-width { max-width: var(--cms-rsp-max-width); }
+.cms-rsp.cms-rsp-height.cms-rsp-height { height: var(--cms-rsp-height); }
+.cms-rsp.cms-rsp-min-height.cms-rsp-min-height { min-height: var(--cms-rsp-min-height); }
+.cms-rsp.cms-rsp-max-height.cms-rsp-max-height { max-height: var(--cms-rsp-max-height); }
+.cms-rsp.cms-rsp-padding.cms-rsp-padding { padding: var(--cms-rsp-padding); }
+.cms-rsp.cms-rsp-padding-left.cms-rsp-padding-left { padding-left: var(--cms-rsp-padding-left); }
+.cms-rsp.cms-rsp-padding-right.cms-rsp-padding-right { padding-right: var(--cms-rsp-padding-right); }
+.cms-rsp.cms-rsp-padding-top.cms-rsp-padding-top { padding-top: var(--cms-rsp-padding-top); }
+.cms-rsp.cms-rsp-padding-bottom.cms-rsp-padding-bottom { padding-bottom: var(--cms-rsp-padding-bottom); }
+.cms-rsp.cms-rsp-margin.cms-rsp-margin { margin: var(--cms-rsp-margin); }
+.cms-rsp.cms-rsp-margin-left.cms-rsp-margin-left { margin-left: var(--cms-rsp-margin-left); }
+.cms-rsp.cms-rsp-margin-right.cms-rsp-margin-right { margin-right: var(--cms-rsp-margin-right); }
+.cms-rsp.cms-rsp-margin-top.cms-rsp-margin-top { margin-top: var(--cms-rsp-margin-top); }
+.cms-rsp.cms-rsp-margin-bottom.cms-rsp-margin-bottom { margin-bottom: var(--cms-rsp-margin-bottom); }
+.cms-rsp.cms-rsp-font-size.cms-rsp-font-size { font-size: var(--cms-rsp-font-size); }
+.cms-rsp.cms-rsp-font-weight.cms-rsp-font-weight { font-weight: var(--cms-rsp-font-weight); }
+.cms-rsp.cms-rsp-line-height.cms-rsp-line-height { line-height: var(--cms-rsp-line-height); }
+.cms-rsp.cms-rsp-letter-spacing.cms-rsp-letter-spacing { letter-spacing: var(--cms-rsp-letter-spacing); }
+.cms-rsp.cms-rsp-border-radius.cms-rsp-border-radius { border-radius: var(--cms-rsp-border-radius); }
+.cms-rsp.cms-rsp-overflow.cms-rsp-overflow { overflow: var(--cms-rsp-overflow); }
+.cms-rsp.cms-rsp-order.cms-rsp-order { order: var(--cms-rsp-order); }
 
 @media (min-width: 768px) {
-  .cms-rsp.cms-rsp.cms-rsp {
-    display: var(--cms-rsp-tablet-display, var(--cms-rsp-display));
-    flex-direction: var(--cms-rsp-tablet-flex-direction, var(--cms-rsp-flex-direction));
-    flex-wrap: var(--cms-rsp-tablet-flex-wrap, var(--cms-rsp-flex-wrap));
-    align-items: var(--cms-rsp-tablet-align-items, var(--cms-rsp-align-items));
-    justify-content: var(--cms-rsp-tablet-justify-content, var(--cms-rsp-justify-content));
-    align-self: var(--cms-rsp-tablet-align-self, var(--cms-rsp-align-self));
-    justify-self: var(--cms-rsp-tablet-justify-self, var(--cms-rsp-justify-self));
-    place-items: var(--cms-rsp-tablet-place-items, var(--cms-rsp-place-items));
-    place-self: var(--cms-rsp-tablet-place-self, var(--cms-rsp-place-self));
-    grid-template-columns: var(--cms-rsp-tablet-grid-template-columns, var(--cms-rsp-grid-template-columns));
-    grid-template-rows: var(--cms-rsp-tablet-grid-template-rows, var(--cms-rsp-grid-template-rows));
-    grid-auto-flow: var(--cms-rsp-tablet-grid-auto-flow, var(--cms-rsp-grid-auto-flow));
-    grid-auto-rows: var(--cms-rsp-tablet-grid-auto-rows, var(--cms-rsp-grid-auto-rows));
-    grid-column: var(--cms-rsp-tablet-grid-column, var(--cms-rsp-grid-column));
-    grid-row: var(--cms-rsp-tablet-grid-row, var(--cms-rsp-grid-row));
-    grid-area: var(--cms-rsp-tablet-grid-area, var(--cms-rsp-grid-area));
-    gap: var(--cms-rsp-tablet-gap, var(--cms-rsp-gap));
-    row-gap: var(--cms-rsp-tablet-row-gap, var(--cms-rsp-row-gap));
-    column-gap: var(--cms-rsp-tablet-column-gap, var(--cms-rsp-column-gap));
-    width: var(--cms-rsp-tablet-width, var(--cms-rsp-width));
-    min-width: var(--cms-rsp-tablet-min-width, var(--cms-rsp-min-width));
-    max-width: var(--cms-rsp-tablet-max-width, var(--cms-rsp-max-width));
-    height: var(--cms-rsp-tablet-height, var(--cms-rsp-height));
-    min-height: var(--cms-rsp-tablet-min-height, var(--cms-rsp-min-height));
-    max-height: var(--cms-rsp-tablet-max-height, var(--cms-rsp-max-height));
-    padding: var(--cms-rsp-tablet-padding, var(--cms-rsp-padding));
-    padding-left: var(--cms-rsp-tablet-padding-left, var(--cms-rsp-padding-left));
-    padding-right: var(--cms-rsp-tablet-padding-right, var(--cms-rsp-padding-right));
-    padding-top: var(--cms-rsp-tablet-padding-top, var(--cms-rsp-padding-top));
-    padding-bottom: var(--cms-rsp-tablet-padding-bottom, var(--cms-rsp-padding-bottom));
-    margin: var(--cms-rsp-tablet-margin, var(--cms-rsp-margin));
-    margin-left: var(--cms-rsp-tablet-margin-left, var(--cms-rsp-margin-left));
-    margin-right: var(--cms-rsp-tablet-margin-right, var(--cms-rsp-margin-right));
-    margin-top: var(--cms-rsp-tablet-margin-top, var(--cms-rsp-margin-top));
-    margin-bottom: var(--cms-rsp-tablet-margin-bottom, var(--cms-rsp-margin-bottom));
-    font-size: var(--cms-rsp-tablet-font-size, var(--cms-rsp-font-size));
-    font-weight: var(--cms-rsp-tablet-font-weight, var(--cms-rsp-font-weight));
-    line-height: var(--cms-rsp-tablet-line-height, var(--cms-rsp-line-height));
-    letter-spacing: var(--cms-rsp-tablet-letter-spacing, var(--cms-rsp-letter-spacing));
-    border-radius: var(--cms-rsp-tablet-border-radius, var(--cms-rsp-border-radius));
-    overflow: var(--cms-rsp-tablet-overflow, var(--cms-rsp-overflow));
-    order: var(--cms-rsp-tablet-order, var(--cms-rsp-order));
-  }
+  .cms-rsp.cms-rsp-tablet-display.cms-rsp-tablet-display { display: var(--cms-rsp-tablet-display); }
+  .cms-rsp.cms-rsp-tablet-flex-direction.cms-rsp-tablet-flex-direction { flex-direction: var(--cms-rsp-tablet-flex-direction); }
+  .cms-rsp.cms-rsp-tablet-flex-wrap.cms-rsp-tablet-flex-wrap { flex-wrap: var(--cms-rsp-tablet-flex-wrap); }
+  .cms-rsp.cms-rsp-tablet-align-items.cms-rsp-tablet-align-items { align-items: var(--cms-rsp-tablet-align-items); }
+  .cms-rsp.cms-rsp-tablet-justify-content.cms-rsp-tablet-justify-content { justify-content: var(--cms-rsp-tablet-justify-content); }
+  .cms-rsp.cms-rsp-tablet-align-self.cms-rsp-tablet-align-self { align-self: var(--cms-rsp-tablet-align-self); }
+  .cms-rsp.cms-rsp-tablet-justify-self.cms-rsp-tablet-justify-self { justify-self: var(--cms-rsp-tablet-justify-self); }
+  .cms-rsp.cms-rsp-tablet-place-items.cms-rsp-tablet-place-items { place-items: var(--cms-rsp-tablet-place-items); }
+  .cms-rsp.cms-rsp-tablet-place-self.cms-rsp-tablet-place-self { place-self: var(--cms-rsp-tablet-place-self); }
+  .cms-rsp.cms-rsp-tablet-grid-template-columns.cms-rsp-tablet-grid-template-columns { grid-template-columns: var(--cms-rsp-tablet-grid-template-columns); }
+  .cms-rsp.cms-rsp-tablet-grid-template-rows.cms-rsp-tablet-grid-template-rows { grid-template-rows: var(--cms-rsp-tablet-grid-template-rows); }
+  .cms-rsp.cms-rsp-tablet-grid-auto-flow.cms-rsp-tablet-grid-auto-flow { grid-auto-flow: var(--cms-rsp-tablet-grid-auto-flow); }
+  .cms-rsp.cms-rsp-tablet-grid-auto-rows.cms-rsp-tablet-grid-auto-rows { grid-auto-rows: var(--cms-rsp-tablet-grid-auto-rows); }
+  .cms-rsp.cms-rsp-tablet-grid-column.cms-rsp-tablet-grid-column { grid-column: var(--cms-rsp-tablet-grid-column); }
+  .cms-rsp.cms-rsp-tablet-grid-row.cms-rsp-tablet-grid-row { grid-row: var(--cms-rsp-tablet-grid-row); }
+  .cms-rsp.cms-rsp-tablet-grid-area.cms-rsp-tablet-grid-area { grid-area: var(--cms-rsp-tablet-grid-area); }
+  .cms-rsp.cms-rsp-tablet-gap.cms-rsp-tablet-gap { gap: var(--cms-rsp-tablet-gap); }
+  .cms-rsp.cms-rsp-tablet-row-gap.cms-rsp-tablet-row-gap { row-gap: var(--cms-rsp-tablet-row-gap); }
+  .cms-rsp.cms-rsp-tablet-column-gap.cms-rsp-tablet-column-gap { column-gap: var(--cms-rsp-tablet-column-gap); }
+  .cms-rsp.cms-rsp-tablet-width.cms-rsp-tablet-width { width: var(--cms-rsp-tablet-width); }
+  .cms-rsp.cms-rsp-tablet-min-width.cms-rsp-tablet-min-width { min-width: var(--cms-rsp-tablet-min-width); }
+  .cms-rsp.cms-rsp-tablet-max-width.cms-rsp-tablet-max-width { max-width: var(--cms-rsp-tablet-max-width); }
+  .cms-rsp.cms-rsp-tablet-height.cms-rsp-tablet-height { height: var(--cms-rsp-tablet-height); }
+  .cms-rsp.cms-rsp-tablet-min-height.cms-rsp-tablet-min-height { min-height: var(--cms-rsp-tablet-min-height); }
+  .cms-rsp.cms-rsp-tablet-max-height.cms-rsp-tablet-max-height { max-height: var(--cms-rsp-tablet-max-height); }
+  .cms-rsp.cms-rsp-tablet-padding.cms-rsp-tablet-padding { padding: var(--cms-rsp-tablet-padding); }
+  .cms-rsp.cms-rsp-tablet-padding-left.cms-rsp-tablet-padding-left { padding-left: var(--cms-rsp-tablet-padding-left); }
+  .cms-rsp.cms-rsp-tablet-padding-right.cms-rsp-tablet-padding-right { padding-right: var(--cms-rsp-tablet-padding-right); }
+  .cms-rsp.cms-rsp-tablet-padding-top.cms-rsp-tablet-padding-top { padding-top: var(--cms-rsp-tablet-padding-top); }
+  .cms-rsp.cms-rsp-tablet-padding-bottom.cms-rsp-tablet-padding-bottom { padding-bottom: var(--cms-rsp-tablet-padding-bottom); }
+  .cms-rsp.cms-rsp-tablet-margin.cms-rsp-tablet-margin { margin: var(--cms-rsp-tablet-margin); }
+  .cms-rsp.cms-rsp-tablet-margin-left.cms-rsp-tablet-margin-left { margin-left: var(--cms-rsp-tablet-margin-left); }
+  .cms-rsp.cms-rsp-tablet-margin-right.cms-rsp-tablet-margin-right { margin-right: var(--cms-rsp-tablet-margin-right); }
+  .cms-rsp.cms-rsp-tablet-margin-top.cms-rsp-tablet-margin-top { margin-top: var(--cms-rsp-tablet-margin-top); }
+  .cms-rsp.cms-rsp-tablet-margin-bottom.cms-rsp-tablet-margin-bottom { margin-bottom: var(--cms-rsp-tablet-margin-bottom); }
+  .cms-rsp.cms-rsp-tablet-font-size.cms-rsp-tablet-font-size { font-size: var(--cms-rsp-tablet-font-size); }
+  .cms-rsp.cms-rsp-tablet-font-weight.cms-rsp-tablet-font-weight { font-weight: var(--cms-rsp-tablet-font-weight); }
+  .cms-rsp.cms-rsp-tablet-line-height.cms-rsp-tablet-line-height { line-height: var(--cms-rsp-tablet-line-height); }
+  .cms-rsp.cms-rsp-tablet-letter-spacing.cms-rsp-tablet-letter-spacing { letter-spacing: var(--cms-rsp-tablet-letter-spacing); }
+  .cms-rsp.cms-rsp-tablet-border-radius.cms-rsp-tablet-border-radius { border-radius: var(--cms-rsp-tablet-border-radius); }
+  .cms-rsp.cms-rsp-tablet-overflow.cms-rsp-tablet-overflow { overflow: var(--cms-rsp-tablet-overflow); }
+  .cms-rsp.cms-rsp-tablet-order.cms-rsp-tablet-order { order: var(--cms-rsp-tablet-order); }
 }
 
 @media (min-width: 1024px) {
-  .cms-rsp.cms-rsp.cms-rsp {
-    display: var(--cms-rsp-pc-display, var(--cms-rsp-tablet-display, var(--cms-rsp-display)));
-    flex-direction: var(--cms-rsp-pc-flex-direction, var(--cms-rsp-tablet-flex-direction, var(--cms-rsp-flex-direction)));
-    flex-wrap: var(--cms-rsp-pc-flex-wrap, var(--cms-rsp-tablet-flex-wrap, var(--cms-rsp-flex-wrap)));
-    align-items: var(--cms-rsp-pc-align-items, var(--cms-rsp-tablet-align-items, var(--cms-rsp-align-items)));
-    justify-content: var(--cms-rsp-pc-justify-content, var(--cms-rsp-tablet-justify-content, var(--cms-rsp-justify-content)));
-    align-self: var(--cms-rsp-pc-align-self, var(--cms-rsp-tablet-align-self, var(--cms-rsp-align-self)));
-    justify-self: var(--cms-rsp-pc-justify-self, var(--cms-rsp-tablet-justify-self, var(--cms-rsp-justify-self)));
-    place-items: var(--cms-rsp-pc-place-items, var(--cms-rsp-tablet-place-items, var(--cms-rsp-place-items)));
-    place-self: var(--cms-rsp-pc-place-self, var(--cms-rsp-tablet-place-self, var(--cms-rsp-place-self)));
-    grid-template-columns: var(--cms-rsp-pc-grid-template-columns, var(--cms-rsp-tablet-grid-template-columns, var(--cms-rsp-grid-template-columns)));
-    grid-template-rows: var(--cms-rsp-pc-grid-template-rows, var(--cms-rsp-tablet-grid-template-rows, var(--cms-rsp-grid-template-rows)));
-    grid-auto-flow: var(--cms-rsp-pc-grid-auto-flow, var(--cms-rsp-tablet-grid-auto-flow, var(--cms-rsp-grid-auto-flow)));
-    grid-auto-rows: var(--cms-rsp-pc-grid-auto-rows, var(--cms-rsp-tablet-grid-auto-rows, var(--cms-rsp-grid-auto-rows)));
-    grid-column: var(--cms-rsp-pc-grid-column, var(--cms-rsp-tablet-grid-column, var(--cms-rsp-grid-column)));
-    grid-row: var(--cms-rsp-pc-grid-row, var(--cms-rsp-tablet-grid-row, var(--cms-rsp-grid-row)));
-    grid-area: var(--cms-rsp-pc-grid-area, var(--cms-rsp-tablet-grid-area, var(--cms-rsp-grid-area)));
-    gap: var(--cms-rsp-pc-gap, var(--cms-rsp-tablet-gap, var(--cms-rsp-gap)));
-    row-gap: var(--cms-rsp-pc-row-gap, var(--cms-rsp-tablet-row-gap, var(--cms-rsp-row-gap)));
-    column-gap: var(--cms-rsp-pc-column-gap, var(--cms-rsp-tablet-column-gap, var(--cms-rsp-column-gap)));
-    width: var(--cms-rsp-pc-width, var(--cms-rsp-tablet-width, var(--cms-rsp-width)));
-    min-width: var(--cms-rsp-pc-min-width, var(--cms-rsp-tablet-min-width, var(--cms-rsp-min-width)));
-    max-width: var(--cms-rsp-pc-max-width, var(--cms-rsp-tablet-max-width, var(--cms-rsp-max-width)));
-    height: var(--cms-rsp-pc-height, var(--cms-rsp-tablet-height, var(--cms-rsp-height)));
-    min-height: var(--cms-rsp-pc-min-height, var(--cms-rsp-tablet-min-height, var(--cms-rsp-min-height)));
-    max-height: var(--cms-rsp-pc-max-height, var(--cms-rsp-tablet-max-height, var(--cms-rsp-max-height)));
-    padding: var(--cms-rsp-pc-padding, var(--cms-rsp-tablet-padding, var(--cms-rsp-padding)));
-    padding-left: var(--cms-rsp-pc-padding-left, var(--cms-rsp-tablet-padding-left, var(--cms-rsp-padding-left)));
-    padding-right: var(--cms-rsp-pc-padding-right, var(--cms-rsp-tablet-padding-right, var(--cms-rsp-padding-right)));
-    padding-top: var(--cms-rsp-pc-padding-top, var(--cms-rsp-tablet-padding-top, var(--cms-rsp-padding-top)));
-    padding-bottom: var(--cms-rsp-pc-padding-bottom, var(--cms-rsp-tablet-padding-bottom, var(--cms-rsp-padding-bottom)));
-    margin: var(--cms-rsp-pc-margin, var(--cms-rsp-tablet-margin, var(--cms-rsp-margin)));
-    margin-left: var(--cms-rsp-pc-margin-left, var(--cms-rsp-tablet-margin-left, var(--cms-rsp-margin-left)));
-    margin-right: var(--cms-rsp-pc-margin-right, var(--cms-rsp-tablet-margin-right, var(--cms-rsp-margin-right)));
-    margin-top: var(--cms-rsp-pc-margin-top, var(--cms-rsp-tablet-margin-top, var(--cms-rsp-margin-top)));
-    margin-bottom: var(--cms-rsp-pc-margin-bottom, var(--cms-rsp-tablet-margin-bottom, var(--cms-rsp-margin-bottom)));
-    font-size: var(--cms-rsp-pc-font-size, var(--cms-rsp-tablet-font-size, var(--cms-rsp-font-size)));
-    font-weight: var(--cms-rsp-pc-font-weight, var(--cms-rsp-tablet-font-weight, var(--cms-rsp-font-weight)));
-    line-height: var(--cms-rsp-pc-line-height, var(--cms-rsp-tablet-line-height, var(--cms-rsp-line-height)));
-    letter-spacing: var(--cms-rsp-pc-letter-spacing, var(--cms-rsp-tablet-letter-spacing, var(--cms-rsp-letter-spacing)));
-    border-radius: var(--cms-rsp-pc-border-radius, var(--cms-rsp-tablet-border-radius, var(--cms-rsp-border-radius)));
-    overflow: var(--cms-rsp-pc-overflow, var(--cms-rsp-tablet-overflow, var(--cms-rsp-overflow)));
-    order: var(--cms-rsp-pc-order, var(--cms-rsp-tablet-order, var(--cms-rsp-order)));
-  }
+  .cms-rsp.cms-rsp-pc-display.cms-rsp-pc-display { display: var(--cms-rsp-pc-display); }
+  .cms-rsp.cms-rsp-pc-flex-direction.cms-rsp-pc-flex-direction { flex-direction: var(--cms-rsp-pc-flex-direction); }
+  .cms-rsp.cms-rsp-pc-flex-wrap.cms-rsp-pc-flex-wrap { flex-wrap: var(--cms-rsp-pc-flex-wrap); }
+  .cms-rsp.cms-rsp-pc-align-items.cms-rsp-pc-align-items { align-items: var(--cms-rsp-pc-align-items); }
+  .cms-rsp.cms-rsp-pc-justify-content.cms-rsp-pc-justify-content { justify-content: var(--cms-rsp-pc-justify-content); }
+  .cms-rsp.cms-rsp-pc-align-self.cms-rsp-pc-align-self { align-self: var(--cms-rsp-pc-align-self); }
+  .cms-rsp.cms-rsp-pc-justify-self.cms-rsp-pc-justify-self { justify-self: var(--cms-rsp-pc-justify-self); }
+  .cms-rsp.cms-rsp-pc-place-items.cms-rsp-pc-place-items { place-items: var(--cms-rsp-pc-place-items); }
+  .cms-rsp.cms-rsp-pc-place-self.cms-rsp-pc-place-self { place-self: var(--cms-rsp-pc-place-self); }
+  .cms-rsp.cms-rsp-pc-grid-template-columns.cms-rsp-pc-grid-template-columns { grid-template-columns: var(--cms-rsp-pc-grid-template-columns); }
+  .cms-rsp.cms-rsp-pc-grid-template-rows.cms-rsp-pc-grid-template-rows { grid-template-rows: var(--cms-rsp-pc-grid-template-rows); }
+  .cms-rsp.cms-rsp-pc-grid-auto-flow.cms-rsp-pc-grid-auto-flow { grid-auto-flow: var(--cms-rsp-pc-grid-auto-flow); }
+  .cms-rsp.cms-rsp-pc-grid-auto-rows.cms-rsp-pc-grid-auto-rows { grid-auto-rows: var(--cms-rsp-pc-grid-auto-rows); }
+  .cms-rsp.cms-rsp-pc-grid-column.cms-rsp-pc-grid-column { grid-column: var(--cms-rsp-pc-grid-column); }
+  .cms-rsp.cms-rsp-pc-grid-row.cms-rsp-pc-grid-row { grid-row: var(--cms-rsp-pc-grid-row); }
+  .cms-rsp.cms-rsp-pc-grid-area.cms-rsp-pc-grid-area { grid-area: var(--cms-rsp-pc-grid-area); }
+  .cms-rsp.cms-rsp-pc-gap.cms-rsp-pc-gap { gap: var(--cms-rsp-pc-gap); }
+  .cms-rsp.cms-rsp-pc-row-gap.cms-rsp-pc-row-gap { row-gap: var(--cms-rsp-pc-row-gap); }
+  .cms-rsp.cms-rsp-pc-column-gap.cms-rsp-pc-column-gap { column-gap: var(--cms-rsp-pc-column-gap); }
+  .cms-rsp.cms-rsp-pc-width.cms-rsp-pc-width { width: var(--cms-rsp-pc-width); }
+  .cms-rsp.cms-rsp-pc-min-width.cms-rsp-pc-min-width { min-width: var(--cms-rsp-pc-min-width); }
+  .cms-rsp.cms-rsp-pc-max-width.cms-rsp-pc-max-width { max-width: var(--cms-rsp-pc-max-width); }
+  .cms-rsp.cms-rsp-pc-height.cms-rsp-pc-height { height: var(--cms-rsp-pc-height); }
+  .cms-rsp.cms-rsp-pc-min-height.cms-rsp-pc-min-height { min-height: var(--cms-rsp-pc-min-height); }
+  .cms-rsp.cms-rsp-pc-max-height.cms-rsp-pc-max-height { max-height: var(--cms-rsp-pc-max-height); }
+  .cms-rsp.cms-rsp-pc-padding.cms-rsp-pc-padding { padding: var(--cms-rsp-pc-padding); }
+  .cms-rsp.cms-rsp-pc-padding-left.cms-rsp-pc-padding-left { padding-left: var(--cms-rsp-pc-padding-left); }
+  .cms-rsp.cms-rsp-pc-padding-right.cms-rsp-pc-padding-right { padding-right: var(--cms-rsp-pc-padding-right); }
+  .cms-rsp.cms-rsp-pc-padding-top.cms-rsp-pc-padding-top { padding-top: var(--cms-rsp-pc-padding-top); }
+  .cms-rsp.cms-rsp-pc-padding-bottom.cms-rsp-pc-padding-bottom { padding-bottom: var(--cms-rsp-pc-padding-bottom); }
+  .cms-rsp.cms-rsp-pc-margin.cms-rsp-pc-margin { margin: var(--cms-rsp-pc-margin); }
+  .cms-rsp.cms-rsp-pc-margin-left.cms-rsp-pc-margin-left { margin-left: var(--cms-rsp-pc-margin-left); }
+  .cms-rsp.cms-rsp-pc-margin-right.cms-rsp-pc-margin-right { margin-right: var(--cms-rsp-pc-margin-right); }
+  .cms-rsp.cms-rsp-pc-margin-top.cms-rsp-pc-margin-top { margin-top: var(--cms-rsp-pc-margin-top); }
+  .cms-rsp.cms-rsp-pc-margin-bottom.cms-rsp-pc-margin-bottom { margin-bottom: var(--cms-rsp-pc-margin-bottom); }
+  .cms-rsp.cms-rsp-pc-font-size.cms-rsp-pc-font-size { font-size: var(--cms-rsp-pc-font-size); }
+  .cms-rsp.cms-rsp-pc-font-weight.cms-rsp-pc-font-weight { font-weight: var(--cms-rsp-pc-font-weight); }
+  .cms-rsp.cms-rsp-pc-line-height.cms-rsp-pc-line-height { line-height: var(--cms-rsp-pc-line-height); }
+  .cms-rsp.cms-rsp-pc-letter-spacing.cms-rsp-pc-letter-spacing { letter-spacing: var(--cms-rsp-pc-letter-spacing); }
+  .cms-rsp.cms-rsp-pc-border-radius.cms-rsp-pc-border-radius { border-radius: var(--cms-rsp-pc-border-radius); }
+  .cms-rsp.cms-rsp-pc-overflow.cms-rsp-pc-overflow { overflow: var(--cms-rsp-pc-overflow); }
+  .cms-rsp.cms-rsp-pc-order.cms-rsp-pc-order { order: var(--cms-rsp-pc-order); }
 }
 
 .cms-m-xxs { margin: var(--cms-m-xxs); }

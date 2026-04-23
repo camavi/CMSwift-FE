@@ -1,7 +1,7 @@
 {
   "name": "cmswift",
   "private": true,
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "CMSwift UI + reactive runtime framework",
   "author": "Carlos Malleux",
   "license": "MIT",
@@ -17,6 +17,7 @@
     "build:runtime": "npm run build:cms && npm run build:ui && npm run build:cmswift",
     "preview": "vite preview",
     "test": "node --test tests/*.test.mjs",
+    "test:browser": "node --test tests/browser/*.test.mjs",
     "gen:ui-dts": "node cms-dev/generate-ui-dts.mjs",
     "gen:ui-dts:watch": "node cms-dev/generate-ui-dts.mjs --watch"
   },

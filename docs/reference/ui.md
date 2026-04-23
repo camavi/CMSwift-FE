@@ -147,8 +147,9 @@ CSS source rules:
 - generated CSS entry: `packages/ui/dist/css/responsive.css`
 - umbrella generated CSS entry: `packages/cmswift/dist/css/responsive.css`
 - bundled UI CSS includes responsive rules before component rules; responsive
-  custom-property selectors use higher specificity so breakpoint props can
-  override defaults from `ui-components.css`
+  custom-property selectors are activated per property and breakpoint so an
+  undefined responsive variable never resets component defaults from
+  `ui-components.css`
 
 ## Canonical Usage Patterns
 
