@@ -829,3 +829,93 @@ test("Menu repositions when panel width grows after open", {
   assert.ok(result.left >= 8, JSON.stringify(result));
   assert.ok(result.right <= result.viewportWidth - 8, JSON.stringify(result));
 });
+
+test("Dialog fullscreen stays inside the mobile viewport without overscan", {
+  skip: findChrome() ? false : "Chrome/Chromium is not available"
+}, async () => {
+  const chromePath = findChrome();
+  const tmpDir = await mkdtemp(path.join(os.tmpdir(), "cmswift-dialog-fullscreen-mobile-"));
+  const htmlFile = path.join(tmpDir, "index.html");
+  const coreUrl = pathToFileURL(path.join(ROOT_DIR, "packages/core/dist/cms.js")).href;
+  const uiUrl = pathToFileURL(path.join(ROOT_DIR, "packages/ui/dist/ui.js")).href;
+  const cssUrl = pathToFileURL(path.join(ROOT_DIR, "packages/ui/dist/css/ui.css")).href;
+
+  await writeFile(htmlFile, `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="${cssUrl}">
+  <style>
+    body { margin: 0; }
+  </style>
+</head>
+<body>
+  <script src="${coreUrl}"></script>
+  <script src="${uiUrl}"></script>
+  <script>
+    const finish = (result) => {
+      document.body.setAttribute("data-result", encodeURIComponent(JSON.stringify(result)));
+    };
+
+    try {
+      const UI = window._ || window.CMSwift?.ui;
+      const dialog = UI.Dialog({
+        fullscreen: true,
+        title: "Workspace go-live",
+        subtitle: "Probe",
+        stickyHeader: true,
+        stickyActions: true,
+        actions: [
+          UI.Btn({ label: "Annulla" }),
+          UI.Btn({ color: "primary", label: "Pubblica" })
+        ],
+        content: UI.div(
+          { style: { minHeight: "1200px" } },
+          "Contenuto fullscreen"
+        )
+      });
+
+      dialog.open();
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const panel = document.querySelector(".cms-overlay-panel.cms-dialog");
+          const rect = panel.getBoundingClientRect();
+          const style = getComputedStyle(panel);
+          finish({
+            className: panel.className,
+            left: Number(rect.left.toFixed(2)),
+            right: Number(rect.right.toFixed(2)),
+            top: Number(rect.top.toFixed(2)),
+            bottom: Number(rect.bottom.toFixed(2)),
+            width: Math.round(rect.width),
+            height: Math.round(rect.height),
+            viewportWidth: window.innerWidth,
+            viewportHeight: window.innerHeight,
+            position: style.position,
+            boxSizing: style.boxSizing,
+            transform: style.transform
+          });
+        });
+      });
+    } catch (error) {
+      finish({ error: String(error?.stack || error) });
+    }
+  </script>
+</body>
+</html>`, "utf8");
+
+  const result = readBrowserResult(await runChrome(chromePath, htmlFile, { width: 390, height: 844 }));
+
+  assert.equal(result.error, undefined);
+  assert.equal(result.className.includes("fullscreen"), true);
+  assert.equal(result.position, "fixed");
+  assert.equal(result.boxSizing, "border-box");
+  assert.equal(result.left >= 0, true, JSON.stringify(result));
+  assert.equal(result.top >= 0, true, JSON.stringify(result));
+  assert.equal(result.right <= result.viewportWidth, true, JSON.stringify(result));
+  assert.equal(result.bottom <= result.viewportHeight, true, JSON.stringify(result));
+  assert.equal(result.width, result.viewportWidth, JSON.stringify(result));
+  assert.equal(result.height <= result.viewportHeight, true, JSON.stringify(result));
+});

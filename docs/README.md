@@ -13,6 +13,7 @@ Index of the technical documentation for the framework repository.
 
 ## Release
 
+- [Release Notes v1.0.17](release/release-notes-v1.0.17.md)
 - [Release Notes v1.0.16](release/release-notes-v1.0.16.md)
 - [Release Notes v1.0.15](release/release-notes-v1.0.15.md)
 - [Release Notes v1.0.14](release/release-notes-v1.0.14.md)

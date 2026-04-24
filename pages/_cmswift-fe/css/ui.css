@@ -8345,6 +8345,7 @@ select {
   max-height: var(--cms-dialog-max-height);
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
   gap: var(--cms-s-md);
   padding: var(--cms-s-lg);
   border-radius: calc(var(--set-border-radius, var(--cms-r-lg)) + 2px);
@@ -8527,9 +8528,39 @@ select {
 
 .cms-dialog.cms-dialog-full,
 .cms-dialog.fullscreen {
-  --cms-dialog-width: min(100vw - 20px, 1280px);
-  --cms-dialog-max-width: calc(100vw - 20px);
-  --cms-dialog-max-height: calc(100vh - 20px);
+  --cms-dialog-width: 100vw;
+  --cms-dialog-max-width: 100vw;
+  --cms-dialog-max-height: 100vh;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-width: 0;
+  max-width: 100vw;
+  max-height: 100vh;
+  max-height: 100dvh;
+  margin: 0;
+  border-radius: 0;
+}
+
+.cms-dialog.cms-dialog-full .cms-dialog-shell,
+.cms-dialog.fullscreen .cms-dialog-shell {
+  flex: 1 1 auto;
+}
+
+.cms-dialog.cms-dialog-full .cms-dialog-body,
+.cms-dialog.fullscreen .cms-dialog-body {
+  flex: 1 1 auto;
+}
+
+.cms-overlay-panel.cms-dialog.cms-dialog-full.enter,
+.cms-overlay-panel.cms-dialog.cms-dialog-full.entered,
+.cms-overlay-panel.cms-dialog.cms-dialog-full.leave,
+.cms-overlay-panel.cms-dialog.fullscreen.enter,
+.cms-overlay-panel.cms-dialog.fullscreen.entered,
+.cms-overlay-panel.cms-dialog.fullscreen.leave {
+  transform: none;
 }
 
 .cms-overlay.cms-dialog-align-top {
