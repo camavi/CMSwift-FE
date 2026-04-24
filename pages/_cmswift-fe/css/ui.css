@@ -8532,6 +8532,7 @@ select {
   --cms-dialog-max-width: var(--cms-dialog-fullscreen-width, 100vw);
   --cms-dialog-max-height: var(--cms-dialog-fullscreen-height, 100dvh);
   position: fixed;
+  inset: 0;
   top: var(--cms-dialog-fullscreen-top, 0px);
   left: var(--cms-dialog-fullscreen-left, 0px);
   right: auto;
@@ -8540,13 +8541,17 @@ select {
   height: var(--cms-dialog-fullscreen-height, 100vh);
   height: var(--cms-dialog-fullscreen-height, 100dvh);
   min-width: 0;
+  min-height: var(--cms-dialog-fullscreen-height, 100dvh);
   max-width: var(--cms-dialog-fullscreen-width, 100vw);
   max-height: var(--cms-dialog-fullscreen-height, 100vh);
   max-height: var(--cms-dialog-fullscreen-height, 100dvh);
   margin: 0;
   border: 0;
   border-radius: 0;
+  box-sizing: border-box;
   box-shadow: none;
+  overflow: hidden;
+  transform: none;
 }
 
 .cms-dialog.cms-dialog-full .cms-dialog-shell,

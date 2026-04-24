@@ -15766,21 +15766,26 @@ if (CMSwift.isDev?.()) {
       }
       target.style.setProperty(name, formatter(value));
     };
+    const fullscreenViewportSize = () => {
+      const vv = window.visualViewport;
+      const left = Math.max(0, Math.round(vv?.offsetLeft ?? 0));
+      const top = Math.max(0, Math.round(vv?.offsetTop ?? 0));
+      const width = Math.max(0, Math.round(vv?.width ?? window.innerWidth ?? 0));
+      const height = Math.max(0, Math.round(vv?.height ?? window.innerHeight ?? 0));
+      return { left, top, width, height };
+    };
     const syncFullscreenViewport = (currentEntry) => {
       if (!currentEntry?.panel) return;
-      const vv = window.visualViewport;
-      const left = vv?.offsetLeft ?? 0;
-      const top = vv?.offsetTop ?? 0;
-      const width = vv?.width ?? window.innerWidth;
-      const height = vv?.height ?? window.innerHeight;
+      const { left, top, width, height } = fullscreenViewportSize();
       setStyleValue(currentEntry.panel, "position", "fixed");
-      setStyleValue(currentEntry.panel, "inset", "auto");
+      setStyleValue(currentEntry.panel, "inset", 0, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "top", top, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "left", left, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "right", "auto");
       setStyleValue(currentEntry.panel, "bottom", "auto");
       setStyleValue(currentEntry.panel, "width", width, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "height", height, (v) => `${v}px`);
+      setStyleValue(currentEntry.panel, "min-height", height, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "max-width", width, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "max-height", height, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "min-width", 0, (v) => `${v}px`);
@@ -15789,6 +15794,7 @@ if (CMSwift.isDev?.()) {
       setStyleValue(currentEntry.panel, "border-width", 0, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "border-radius", 0, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "transform", "none");
+      setStyleValue(currentEntry.panel, "overflow", "hidden");
       setStyleValue(currentEntry.panel, "--cms-dialog-fullscreen-left", left, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "--cms-dialog-fullscreen-top", top, (v) => `${v}px`);
       setStyleValue(currentEntry.panel, "--cms-dialog-fullscreen-width", width, (v) => `${v}px`);
@@ -15804,6 +15810,7 @@ if (CMSwift.isDev?.()) {
       setStyleValue(currentEntry.panel, "bottom", null);
       setStyleValue(currentEntry.panel, "width", null);
       setStyleValue(currentEntry.panel, "height", null);
+      setStyleValue(currentEntry.panel, "min-height", null);
       setStyleValue(currentEntry.panel, "max-width", null);
       setStyleValue(currentEntry.panel, "max-height", null);
       setStyleValue(currentEntry.panel, "min-width", null);
@@ -15812,6 +15819,7 @@ if (CMSwift.isDev?.()) {
       setStyleValue(currentEntry.panel, "border-width", null);
       setStyleValue(currentEntry.panel, "border-radius", null);
       setStyleValue(currentEntry.panel, "transform", null);
+      setStyleValue(currentEntry.panel, "overflow", null);
       setStyleValue(currentEntry.panel, "--cms-dialog-fullscreen-left", null);
       setStyleValue(currentEntry.panel, "--cms-dialog-fullscreen-top", null);
       setStyleValue(currentEntry.panel, "--cms-dialog-fullscreen-width", null);
@@ -15825,15 +15833,32 @@ if (CMSwift.isDev?.()) {
         clearFullscreenViewport(currentEntry);
         return;
       }
+      let frameId = null;
+      const raf = globalThis.requestAnimationFrame || ((fn) => setTimeout(() => fn(Date.now()), 0));
+      const caf = globalThis.cancelAnimationFrame || clearTimeout;
       const sync = () => syncFullscreenViewport(currentEntry);
+      const scheduleSync = () => {
+        if (frameId != null) caf(frameId);
+        frameId = raf(() => {
+          frameId = null;
+          sync();
+        });
+      };
       sync();
+      scheduleSync();
       window.addEventListener("resize", sync);
+      window.addEventListener("orientationchange", scheduleSync);
       window.visualViewport?.addEventListener?.("resize", sync);
-      window.visualViewport?.addEventListener?.("scroll", sync);
+      window.visualViewport?.addEventListener?.("scroll", scheduleSync);
       currentEntry._dialogViewportCleanup = () => {
+        if (frameId != null) {
+          caf(frameId);
+          frameId = null;
+        }
         window.removeEventListener("resize", sync);
+        window.removeEventListener("orientationchange", scheduleSync);
         window.visualViewport?.removeEventListener?.("resize", sync);
-        window.visualViewport?.removeEventListener?.("scroll", sync);
+        window.visualViewport?.removeEventListener?.("scroll", scheduleSync);
       };
     };
     const getOptions = () => currentProps;

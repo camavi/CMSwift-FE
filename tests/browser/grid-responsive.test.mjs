@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { mkdtemp, writeFile } from "node:fs/promises";
+import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -50,6 +51,131 @@ const readBrowserResult = (dom) => {
   const match = dom.match(/\sdata-result="([^"]+)"/);
   assert.ok(match, `missing browser result in DOM:\n${dom.slice(0, 2000)}`);
   return JSON.parse(decodeURIComponent(match[1]));
+};
+
+const hasDevtoolsWebSocket = () => typeof WebSocket === "function";
+
+const requestJson = (baseUrl, requestPath, method = "GET") => new Promise((resolve, reject) => {
+  const req = http.request(`${baseUrl}${requestPath}`, { method }, (res) => {
+    let data = "";
+    res.on("data", (chunk) => {
+      data += chunk;
+    });
+    res.on("end", () => {
+      try {
+        resolve(JSON.parse(data));
+      } catch (error) {
+        error.message = `${error.message}\n${data}`;
+        reject(error);
+      }
+    });
+  });
+  req.on("error", reject);
+  req.end();
+});
+
+const runChromeMobileEval = async (chromePath, pageUrl, evaluateExpression, options = {}) => {
+  assert.ok(hasDevtoolsWebSocket(), "Node WebSocket API is required for mobile browser emulation tests");
+  const port = options.port || 19000 + Math.floor(Math.random() * 2000);
+  const baseUrl = `http://127.0.0.1:${port}`;
+  const userDataDir = await mkdtemp(path.join(os.tmpdir(), "cmswift-chrome-cdp-"));
+  const chrome = spawn(chromePath, [
+    `--remote-debugging-port=${port}`,
+    `--user-data-dir=${userDataDir}`,
+    "--headless=new",
+    "--disable-gpu",
+    "--no-sandbox",
+    "--disable-dev-shm-usage",
+    "--allow-file-access-from-files",
+    "about:blank"
+  ], { stdio: "ignore" });
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const cleanup = async () => {
+    chrome.kill("SIGTERM");
+    await sleep(200);
+  };
+
+  let ws = null;
+  try {
+    let version = null;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      try {
+        version = await requestJson(baseUrl, "/json/version");
+        break;
+      } catch {
+        await sleep(100);
+      }
+    }
+    assert.ok(version, "Chrome DevTools endpoint did not start");
+
+    const target = await requestJson(baseUrl, "/json/new?about:blank", "PUT");
+    ws = new WebSocket(target.webSocketDebuggerUrl);
+    const pending = new Map();
+    let nextId = 1;
+
+    ws.onmessage = (event) => {
+      const payload = JSON.parse(String(event.data));
+      if (!payload.id || !pending.has(payload.id)) return;
+      const { resolve, reject } = pending.get(payload.id);
+      pending.delete(payload.id);
+      if (payload.error) reject(new Error(JSON.stringify(payload.error)));
+      else resolve(payload.result);
+    };
+
+    await new Promise((resolve, reject) => {
+      ws.onopen = resolve;
+      ws.onerror = reject;
+    });
+
+    const send = (method, params = {}) => new Promise((resolve, reject) => {
+      const id = nextId++;
+      pending.set(id, { resolve, reject });
+      ws.send(JSON.stringify({ id, method, params }));
+    });
+
+    await send("Page.enable");
+    await send("Runtime.enable");
+    await send("Emulation.setDeviceMetricsOverride", {
+      width: options.width || 390,
+      height: options.height || 844,
+      deviceScaleFactor: options.deviceScaleFactor || 3,
+      mobile: true,
+      screenWidth: options.width || 390,
+      screenHeight: options.height || 844,
+    });
+    await send("Page.navigate", { url: pageUrl });
+    await sleep(options.navigateDelayMs || 1200);
+
+    const result = await send("Runtime.evaluate", {
+      expression: evaluateExpression,
+      returnByValue: true,
+      awaitPromise: true
+    });
+
+    ws.close();
+    await cleanup();
+    if (Object.prototype.hasOwnProperty.call(result?.result || {}, "value")) {
+      return result.result.value;
+    }
+    if (result?.exceptionDetails) {
+      return {
+        error: "runtime-evaluate-exception",
+        text: result.exceptionDetails.text,
+        description: result.exceptionDetails.exception?.description || null
+      };
+    }
+    return {
+      error: "runtime-evaluate-no-value",
+      raw: result
+    };
+  } catch (error) {
+    try {
+      ws?.close();
+    } catch {}
+    await cleanup();
+    throw error;
+  }
 };
 
 test("Grid responsive columns keep display:grid and render four desktop tracks", {
@@ -831,7 +957,9 @@ test("Menu repositions when panel width grows after open", {
 });
 
 test("Dialog fullscreen stays inside the mobile viewport without overscan", {
-  skip: findChrome() ? false : "Chrome/Chromium is not available"
+  skip: !findChrome()
+    ? "Chrome/Chromium is not available"
+    : (!hasDevtoolsWebSocket() ? "Node WebSocket API is not available" : false)
 }, async () => {
   const chromePath = findChrome();
   const tmpDir = await mkdtemp(path.join(os.tmpdir(), "cmswift-dialog-fullscreen-mobile-"));
@@ -861,11 +989,15 @@ test("Dialog fullscreen stays inside the mobile viewport without overscan", {
     try {
       const UI = window._ || window.CMSwift?.ui;
       const dialog = UI.Dialog({
+        size: "full",
         fullscreen: true,
+        state: "secondary",
         title: "Workspace go-live",
         subtitle: "Probe",
+        bodyMaxHeight: "78vh",
         stickyHeader: true,
         stickyActions: true,
+        scrollable: true,
         actions: [
           UI.Btn({ label: "Annulla" }),
           UI.Btn({ color: "primary", label: "Pubblica" })
@@ -907,9 +1039,47 @@ test("Dialog fullscreen stays inside the mobile viewport without overscan", {
 </body>
 </html>`, "utf8");
 
-  const result = readBrowserResult(await runChrome(chromePath, htmlFile, { width: 390, height: 844 }));
+  const result = await runChromeMobileEval(chromePath, pathToFileURL(htmlFile).href, `(() => new Promise((resolve) => {
+    const start = Date.now();
+    const measure = () => {
+      const panel = document.querySelector(".cms-overlay-panel.cms-dialog");
+      if (!panel) {
+        if ((Date.now() - start) > 4000) {
+          resolve({
+            error: "panel-not-found",
+            bodyResult: document.body?.getAttribute("data-result") || null,
+            readyState: document.readyState
+          });
+          return;
+        }
+        setTimeout(measure, 50);
+        return;
+      }
+      const rect = panel.getBoundingClientRect();
+      const style = getComputedStyle(panel);
+      const vv = window.visualViewport;
+      resolve({
+        className: panel.className,
+        left: Number(rect.left.toFixed(2)),
+        right: Number(rect.right.toFixed(2)),
+        top: Number(rect.top.toFixed(2)),
+        bottom: Number(rect.bottom.toFixed(2)),
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        viewportWidth: Math.round((vv && vv.width) || window.innerWidth),
+        viewportHeight: Math.round((vv && vv.height) || window.innerHeight),
+        position: style.position,
+        boxSizing: style.boxSizing,
+        transform: style.transform,
+        borderTopWidth: style.borderTopWidth,
+        borderBottomWidth: style.borderBottomWidth,
+        inset: style.inset
+      });
+    };
+    setTimeout(measure, 500);
+  }))()`);
 
-  assert.equal(result.error, undefined);
+  assert.equal(result.error, undefined, JSON.stringify(result));
   assert.equal(result.className.includes("fullscreen"), true);
   assert.equal(result.position, "fixed");
   assert.equal(result.boxSizing, "border-box");
