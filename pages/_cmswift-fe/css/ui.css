@@ -5022,11 +5022,22 @@ select {
 .cms-layout-shell-grid>.aside.sticky,
 .cms-layout-shell-grid>.cms-layout-nav.sticky,
 .cms-layout-shell-grid>.nav.sticky {
+  position: relative;
+  z-index: 10;
+  align-self: stretch;
+  min-height: 0;
+  overflow: visible;
+}
+
+.cms-layout-shell-grid>.cms-layout-aside.sticky>.cms-layout-panel-body,
+.cms-layout-shell-grid>.aside.sticky>.cms-layout-panel-body,
+.cms-layout-shell-grid>.cms-layout-nav.sticky>.cms-layout-panel-body,
+.cms-layout-shell-grid>.nav.sticky>.cms-layout-panel-body {
   position: sticky;
   top: calc(var(--layout-header-height, 0px) + var(--cms-layout-gap));
-  align-self: start;
-  max-height: calc(100vh - var(--layout-header-height, 0px) - var(--cms-layout-gap));
-  overflow: auto;
+  bottom: var(--cms-layout-gap);
+  padding-bottom: 10px;
+  max-height: calc(100vh - var(--layout-header-height, 0px) - (var(--cms-layout-gap) * 2));
 }
 
 .cms-layout-shell-grid>.cms-layout-footer,
@@ -9924,9 +9935,7 @@ select {
     top: 70px;
     height: auto;
     max-height: calc(100vh - 90px);
-    opacity: 0;
     transform: translateY(-6px);
-    pointer-events: none;
     transition: opacity 160ms ease, transform 160ms ease;
   }
 

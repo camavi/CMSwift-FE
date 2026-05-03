@@ -4868,16 +4868,37 @@ const unitCover = (v, name = 'size') => {
     }
     return null;
   }
-
   UI.Layout = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
     const hasOwn = (obj, key) => !!obj && Object.prototype.hasOwnProperty.call(obj, key);
+    const getViewportWidth = () => typeof window === "undefined" ? 1024 : window.innerWidth;
+    const getResponsiveProps = () => {
+      const width = getViewportWidth();
+      const mobileProps = CMSwift.uiResponsivePropsFor(props, uiResponsiveDevice("mobile")) || {};
+      const tabletProps = width >= 768 ? (CMSwift.uiResponsivePropsFor(props, uiResponsiveDevice("tablet")) || {}) : {};
+      const pcProps = width >= 1024 ? (CMSwift.uiResponsivePropsFor(props, uiResponsiveDevice("pc")) || {}) : {};
+      return { ...mobileProps, ...tabletProps, ...pcProps };
+    };
     const resolveProp = (...keys) => {
       for (const key of keys) {
         if (hasOwn(props, key)) return props[key];
       }
       return undefined;
+    };
+    const resolveLayoutProp = (...keys) => {
+      const responsiveProps = getResponsiveProps();
+      for (const key of keys) {
+        if (hasOwn(responsiveProps, key)) return responsiveProps[key];
+      }
+      return resolveProp(...keys);
+    };
+    const resolveLayoutDeviceProp = (...keys) => {
+      const responsiveProps = CMSwift.uiResponsivePropsFor(props, uiResponsiveDevice(getResponsiveDeviceKey())) || {};
+      for (const key of keys) {
+        if (hasOwn(responsiveProps, key)) return responsiveProps[key];
+      }
+      return resolveProp(...keys);
     };
     const toLayoutCssSize = (value, fallback = null) => {
       if (value == null || value === false || value === "") return fallback;
@@ -4888,6 +4909,14 @@ const unitCover = (v, name = 'size') => {
       if (typeof value === "number" && Number.isFinite(value)) return value;
       const parsed = Number.parseFloat(String(value));
       return Number.isFinite(parsed) ? parsed : fallback;
+    };
+    const toLayoutGridTemplateAreas = (value) => {
+      const raw = uiUnwrap(value);
+      if (raw == null || raw === false || raw === "") return null;
+      if (Array.isArray(raw)) {
+        return raw.map((row) => `"${Array.isArray(row) ? row.join(" ") : String(row)}"`).join(" ");
+      }
+      return String(raw);
     };
     const clampLayoutWidth = (value, min = null, max = null) => {
       let next = Number.isFinite(value) ? value : 0;
@@ -4902,24 +4931,22 @@ const unitCover = (v, name = 'size') => {
     const pageSource = resolveProp("page", "main", "content", "body");
     const footerSource = resolveProp("footer", "footerContent");
 
-    const drawerEnabledProp = resolveProp("drawerEnabled", "asideEnabled");
-    const navEnabledProp = resolveProp("navEnabled", "asideRightEnabled", "rightAsideEnabled");
-    const drawerEnabledValue = uiUnwrap(drawerEnabledProp);
-    const navEnabledValue = uiUnwrap(navEnabledProp);
-    const drawerRequested = drawerEnabledValue !== false;
-    const navRequested = navEnabledValue === true || uiUnwrap(props.noNav) === false;
-    const drawerDisabled = uiUnwrap(props.noDrawer) === true || drawerEnabledValue === false || drawerSource === false;
-    const navDisabled = uiUnwrap(props.noNav) === true || navEnabledValue === false || navSource === false;
-    const getDrawerFloating = () => uiUnwrap(props.drawerFloating) === true;
-    const getNavFloating = () => uiUnwrap(props.navFloating) === true;
-    const getDrawerResizable = () => uiUnwrap(props.drawerResizable) === true;
-    const getNavResizable = () => uiUnwrap(props.navResizable) === true;
-    const getDrawerMinWidth = () => toLayoutPx(uiUnwrap(props.drawerMinWidth), 180);
-    const getDrawerMaxWidth = () => toLayoutPx(uiUnwrap(props.drawerMaxWidth), null);
-    const getNavMinWidth = () => toLayoutPx(uiUnwrap(props.navMinWidth), 180);
-    const getNavMaxWidth = () => toLayoutPx(uiUnwrap(props.navMaxWidth), null);
-    const initialDrawerWidthPx = toLayoutPx(uiUnwrap(props.drawerWidth), 280);
-    const initialNavWidthPx = toLayoutPx(uiUnwrap(props.navWidth) ?? uiUnwrap(props.asideRightWidth), 280);
+    const getDrawerEnabledValue = () => uiUnwrap(resolveLayoutProp("drawerEnabled", "asideEnabled"));
+    const getNavEnabledValue = () => uiUnwrap(resolveLayoutProp("navEnabled", "asideRightEnabled", "rightAsideEnabled"));
+    const getDrawerRequested = () => getDrawerEnabledValue() !== false;
+    const getNavRequested = () => getNavEnabledValue() === true || uiUnwrap(resolveLayoutProp("noNav")) === false;
+    const getDrawerDisabled = () => uiUnwrap(resolveLayoutProp("noDrawer")) === true || getDrawerEnabledValue() === false || drawerSource === false;
+    const getNavDisabled = () => uiUnwrap(resolveLayoutProp("noNav")) === true || getNavEnabledValue() === false || navSource === false;
+    const getDrawerFloating = () => uiUnwrap(resolveLayoutProp("drawerFloating")) === true;
+    const getNavFloating = () => uiUnwrap(resolveLayoutProp("navFloating")) === true;
+    const getDrawerResizable = () => uiUnwrap(resolveLayoutProp("drawerResizable")) === true;
+    const getNavResizable = () => uiUnwrap(resolveLayoutProp("navResizable")) === true;
+    const getDrawerMinWidth = () => toLayoutPx(uiUnwrap(resolveLayoutProp("drawerMinWidth")), 180);
+    const getDrawerMaxWidth = () => toLayoutPx(uiUnwrap(resolveLayoutProp("drawerMaxWidth")), null);
+    const getNavMinWidth = () => toLayoutPx(uiUnwrap(resolveLayoutProp("navMinWidth")), 180);
+    const getNavMaxWidth = () => toLayoutPx(uiUnwrap(resolveLayoutProp("navMaxWidth")), null);
+    const initialDrawerWidthPx = toLayoutPx(uiUnwrap(resolveLayoutProp("drawerWidth")), 280);
+    const initialNavWidthPx = toLayoutPx(uiUnwrap(resolveLayoutProp("navWidth")) ?? uiUnwrap(resolveLayoutProp("asideRightWidth")), 280);
     const [getDrawerWidthPx, setDrawerWidthPx] = CMSwift.reactive.signal(
       clampLayoutWidth(initialDrawerWidthPx, getDrawerMinWidth(), getDrawerMaxWidth())
     );
@@ -4957,14 +4984,22 @@ const unitCover = (v, name = 'size') => {
       if (getNavOpen() !== next) syncNavOpen(next);
     });
 
-    const layoutBreakpoint = Number(uiUnwrap(props.layoutBreakpoint) ?? 0);
-    const drawerBreakpoint = Number(uiUnwrap(props.drawerBreakpoint) ?? (layoutBreakpoint || 1024));
-    const navBreakpoint = Number(uiUnwrap(props.navBreakpoint) ?? (layoutBreakpoint || drawerBreakpoint));
-    const responsiveBreakpoint = Math.max(drawerBreakpoint, navBreakpoint, 0);
+    const getResponsiveBreakpoint = () => {
+      const layoutBreakpoint = Number(uiUnwrap(resolveLayoutProp("layoutBreakpoint")) ?? 0);
+      const drawerBreakpoint = Number(uiUnwrap(resolveLayoutProp("drawerBreakpoint")) ?? (layoutBreakpoint || 1024));
+      const navBreakpoint = Number(uiUnwrap(resolveLayoutProp("navBreakpoint")) ?? (layoutBreakpoint || drawerBreakpoint));
+      return Math.max(drawerBreakpoint, navBreakpoint, 0);
+    };
+    const getResponsiveDeviceKey = () => {
+      const width = getViewportWidth();
+      return width >= 1024 ? "pc" : (width >= 768 ? "tablet" : "mobile");
+    };
     const [getMobile, setMobile] = CMSwift.reactive.signal(false);
+    const [getResponsiveKey, setResponsiveKey] = CMSwift.reactive.signal(getResponsiveDeviceKey());
     const checkMobile = () => {
       if (typeof window === "undefined") return;
-      setMobile(window.innerWidth < responsiveBreakpoint);
+      setResponsiveKey(getResponsiveDeviceKey());
+      setMobile(window.innerWidth < getResponsiveBreakpoint());
     };
     if (typeof window !== "undefined") {
       checkMobile();
@@ -4998,7 +5033,13 @@ const unitCover = (v, name = 'size') => {
 
     const pageFallback = pageSource !== undefined ? pageSource : children;
 
-    const cls = uiClass(["cms-app", "cms-layout", props.class]);
+    const cls = uiClass([
+      "cms-app",
+      "cms-layout",
+      CMSwift.uiResponsiveClasses({ mobile: props }, uiResponsiveLayoutRules),
+      CMSwift.uiResponsiveClasses(props, uiResponsiveLayoutRules),
+      props.class
+    ]);
     const p = CMSwift.omit(props, [
       "header", "headerContent",
       "aside", "drawer",
@@ -5018,24 +5059,15 @@ const unitCover = (v, name = 'size') => {
       "stickyHeader", "stickyFooter", "stickyAside", "stickyNav",
       "tagPage",
       "shellClass", "headerClass", "asideClass", "navClass", "pageClass", "footerClass", "overlayClass",
-      "gap", "headerOffset", "minHeight",
+      "gap", "headerOffset", "minHeight", "areas", "gridTemplateAreas", "templateAreas",
       "slots"
     ]);
     p.class = cls;
     p.style = { ...(props.style || {}) };
-    p.style["--cms-layout-drawer-width"] = toLayoutCssSize(uiUnwrap(props.drawerWidth) ?? 280, "280px");
-    p.style["--cms-layout-nav-width"] = toLayoutCssSize(uiUnwrap(props.navWidth) ?? uiUnwrap(props.asideRightWidth) ?? 280, "280px");
-    p.style["--cms-layout-drawer-peek"] = toLayoutCssSize(uiUnwrap(props.drawerPeek) ?? 20, "20px");
-    p.style["--cms-layout-nav-peek"] = toLayoutCssSize(uiUnwrap(props.navPeek) ?? uiUnwrap(props.asideRightPeek) ?? 20, "20px");
-    const layoutGap = toLayoutCssSize(uiUnwrap(props.gap), null);
-    if (layoutGap != null) p.style["--cms-layout-gap"] = layoutGap;
-    const headerOffset = toLayoutCssSize(uiUnwrap(props.headerOffset), null);
-    if (headerOffset != null) p.style["--layout-header-height"] = headerOffset;
-    const minHeight = toLayoutCssSize(uiUnwrap(props.minHeight), null);
-    if (minHeight != null) p.style["--cms-layout-min-height"] = minHeight;
+    CMSwift.uiApplyResponsiveProps(p, props, CMSwift.uiResponsiveStyleRules);
 
     const root = _.div(p);
-    const tagPage = uiUnwrap(props.tagPage) === true;
+    const tagPage = uiUnwrap(resolveLayoutProp("tagPage")) === true;
     const tags = tagPage
       ? { header: "header", aside: "aside", nav: "nav", page: "main", footer: "footer" }
       : { header: "div", aside: "div", nav: "div", page: "div", footer: "div" };
@@ -5086,7 +5118,7 @@ const unitCover = (v, name = 'size') => {
     const overlay = _.div({
       class: uiClass(["cms-aside-overlay", props.overlayClass]),
       onClick: () => {
-        if (uiUnwrap(props.overlayClose) === false) return;
+        if (uiUnwrap(resolveLayoutProp("overlayClose")) === false) return;
         if (getOpen()) setOpen(false);
         if (getNavOpen()) setNavOpen(false);
       }
@@ -5131,6 +5163,20 @@ const unitCover = (v, name = 'size') => {
       clearWrap(wrap);
       nodes.forEach((node) => wrap.appendChild(node));
       return nodes.length > 0;
+    };
+    const syncLayoutVars = () => {
+      root.style.setProperty("--cms-layout-drawer-width", toLayoutCssSize(uiUnwrap(resolveLayoutProp("drawerWidth")) ?? 280, "280px"));
+      root.style.setProperty("--cms-layout-nav-width", toLayoutCssSize(uiUnwrap(resolveLayoutProp("navWidth")) ?? uiUnwrap(resolveLayoutProp("asideRightWidth")) ?? 280, "280px"));
+      root.style.setProperty("--cms-layout-drawer-peek", toLayoutCssSize(uiUnwrap(resolveLayoutProp("drawerPeek")) ?? 20, "20px"));
+      root.style.setProperty("--cms-layout-nav-peek", toLayoutCssSize(uiUnwrap(resolveLayoutProp("navPeek")) ?? uiUnwrap(resolveLayoutProp("asideRightPeek")) ?? 20, "20px"));
+      const layoutGap = toLayoutCssSize(uiUnwrap(resolveLayoutProp("gap")), null);
+      if (layoutGap != null) root.style.setProperty("--cms-layout-gap", layoutGap);
+      else root.style.removeProperty("--cms-layout-gap");
+      const headerOffset = toLayoutCssSize(uiUnwrap(resolveLayoutProp("headerOffset")), null);
+      if (headerOffset != null) root.style.setProperty("--layout-header-height", headerOffset);
+      const minHeight = toLayoutCssSize(uiUnwrap(resolveLayoutProp("minHeight")), null);
+      if (minHeight != null) root.style.setProperty("--cms-layout-min-height", minHeight);
+      else root.style.removeProperty("--cms-layout-min-height");
     };
     const syncPanelWidths = () => {
       if (getDrawerResizable()) {
@@ -5183,8 +5229,8 @@ const unitCover = (v, name = 'size') => {
       const mobile = !!getMobile();
       const asideOpen = !!getOpen();
       const navOpen = !!getNavOpen();
-      const drawerEnabled = !drawerDisabled && drawerRequested && hasDrawerContent;
-      const navEnabled = !navDisabled && navRequested && hasNavContent;
+      const drawerEnabled = !getDrawerDisabled() && getDrawerRequested() && hasDrawerContent;
+      const navEnabled = !getNavDisabled() && getNavRequested() && hasNavContent;
       const drawerFloating = drawerEnabled && (mobile || getDrawerFloating());
       const navFloating = navEnabled && (mobile || getNavFloating());
       const drawerVisible = drawerEnabled && asideOpen;
@@ -5195,6 +5241,7 @@ const unitCover = (v, name = 'size') => {
       const inlineNavResizable = inlineNavVisible && getNavResizable();
       const overlayVisible = (drawerVisible && drawerFloating) || (navVisible && navFloating);
 
+      syncLayoutVars();
       syncPanelWidths();
 
       root.classList.toggle("is-mobile", mobile);
@@ -5208,6 +5255,10 @@ const unitCover = (v, name = 'size') => {
       root.classList.toggle("has-footer", hasFooterContent);
       root.classList.toggle("drawer-floating", drawerFloating);
       root.classList.toggle("nav-floating", navFloating);
+      headerWrap.classList.toggle("sticky", uiUnwrap(resolveLayoutProp("stickyHeader")) === true);
+      footerWrap.classList.toggle("sticky", uiUnwrap(resolveLayoutProp("stickyFooter")) === true);
+      asideWrap.classList.toggle("sticky", uiUnwrap(resolveLayoutProp("stickyAside")) !== false);
+      navWrap.classList.toggle("sticky", uiUnwrap(resolveLayoutProp("stickyNav")) === true);
 
       headerWrap.hidden = !hasHeaderContent;
       footerWrap.hidden = !hasFooterContent;
@@ -5235,11 +5286,14 @@ const unitCover = (v, name = 'size') => {
         "minmax(0, 1fr)",
         inlineNavVisible ? "minmax(0, var(--cms-layout-nav-width))" : "0px"
       ].join(" ");
-      shell.style.gridTemplateAreas = [
+      const defaultAreas = [
         "\"header header header\"",
         `"${inlineDrawerVisible ? "aside" : "."} main ${inlineNavVisible ? "nav" : "."}"`,
         "\"footer footer footer\""
       ].join(" ");
+      shell.style.gridTemplateAreas = toLayoutGridTemplateAreas(
+        resolveLayoutDeviceProp("areas", "gridTemplateAreas", "templateAreas")
+      ) || defaultAreas;
     };
 
     const headerUpdate = (value, newUrl) => {
@@ -5277,8 +5331,8 @@ const unitCover = (v, name = 'size') => {
     };
 
     hasHeaderContent = fillWrap(headerWrap, renderAliasSlot(["header"], headerSource));
-    hasDrawerContent = fillWrap(asideContentWrap, drawerDisabled ? [] : renderAliasSlot(["aside", "drawer"], drawerSource));
-    hasNavContent = fillWrap(navContentWrap, navDisabled ? [] : renderAliasSlot(["nav", "asideRight", "drawerRight"], navSource));
+    hasDrawerContent = fillWrap(asideContentWrap, drawerSource === false ? [] : renderAliasSlot(["aside", "drawer"], drawerSource));
+    hasNavContent = fillWrap(navContentWrap, navSource === false ? [] : renderAliasSlot(["nav", "asideRight", "drawerRight"], navSource));
     hasPageContent = fillWrap(mainWrap, renderAliasSlot(["page", "main", "default"], pageFallback));
     hasFooterContent = fillWrap(footerWrap, renderAliasSlot(["footer"], footerSource));
 
@@ -5289,6 +5343,7 @@ const unitCover = (v, name = 'size') => {
     syncHeaderHeight();
 
     CMSwift.reactive.effect(() => {
+      getResponsiveKey();
       getMobile();
       getOpen();
       getNavOpen();
@@ -5296,7 +5351,7 @@ const unitCover = (v, name = 'size') => {
     }, "UI.Layout:state");
 
     const onKeyDown = (e) => {
-      if (uiUnwrap(props.escClose) === false) return;
+      if (uiUnwrap(resolveLayoutProp("escClose")) === false) return;
       if ((!getMobile() && !getDrawerFloating() && !getNavFloating()) || (!getOpen() && !getNavOpen())) return;
       if (e.key !== "Escape") return;
       e.preventDefault();
@@ -5397,6 +5452,12 @@ const unitCover = (v, name = 'size') => {
         gap: "number|string",
         headerOffset: "number|string",
         minHeight: "number|string",
+        areas: "string|array",
+        gridTemplateAreas: "string|array",
+        templateAreas: "string|array",
+        mobile: "{ gap?, minHeight?, areas?, gridTemplateAreas?, drawerWidth?, navWidth?, drawerFloating?, navFloating?, noDrawer?, noNav? }",
+        tablet: "{ gap?, minHeight?, areas?, gridTemplateAreas?, drawerWidth?, navWidth?, drawerFloating?, navFloating?, noDrawer?, noNav? }",
+        pc: "{ gap?, minHeight?, areas?, gridTemplateAreas?, drawerWidth?, navWidth?, drawerFloating?, navFloating?, noDrawer?, noNav? }",
         shellClass: "string",
         headerClass: "string",
         asideClass: "string",
