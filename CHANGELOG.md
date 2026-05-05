@@ -9,6 +9,33 @@ The format is kept intentionally simple:
 - Fixed
 - Docs
 
+## [1.0.24] - 2026-05-05
+
+### Changed
+
+- added layout disposition presets for `UI.Layout`
+- added local/global layout mode metadata for `UI.Layout`
+- regenerated readable and minified UI runtime bundles after the layout update
+- package versions bumped to `1.0.24`
+- README CDN examples now pin `1.0.24`
+
+### Docs
+
+- added `v1.0.24` release notes
+
+## [1.0.23] - 2026-04-30
+
+### Changed
+
+- standardized developer-facing UI component metadata in English
+- regenerated readable and minified UI runtime bundles after the metadata refresh
+- package versions bumped to `1.0.23`
+- README CDN examples now pin `1.0.23`
+
+### Docs
+
+- added `v1.0.23` release notes
+
 ## [1.0.22] - 2026-04-30
 
 ### Fixed

@@ -3346,6 +3346,65 @@
     }
     return null;
   }
+  const layoutDispositionMap = {
+    classic: { side: "left", nav: "top", rows: ["header", "nav", "body", "footer"] },
+    classicright: { side: "right", nav: "top", rows: ["header", "nav", "body", "footer"] },
+    sidebarfullleft: { side: "left", fullSide: true, nav: "top", rows: ["header", "nav", "body", "footer"] },
+    sidebarfullright: { side: "right", fullSide: true, nav: "top", rows: ["header", "nav", "body", "footer"] },
+    appshell: { side: "left", nav: "top", rows: ["header", "nav", "body", "footer"] },
+    dashboard: { side: "left", nav: "top", rows: ["header", "nav", "body", "footer"] },
+    website: { side: null, nav: "top", rows: ["header", "nav", "body", "footer"] },
+    documentation: { side: "right", nav: "left", rows: ["header", "body", "footer"] },
+    landing: { side: null, nav: null, rows: ["header", "body", "footer"] }
+  };
+  const normalizeLayoutDisposition = (value) => {
+    const raw = uiUnwrap(value);
+    if (raw == null || raw === false || raw === "") return "";
+    return String(raw).trim().toLowerCase().replace(/[\s_-]+/g, "");
+  };
+  const createLayoutDispositionAreas = (config, state) => {
+    if (!config || !state.main) return null;
+    const side = config.side || (state.aside ? "left" : null);
+    const navPosition = config.nav || (state.nav ? "top" : null);
+    const sideVisible = !!state.aside && !!side;
+    const navVisible = !!state.nav && !!navPosition;
+    const leftArea = navVisible && navPosition === "left" ? "nav" : (sideVisible && side === "left" ? "aside" : ".");
+    const rightArea = navVisible && navPosition === "right" ? "nav" : (sideVisible && side === "right" ? "aside" : ".");
+    const bodyRow = [leftArea, "main", rightArea];
+    const rows = [];
+    const rowNames = [...(config.rows || [])];
+    if (navVisible && navPosition === "top" && !rowNames.includes("nav")) {
+      const bodyIndex = rowNames.indexOf("body");
+      rowNames.splice(bodyIndex >= 0 ? bodyIndex : rowNames.length, 0, "nav");
+    }
+    for (const rowName of rowNames) {
+      if (rowName === "header" && state.header) {
+        rows.push(config.fullSide && sideVisible && side === "left"
+          ? ["aside", "header", "header"]
+          : config.fullSide && sideVisible && side === "right"
+            ? ["header", "header", "aside"]
+            : ["header", "header", "header"]
+        );
+      } else if (rowName === "nav" && navVisible && navPosition === "top") {
+        rows.push(config.fullSide && sideVisible && side === "left"
+          ? ["aside", "nav", "nav"]
+          : config.fullSide && sideVisible && side === "right"
+            ? ["nav", "nav", "aside"]
+            : ["nav", "nav", "nav"]
+        );
+      } else if (rowName === "body") {
+        rows.push(bodyRow);
+      } else if (rowName === "footer" && state.footer) {
+        rows.push(config.fullSide && sideVisible && side === "left"
+          ? ["aside", "footer", "footer"]
+          : config.fullSide && sideVisible && side === "right"
+            ? ["footer", "footer", "aside"]
+            : ["footer", "footer", "footer"]
+        );
+      }
+    }
+    return rows.length ? rows.map((row) => `"${row.join(" ")}"`).join(" ") : null;
+  };
   UI.Layout = (...args) => {
     const { props, children } = CMSwift.uiNormalizeArgs(args);
     const slots = props.slots || {};
@@ -3377,6 +3436,15 @@
         if (hasOwn(responsiveProps, key)) return responsiveProps[key];
       }
       return resolveProp(...keys);
+    };
+    const getLayoutDisposition = () => normalizeLayoutDisposition(
+      resolveLayoutDeviceProp("disposition", "layoutDisposition", "layout")
+    );
+    const getLayoutMode = () => {
+      const raw = uiUnwrap(resolveLayoutProp("mode", "layoutMode"));
+      if (raw == null || raw === false || raw === "") return "";
+      const mode = String(raw).trim().toLowerCase();
+      return mode === "global" || mode === "local" ? mode : "";
     };
     const toLayoutCssSize = (value, fallback = null) => {
       if (value == null || value === false || value === "") return fallback;
@@ -3535,7 +3603,7 @@
       "drawerFloating", "navFloating",
       "overlayClose", "escClose",
       "stickyHeader", "stickyFooter", "stickyAside", "stickyNav",
-      "tagPage",
+      "tagPage", "mode", "layoutMode", "disposition", "layoutDisposition", "layout",
       "shellClass", "headerClass", "asideClass", "navClass", "pageClass", "footerClass", "overlayClass",
       "gap", "headerOffset", "minHeight", "areas", "gridTemplateAreas", "templateAreas",
       "slots"
@@ -3733,6 +3801,13 @@
       root.classList.toggle("has-footer", hasFooterContent);
       root.classList.toggle("drawer-floating", drawerFloating);
       root.classList.toggle("nav-floating", navFloating);
+      const disposition = getLayoutDisposition();
+      const mode = disposition ? getLayoutMode() : "";
+      root.dataset.disposition = disposition || "";
+      root.dataset.layoutMode = mode || "";
+      root.classList.toggle("has-disposition", !!disposition);
+      root.classList.toggle("mode-local", mode === "local");
+      root.classList.toggle("mode-global", mode === "global");
       headerWrap.classList.toggle("sticky", uiUnwrap(resolveLayoutProp("stickyHeader")) === true);
       footerWrap.classList.toggle("sticky", uiUnwrap(resolveLayoutProp("stickyFooter")) === true);
       asideWrap.classList.toggle("sticky", uiUnwrap(resolveLayoutProp("stickyAside")) !== false);
@@ -3759,19 +3834,43 @@
       navWrap.setAttribute("aria-hidden", navVisible ? "false" : "true");
       navResizeHandle.hidden = !inlineNavResizable;
 
+      const dispositionConfig = layoutDispositionMap[disposition] || null;
+      const dispositionSide = dispositionConfig?.side || (inlineDrawerVisible && dispositionConfig ? "left" : null);
+      const dispositionNav = dispositionConfig?.nav || (inlineNavVisible && dispositionConfig ? "top" : null);
+      const drawerColumn = inlineDrawerVisible ? (dispositionConfig ? dispositionSide : "left") : "";
+      const navColumn = inlineNavVisible ? (dispositionConfig ? (dispositionNav === "left" || dispositionNav === "right" ? dispositionNav : "") : "right") : "";
+      root.classList.toggle("drawer-left", drawerEnabled && dispositionSide === "left");
+      root.classList.toggle("drawer-right", drawerEnabled && dispositionSide === "right");
+      root.classList.toggle("nav-top", inlineNavVisible && dispositionNav === "top");
+      root.classList.toggle("nav-side", inlineNavVisible && (navColumn === "left" || navColumn === "right"));
       shell.style.gridTemplateColumns = [
-        inlineDrawerVisible ? "minmax(0, var(--cms-layout-drawer-width))" : "0px",
+        drawerColumn === "left"
+          ? "minmax(0, var(--cms-layout-drawer-width))"
+          : navColumn === "left"
+            ? "minmax(0, var(--cms-layout-nav-width))"
+            : "0px",
         "minmax(0, 1fr)",
-        inlineNavVisible ? "minmax(0, var(--cms-layout-nav-width))" : "0px"
+        drawerColumn === "right"
+          ? "minmax(0, var(--cms-layout-drawer-width))"
+          : navColumn === "right"
+            ? "minmax(0, var(--cms-layout-nav-width))"
+            : "0px"
       ].join(" ");
       const defaultAreas = [
         "\"header header header\"",
         `"${inlineDrawerVisible ? "aside" : "."} main ${inlineNavVisible ? "nav" : "."}"`,
         "\"footer footer footer\""
       ].join(" ");
+      const dispositionAreas = createLayoutDispositionAreas(layoutDispositionMap[disposition], {
+        header: hasHeaderContent,
+        aside: inlineDrawerVisible,
+        nav: inlineNavVisible,
+        main: hasPageContent,
+        footer: hasFooterContent
+      });
       shell.style.gridTemplateAreas = toLayoutGridTemplateAreas(
         resolveLayoutDeviceProp("areas", "gridTemplateAreas", "templateAreas")
-      ) || defaultAreas;
+      ) || dispositionAreas || defaultAreas;
     };
 
     const headerUpdate = (value, newUrl) => {
@@ -3927,15 +4026,20 @@
         stickyAside: "boolean",
         stickyNav: "boolean",
         tagPage: "boolean",
+        mode: "local|global",
+        layoutMode: "alias di mode",
+        disposition: "classic|classicRight|sidebarFullLeft|sidebarFullRight|appShell|dashboard|website|documentation|landing",
+        layoutDisposition: "alias di disposition",
+        layout: "alias di disposition",
         gap: "number|string",
         headerOffset: "number|string",
         minHeight: "number|string",
         areas: "string|array",
         gridTemplateAreas: "string|array",
         templateAreas: "string|array",
-        mobile: "{ gap?, minHeight?, areas?, gridTemplateAreas?, drawerWidth?, navWidth?, drawerFloating?, navFloating?, noDrawer?, noNav? }",
-        tablet: "{ gap?, minHeight?, areas?, gridTemplateAreas?, drawerWidth?, navWidth?, drawerFloating?, navFloating?, noDrawer?, noNav? }",
-        pc: "{ gap?, minHeight?, areas?, gridTemplateAreas?, drawerWidth?, navWidth?, drawerFloating?, navFloating?, noDrawer?, noNav? }",
+        mobile: "{ disposition?, mode?, gap?, minHeight?, areas?, gridTemplateAreas?, drawerWidth?, navWidth?, drawerFloating?, navFloating?, noDrawer?, noNav? }",
+        tablet: "{ disposition?, mode?, gap?, minHeight?, areas?, gridTemplateAreas?, drawerWidth?, navWidth?, drawerFloating?, navFloating?, noDrawer?, noNav? }",
+        pc: "{ disposition?, mode?, gap?, minHeight?, areas?, gridTemplateAreas?, drawerWidth?, navWidth?, drawerFloating?, navFloating?, noDrawer?, noNav? }",
         shellClass: "string",
         headerClass: "string",
         asideClass: "string",
@@ -4978,4 +5082,3 @@
     };
   }
   // Esempio: CMSwift.ui.GridCol({ span: 6, sm: 12 }, "Colonna")
-
